@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+/* ─── Dark Theme (default) ─── */
+:root, .dark {
+  --background: #06060b;
+  --surface: #0c0c14;
+  --card: #10101a;
+  --card-hover: #141420;
+  --border: #1a1a2e;
+  --border-glow: #2a2a4a;
+  --accent: #6366f1;
+  --accent-bright: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.12);
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+  --muted: #52526b;
+  --text: #e4e4ed;
+  --text-secondary: #9494a8;
+  --text-dim: #64647a;
+  --phase-build: #8b5cf6;
+  --phase-data: #3b82f6;
+  --phase-analysis: #10b981;
+  --phase-writing: #f59e0b;
+  --phase-defense: #f43f5e;
+
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  --grid-color: rgba(99, 102, 241, 0.02);
+  --glow-color: rgba(99, 102, 241, 0.06);
+  --glass-bg: linear-gradient(135deg, rgba(16, 16, 26, 0.8), rgba(12, 12, 20, 0.6));
+  --glass-border: rgba(99, 102, 241, 0.08);
+  --glass-border-hover: rgba(99, 102, 241, 0.15);
+  --gradient-mask: linear-gradient(135deg, rgba(99, 102, 241, 0.2), transparent 50%, rgba(99, 102, 241, 0.05));
+}
+
+/* ─── Light Theme ─── */
+.light {
+  --background: #f8f8fc;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-hover: #f4f4f8;
+  --border: #e2e2ea;
+  --border-glow: #c8c8d8;
+  --accent: #4f46e5;
+  --accent-bright: #6366f1;
+  --accent-glow: rgba(79, 70, 229, 0.08);
+  --success: #16a34a;
+  --warning: #ca8a04;
+  --danger: #dc2626;
+  --muted: #9494a8;
+  --text: #1a1a2e;
+  --text-secondary: #52526b;
+  --text-dim: #8888a0;
+  --phase-build: #7c3aed;
+  --phase-data: #2563eb;
+  --phase-analysis: #059669;
+  --phase-writing: #d97706;
+  --phase-defense: #e11d48;
+
+  --grid-color: rgba(79, 70, 229, 0.03);
+  --glow-color: rgba(79, 70, 229, 0.04);
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 248, 252, 0.7));
+  --glass-border: rgba(79, 70, 229, 0.1);
+  --glass-border-hover: rgba(79, 70, 229, 0.2);
+  --gradient-mask: linear-gradient(135deg, rgba(79, 70, 229, 0.1), transparent 50%, rgba(79, 70, 229, 0.03));
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-body);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Subtle grid background texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 100%);
+}
+
+/* Ambient glow at top */
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 500px;
+  background: radial-gradient(ellipse, var(--glow-color) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
+
+/* Typography */
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+/* Card styles */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card:hover {
+  border-color: var(--border-glow);
+  background: var(--card-hover);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--border-glow);
+}
+.dark .card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-glow);
+}
+
+/* Glass card */
+.card-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-glass:hover {
+  border-color: var(--glass-border-hover);
+}
+.dark .card-glass:hover {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+.light .card-glass:hover {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Gradient border card */
+.card-gradient {
+  position: relative;
+  background: var(--card);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: var(--gradient-mask);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Light mode card shadow */
+.light .card-gradient {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 0 1px var(--border);
+}
+
+/* Progress bar */
+.progress-bar {
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Staggered animations */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: fadeSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Pulse glow for urgent items */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Subtle shine effect on hover */
+@keyframes shine {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+.card-shine:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.02), transparent);
+  animation: shine 0.6s ease-out;
+  pointer-events: none;
+}
+.light .card-shine:hover::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+}
+
+/* Tab active indicator */
+.tab-active {
+  position: relative;
+}
+.tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+/* ─── Light mode overrides for Tailwind colors ─── */
+.light .bg-zinc-800\/80 { background: rgba(228, 228, 237, 0.8); }
+.light .bg-zinc-800\/50 { background: rgba(228, 228, 237, 0.5); }
+.light .bg-zinc-800\/30 { background: rgba(228, 228, 237, 0.3); }
+.light .bg-zinc-800 { background: #e4e4ed; }
+.light .border-zinc-800\/40, .light .border-zinc-800\/50, .light .border-zinc-800\/30 { border-color: var(--border); }
+.light .border-zinc-700\/50 { border-color: var(--border); }
+.light .text-zinc-100 { color: var(--text); }
+.light .text-zinc-200 { color: #2a2a3e; }
+.light .text-zinc-300 { color: #3a3a50; }
+.light .text-zinc-400 { color: #5a5a70; }
+.light .text-zinc-500 { color: #6a6a80; }
+.light .text-zinc-600 { color: #8888a0; }
+.light .text-zinc-700 { color: #aaaabc; }
+.light .text-white { color: #1a1a2e; }
+
+/* Light mode header */
+.light header { background: rgba(248, 248, 252, 0.9); }
+
+/* Light mode progress bars */
+.light .bg-zinc-800\/80 { background: rgba(226, 226, 234, 0.8); }
