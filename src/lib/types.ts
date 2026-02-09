@@ -109,3 +109,10 @@ export const PRIORITY_LABELS: Record<Milestone['priority'], string> = {
   'important': '🟡 Important',
   'normal': '🟢 Normal',
 }
+
+export interface NotionTask {
+  id: string
+  text: string
+  isChecked: boolean
+  section: 'main' | 'backlog'
+}

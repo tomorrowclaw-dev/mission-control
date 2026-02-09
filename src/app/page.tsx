@@ -6,6 +6,7 @@ import CountdownTimer from '@/components/CountdownTimer'
 import TimelineView from '@/components/TimelineView'
 import WritingProgress from '@/components/WritingProgress'
 import PapersList from '@/components/PapersList'
+import NotionTasks from '@/components/NotionTasks'
 import { getMilestones, getWritingSections, getPapers } from '@/lib/data'
 import { Milestone, WritingSection, Paper } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -153,94 +154,107 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Current Phase */}
-        <div className={`rounded-2xl bg-gradient-to-r ${phase.color} border p-5 animate-in`} style={{ animationDelay: '150ms' }}>
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg">
-              🔧
-            </div>
-            <div className="flex-1">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">Current Phase</div>
-              <div className="font-display text-lg mt-0.5">{phase.label}</div>
-              <div className="text-[12px] text-zinc-400 mt-0.5">{phase.description}</div>
-            </div>
-            <div className="text-right hidden sm:block">
-              <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Milestone</div>
-              <div className="text-sm text-zinc-300 mt-0.5 font-body">End of Feb: Build complete</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex items-center gap-1 animate-in" style={{ animationDelay: '200ms' }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
-                activeTab === tab.key
-                  ? 'bg-zinc-800/80 text-white border border-zinc-700/50 shadow-lg shadow-black/20 tab-active'
-                  : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30 border border-transparent'
-              }`}
-            >
-              <span className="mr-1.5 text-[10px]">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-          <div className="flex-1" />
-          {activeTab === 'papers' && (
-            <span className="text-[11px] text-zinc-600 font-mono">{papers.length} papers</span>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="min-h-[500px] animate-in" style={{ animationDelay: '250ms' }}>
-          {activeTab === 'timeline' && (
-            <TimelineView milestones={milestones} />
-          )}
-
-          {activeTab === 'writing' && (
-            <div className="card-glass p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">✍️</div>
-                <h2 className="font-display text-lg">Writing Progress</h2>
-              </div>
-              <WritingProgress sections={sections} />
-            </div>
-          )}
-
-          {activeTab === 'papers' && (
-            <div>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">📄</div>
-                <h2 className="font-display text-lg">Research Library</h2>
-                <div className="flex-1" />
-                <div className="flex items-center gap-3 text-[11px] font-mono">
-                  <span className="text-zinc-500">{papers.length} papers</span>
-                  <span className="text-green-500">{papers.filter(p => p.review_status === 'cited').length} cited</span>
-                  <span className="text-blue-500">{papers.filter(p => p.review_status === 'reviewed').length} reviewed</span>
-                  <span className="text-zinc-600">{papers.filter(p => !p.review_status || p.review_status === 'unread').length} unread</span>
+        {/* Main Layout Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Phase & Tabs */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Current Phase */}
+            <div className={`rounded-2xl bg-gradient-to-r ${phase.color} border p-5 animate-in`} style={{ animationDelay: '150ms' }}>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg">
+                  🔧
+                </div>
+                <div className="flex-1">
+                  <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">Current Phase</div>
+                  <div className="font-display text-lg mt-0.5">{phase.label}</div>
+                  <div className="text-[12px] text-zinc-400 mt-0.5">{phase.description}</div>
+                </div>
+                <div className="text-right hidden sm:block">
+                  <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Milestone</div>
+                  <div className="text-sm text-zinc-300 mt-0.5 font-body">End of Feb: Build complete</div>
                 </div>
               </div>
-              <PapersList papers={papers} />
             </div>
-          )}
 
-          {activeTab === 'meetings' && (
-            <div className="card-glass p-12 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center text-3xl mx-auto">
-                🎙️
-              </div>
-              <h3 className="font-display text-xl mt-5">Meeting Notes</h3>
-              <p className="text-sm text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
-                Send Plaud transcripts to Clyde and they&apos;ll appear here — auto-summarized with action items extracted.
-              </p>
-              <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-zinc-600 font-mono bg-zinc-800/30 rounded-full px-4 py-2 border border-zinc-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500/50" />
-                Next advisor meeting: Wednesday ~1:30 PM
-              </div>
+            {/* Tabs */}
+            <div className="flex items-center gap-1 animate-in" style={{ animationDelay: '200ms' }}>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
+                    activeTab === tab.key
+                      ? 'bg-zinc-800/80 text-white border border-zinc-700/50 shadow-lg shadow-black/20 tab-active'
+                      : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30 border border-transparent'
+                  }`}
+                >
+                  <span className="mr-1.5 text-[10px]">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+              <div className="flex-1" />
+              {activeTab === 'papers' && (
+                <span className="text-[11px] text-zinc-600 font-mono">{papers.length} papers</span>
+              )}
             </div>
-          )}
+
+            {/* Content */}
+            <div className="min-h-[500px] animate-in" style={{ animationDelay: '250ms' }}>
+              {activeTab === 'timeline' && (
+                <TimelineView milestones={milestones} />
+              )}
+
+              {activeTab === 'writing' && (
+                <div className="card-glass p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">✍️</div>
+                    <h2 className="font-display text-lg">Writing Progress</h2>
+                  </div>
+                  <WritingProgress sections={sections} />
+                </div>
+              )}
+
+              {activeTab === 'papers' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">📄</div>
+                    <h2 className="font-display text-lg">Research Library</h2>
+                    <div className="flex-1" />
+                    <div className="flex items-center gap-3 text-[11px] font-mono">
+                      <span className="text-zinc-500">{papers.length} papers</span>
+                      <span className="text-green-500">{papers.filter(p => p.review_status === 'cited').length} cited</span>
+                      <span className="text-blue-500">{papers.filter(p => p.review_status === 'reviewed').length} reviewed</span>
+                      <span className="text-zinc-600">{papers.filter(p => !p.review_status || p.review_status === 'unread').length} unread</span>
+                    </div>
+                  </div>
+                  <PapersList papers={papers} />
+                </div>
+              )}
+
+              {activeTab === 'meetings' && (
+                <div className="card-glass p-12 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center text-3xl mx-auto">
+                    🎙️
+                  </div>
+                  <h3 className="font-display text-xl mt-5">Meeting Notes</h3>
+                  <p className="text-sm text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
+                    Send Plaud transcripts to Clyde and they&apos;ll appear here — auto-summarized with action items extracted.
+                  </p>
+                  <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-zinc-600 font-mono bg-zinc-800/30 rounded-full px-4 py-2 border border-zinc-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500/50" />
+                    Next advisor meeting: Wednesday ~1:30 PM
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column: Notion Tasks */}
+          <div className="lg:col-span-1">
+             <div className="sticky top-24 animate-in" style={{ animationDelay: '300ms' }}>
+               <NotionTasks />
+             </div>
+          </div>
         </div>
       </main>
 
