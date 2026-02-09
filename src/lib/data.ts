@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { Milestone, WritingSection, Paper, MeetingNote } from './types'
+import { Milestone, WritingSection, Paper, MeetingNote, ContentIdea } from './types'
 
 export async function getMilestones(): Promise<Milestone[]> {
   const { data, error } = await supabase
@@ -51,4 +51,17 @@ export async function updateWritingWordCount(id: string, current_word_count: num
     .update({ current_word_count })
     .eq('id', id)
   if (error) throw error
+}
+
+export async function getContentIdeas(): Promise<ContentIdea[]> {
+  const { data, error } = await supabase
+    .from('content_ideas')
+    .select('*')
+    .order('week_of', { ascending: false })
+    .order('created_at', { ascending: false })
+  if (error) {
+    console.error('Content ideas fetch error:', error.message)
+    return []
+  }
+  return data as ContentIdea[]
 }

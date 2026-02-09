@@ -7,26 +7,29 @@ import TimelineView from '@/components/TimelineView'
 import WritingProgress from '@/components/WritingProgress'
 import PapersList from '@/components/PapersList'
 import NotionTasks from '@/components/NotionTasks'
-import { getMilestones, getWritingSections, getPapers } from '@/lib/data'
-import { Milestone, WritingSection, Paper } from '@/lib/types'
+import ContentIdeas from '@/components/ContentIdeas'
+import { getMilestones, getWritingSections, getPapers, getContentIdeas } from '@/lib/data'
+import { Milestone, WritingSection, Paper, ContentIdea } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'timeline' | 'writing' | 'papers' | 'meetings'
+type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'meetings'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('timeline')
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [sections, setSections] = useState<WritingSection[]>([])
   const [papers, setPapers] = useState<Paper[]>([])
+  const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [m, s, p] = await Promise.all([getMilestones(), getWritingSections(), getPapers()])
+        const [m, s, p, c] = await Promise.all([getMilestones(), getWritingSections(), getPapers(), getContentIdeas()])
         setMilestones(m)
         setSections(s)
         setPapers(p)
+        setContentIdeas(c)
       } catch (err) {
         console.error('Failed to load data:', err)
       } finally {
@@ -68,6 +71,7 @@ export default function Dashboard() {
     { key: 'timeline', label: 'Timeline', icon: '◆' },
     { key: 'writing', label: 'Writing', icon: '◇' },
     { key: 'papers', label: 'Research', icon: '◈' },
+    { key: 'content', label: 'Content', icon: '◎' },
     { key: 'meetings', label: 'Meetings', icon: '◉' },
   ]
 
@@ -228,6 +232,16 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <PapersList papers={papers} />
+                </div>
+              )}
+
+              {activeTab === 'content' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">✍️</div>
+                    <h2 className="font-display text-lg">Content Pipeline</h2>
+                  </div>
+                  <ContentIdeas ideas={contentIdeas} />
                 </div>
               )}
 

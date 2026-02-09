@@ -89,6 +89,22 @@ export interface Reminder {
   created_at: string
 }
 
+export interface ContentIdea {
+  id: string
+  title: string
+  platform: 'twitter' | 'linkedin' | 'both'
+  category: 'ai-tools' | 'thesis-insights' | 'industry' | 'personal-brand' | 'tutorial'
+  hook: string | null
+  full_draft: string | null
+  status: 'idea' | 'drafted' | 'scheduled' | 'posted'
+  scheduled_for: string | null
+  posted_at: string | null
+  week_of: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 export const PHASE_LABELS: Record<Milestone['phase'], string> = {
   'build': '🔧 System Build',
   'data-collection': '📊 Data Collection',
