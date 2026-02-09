@@ -8,11 +8,12 @@ import WritingProgress from '@/components/WritingProgress'
 import PapersList from '@/components/PapersList'
 import NotionTasks from '@/components/NotionTasks'
 import ContentIdeas from '@/components/ContentIdeas'
-import { getMilestones, getWritingSections, getPapers, getContentIdeas } from '@/lib/data'
-import { Milestone, WritingSection, Paper, ContentIdea } from '@/lib/types'
+import AdvisorDeliverables from '@/components/AdvisorDeliverables'
+import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
+import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'meetings'
+type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'meetings' | 'deliverables'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('timeline')
@@ -20,16 +21,24 @@ export default function Dashboard() {
   const [sections, setSections] = useState<WritingSection[]>([])
   const [papers, setPapers] = useState<Paper[]>([])
   const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([])
+  const [deliverables, setDeliverables] = useState<AdvisorDeliverable[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [m, s, p, c] = await Promise.all([getMilestones(), getWritingSections(), getPapers(), getContentIdeas()])
+        const [m, s, p, c, d] = await Promise.all([
+          getMilestones(), 
+          getWritingSections(), 
+          getPapers(), 
+          getContentIdeas(),
+          getAdvisorDeliverables()
+        ])
         setMilestones(m)
         setSections(s)
         setPapers(p)
         setContentIdeas(c)
+        setDeliverables(d)
       } catch (err) {
         console.error('Failed to load data:', err)
       } finally {
@@ -69,6 +78,7 @@ export default function Dashboard() {
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: 'timeline', label: 'Timeline', icon: '◆' },
+    { key: 'deliverables', label: 'Deliverables', icon: '◆' },
     { key: 'writing', label: 'Writing', icon: '◇' },
     { key: 'papers', label: 'Research', icon: '◈' },
     { key: 'content', label: 'Content', icon: '◎' },
@@ -206,6 +216,10 @@ export default function Dashboard() {
             <div className="min-h-[500px] animate-in" style={{ animationDelay: '250ms' }}>
               {activeTab === 'timeline' && (
                 <TimelineView milestones={milestones} />
+              )}
+
+              {activeTab === 'deliverables' && (
+                <AdvisorDeliverables deliverables={deliverables} />
               )}
 
               {activeTab === 'writing' && (

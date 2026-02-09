@@ -132,3 +132,17 @@ export interface NotionTask {
   isChecked: boolean
   section: 'main' | 'backlog'
 }
+
+export interface AdvisorDeliverable {
+  id: string
+  week_number: number
+  week_start: string
+  title: string
+  description: string | null
+  chapter: string | null
+  status: 'upcoming' | 'in_progress' | 'submitted' | 'feedback_received' | 'complete'
+  advisor_notes: string | null
+  submitted_at: string | null
+  created_at: string
+  updated_at: string
+}

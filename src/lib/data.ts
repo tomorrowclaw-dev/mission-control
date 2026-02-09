@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { Milestone, WritingSection, Paper, MeetingNote, ContentIdea } from './types'
+import { Milestone, WritingSection, Paper, MeetingNote, ContentIdea, AdvisorDeliverable } from './types'
 
 export async function getMilestones(): Promise<Milestone[]> {
   const { data, error } = await supabase
@@ -64,4 +64,17 @@ export async function getContentIdeas(): Promise<ContentIdea[]> {
     return []
   }
   return data as ContentIdea[]
+}
+
+export async function getAdvisorDeliverables(): Promise<AdvisorDeliverable[]> {
+  const { data, error } = await supabase
+    .from('advisor_deliverables')
+    .select('*')
+    .order('week_number', { ascending: true })
+  
+  if (error) {
+    console.error('Advisor deliverables fetch error:', error.message)
+    return []
+  }
+  return data as AdvisorDeliverable[]
 }
