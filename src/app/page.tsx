@@ -9,11 +9,14 @@ import PapersList from '@/components/PapersList'
 import NotionTasks from '@/components/NotionTasks'
 import ContentIdeas from '@/components/ContentIdeas'
 import AdvisorDeliverables from '@/components/AdvisorDeliverables'
+import DailyBriefs from '@/components/DailyBriefs'
+import MeetingNotes from '@/components/MeetingNotes'
+import CalendarView from '@/components/CalendarView'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'meetings' | 'deliverables'
+type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'meetings' | 'deliverables' | 'briefs' | 'calendar'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('timeline')
@@ -52,9 +55,9 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-5xl mb-4">🎓</div>
+          <div className="text-5xl mb-4">🚀</div>
           <div className="text-zinc-500 font-body text-sm tracking-wide animate-pulse">
-            Initializing Command Center...
+            Initializing Mission Control...
           </div>
         </div>
       </div>
@@ -78,11 +81,13 @@ export default function Dashboard() {
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: 'timeline', label: 'Timeline', icon: '◆' },
+    { key: 'calendar', label: 'Calendar', icon: '◈' },
     { key: 'deliverables', label: 'Deliverables', icon: '◆' },
     { key: 'writing', label: 'Writing', icon: '◇' },
     { key: 'papers', label: 'Research', icon: '◈' },
-    { key: 'content', label: 'Content', icon: '◎' },
+    { key: 'briefs', label: 'Briefs', icon: '◉' },
     { key: 'meetings', label: 'Meetings', icon: '◉' },
+    { key: 'content', label: 'Content', icon: '◎' },
   ]
 
   const phaseInfo: Record<string, { label: string; color: string; description: string }> = {
@@ -103,10 +108,10 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 border border-indigo-500/20 flex items-center justify-center text-lg">
-                🎓
+                🚀
               </div>
               <div>
-                <h1 className="font-display text-lg tracking-tight">Thesis Command Center</h1>
+                <h1 className="font-display text-lg tracking-tight">Mission Control</h1>
                 <p className="text-[11px] text-zinc-500 font-mono tracking-wide mt-0.5">
                   K-12 Risk Assessment · DSR · HCC
                 </p>
@@ -191,18 +196,18 @@ export default function Dashboard() {
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center gap-1 animate-in" style={{ animationDelay: '200ms' }}>
+            <div className="flex items-center gap-1 flex-wrap animate-in" style={{ animationDelay: '200ms' }}>
               {tabs.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
+                  className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
                     activeTab === tab.key
                       ? 'bg-zinc-800/80 text-white border border-zinc-700/50 shadow-lg shadow-black/20 tab-active'
                       : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30 border border-transparent'
                   }`}
                 >
-                  <span className="mr-1.5 text-[10px]">{tab.icon}</span>
+                  <span className="mr-1 text-[10px]">{tab.icon}</span>
                   {tab.label}
                 </button>
               ))}
@@ -216,6 +221,16 @@ export default function Dashboard() {
             <div className="min-h-[500px] animate-in" style={{ animationDelay: '250ms' }}>
               {activeTab === 'timeline' && (
                 <TimelineView milestones={milestones} />
+              )}
+
+              {activeTab === 'calendar' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">📅</div>
+                    <h2 className="font-display text-lg">Schedule</h2>
+                  </div>
+                  <CalendarView />
+                </div>
               )}
 
               {activeTab === 'deliverables' && (
@@ -249,6 +264,16 @@ export default function Dashboard() {
                 </div>
               )}
 
+              {activeTab === 'briefs' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">📰</div>
+                    <h2 className="font-display text-lg">Daily Briefs</h2>
+                  </div>
+                  <DailyBriefs />
+                </div>
+              )}
+
               {activeTab === 'content' && (
                 <div>
                   <div className="flex items-center gap-3 mb-5">
@@ -260,18 +285,12 @@ export default function Dashboard() {
               )}
 
               {activeTab === 'meetings' && (
-                <div className="card-glass p-12 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center text-3xl mx-auto">
-                    🎙️
+                <div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">🎙️</div>
+                    <h2 className="font-display text-lg">Meeting Notes</h2>
                   </div>
-                  <h3 className="font-display text-xl mt-5">Meeting Notes</h3>
-                  <p className="text-sm text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
-                    Send Plaud transcripts to Clyde and they&apos;ll appear here — auto-summarized with action items extracted.
-                  </p>
-                  <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-zinc-600 font-mono bg-zinc-800/30 rounded-full px-4 py-2 border border-zinc-800">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500/50" />
-                    Next advisor meeting: Wednesday ~1:30 PM
-                  </div>
+                  <MeetingNotes />
                 </div>
               )}
             </div>
@@ -289,8 +308,8 @@ export default function Dashboard() {
       {/* Footer */}
       <footer className="border-t border-zinc-800/30 mt-16">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <span className="text-[11px] text-zinc-700 font-mono">thesis-command-center v0.1</span>
-          <span className="text-[11px] text-zinc-700">Next.js · Supabase · 🐙</span>
+          <span className="text-[11px] text-zinc-700 font-mono">mission-control v0.2</span>
+          <span className="text-[11px] text-zinc-700">Next.js · Supabase · Notion · 🐙</span>
         </div>
       </footer>
     </div>

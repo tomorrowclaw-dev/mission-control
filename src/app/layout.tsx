@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Thesis Command Center",
-  description: "Personal dashboard for tracking thesis progress, research, and milestones",
+  title: "Mission Control",
+  description: "Personal command center for thesis progress, research, calendar, briefs, and more",
 };
 
 export default function RootLayout({
