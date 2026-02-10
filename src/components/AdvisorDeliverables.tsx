@@ -8,18 +8,18 @@ interface AdvisorDeliverablesProps {
 }
 
 const PHASES = [
-  { start: 1, end: 4, label: "Phase 1: Foundation & Literature" },
-  { start: 5, end: 7, label: "Phase 2: Methodology & Design" },
-  { start: 8, end: 11, label: "Phase 3: Data Collection & Evaluation" },
-  { start: 12, end: 14, label: "Phase 4: Discussion & Synthesis" },
-  { start: 15, end: 20, label: "Phase 5: Assembly & Defense" },
+  { start: 1, end: 5, label: "Phase 1: Writing & Building" },
+  { start: 6, end: 8, label: "Phase 2: Evaluation Study" },
+  { start: 9, end: 12, label: "Phase 3: Results & Discussion" },
+  { start: 13, end: 16, label: "Phase 4: Review & Revisions" },
+  { start: 17, end: 18, label: "Phase 5: Defense Prep" },
 ]
 
 export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverablesProps) {
   const now = new Date()
   
   // Progress stats
-  const totalWeeks = 20
+  const totalWeeks = 18
   const completedWeeks = deliverables.filter(d => d.status === 'complete' || d.status === 'submitted' || d.status === 'feedback_received').length
   const progressPercent = Math.round((completedWeeks / totalWeeks) * 100)
 

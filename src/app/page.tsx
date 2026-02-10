@@ -91,11 +91,11 @@ export default function Dashboard() {
   ]
 
   const phaseInfo: Record<string, { label: string; color: string; description: string }> = {
-    'build': { label: 'System Build & Stabilization', color: 'from-violet-500/15 to-violet-500/0 border-violet-500/20', description: 'Get the RAG-based risk assessment assistant fully functional and test-ready' },
-    'data-collection': { label: 'Data Collection', color: 'from-blue-500/15 to-blue-500/0 border-blue-500/20', description: 'Complete all usability sessions and capture complete datasets' },
-    'analysis': { label: 'Analysis & Results', color: 'from-emerald-500/15 to-emerald-500/0 border-emerald-500/20', description: 'Finish analysis and write the Results section' },
-    'writing': { label: 'Writing', color: 'from-amber-500/15 to-amber-500/0 border-amber-500/20', description: 'Situate findings and finalize the thesis narrative' },
-    'defense': { label: 'Final Draft & Defense', color: 'from-rose-500/15 to-rose-500/0 border-rose-500/20', description: 'Produce a submission-quality thesis and successfully defend' },
+    'build': { label: 'Writing & Building', color: 'from-violet-500/15 to-violet-500/0 border-violet-500/20', description: 'Write Chs. 1-3 while building the RAG pipeline and AI Expert artifact' },
+    'data-collection': { label: 'Evaluation Study', color: 'from-blue-500/15 to-blue-500/0 border-blue-500/20', description: 'Run experiment sessions, collect survey data, write Ch.4 Artifact Design' },
+    'analysis': { label: 'Results & Discussion', color: 'from-emerald-500/15 to-emerald-500/0 border-emerald-500/20', description: 'Write Chs. 5-6, assemble complete thesis draft for committee' },
+    'writing': { label: 'Review & Revisions', color: 'from-amber-500/15 to-amber-500/0 border-amber-500/20', description: 'Incorporate committee feedback, polish and finalize thesis' },
+    'defense': { label: 'Defense Prep', color: 'from-rose-500/15 to-rose-500/0 border-rose-500/20', description: 'Build defense presentation, practice, submit final document' },
   }
 
   const phase = phaseInfo[currentPhase]
@@ -190,7 +190,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-right hidden sm:block">
                   <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Milestone</div>
-                  <div className="text-sm text-zinc-300 mt-0.5 font-body">End of Feb: Build complete</div>
+                  <div className="text-sm text-zinc-300 mt-0.5 font-body">Week {(() => { const weekNum = Math.ceil((now.getTime() - new Date('2026-02-09').getTime()) / (7 * 24 * 60 * 60 * 1000)); return Math.max(1, Math.min(weekNum, 18)); })()} of 18</div>
                 </div>
               </div>
             </div>

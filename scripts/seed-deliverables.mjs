@@ -1,55 +1,126 @@
 import { createClient } from '@supabase/supabase-js'
+import * as dotenv from 'dotenv'
+import { resolve } from 'path'
 
-const SUPABASE_URL = 'https://jofskdvhfapxfwjxaxho.supabase.co'
-const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZnNrZHZoZmFweGZ3anhheGhvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU3MzEwOSwiZXhwIjoyMDg2MTQ5MTA5fQ.SQTs3rOzB4r9eY2jAEQmigyKGlzyekXV9QIphSfu_2g'
+dotenv.config({ path: resolve(process.cwd(), '.env.local') })
 
-const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
 const deliverables = [
-  { week: 1, start: '2026-02-10', title: 'Introduction draft', desc: 'Problem statement, research questions, significance of the study', ch: 'Ch 1', status: 'in_progress' },
-  { week: 2, start: '2026-02-17', title: 'Literature Review pt 1', desc: 'K-12 risk assessment landscape, expertise gap in school safety', ch: 'Ch 2' },
-  { week: 3, start: '2026-02-24', title: 'Literature Review pt 2', desc: 'Task-Technology Fit theory, trust calibration, RAG & scaffolding', ch: 'Ch 2' },
-  { week: 4, start: '2026-03-02', title: 'Literature Review pt 3', desc: 'AI in education, Design Science Research foundations', ch: 'Ch 2' },
-  { week: 5, start: '2026-03-09', title: 'Methodology draft', desc: 'DSR framework, three design cycles, evaluation design & instruments', ch: 'Ch 3' },
-  { week: 6, start: '2026-03-16', title: 'Design & Development pt 1', desc: 'System architecture, RAG pipeline, technology stack decisions', ch: 'Ch 4' },
-  { week: 7, start: '2026-03-23', title: 'Design & Development pt 2', desc: 'UI/UX design, scaffolding features, citation grounding mechanisms', ch: 'Ch 4' },
-  { week: 8, start: '2026-03-30', title: 'Data collection progress', desc: 'Usability study protocol, participant recruitment update', ch: null },
-  { week: 9, start: '2026-04-06', title: 'Evaluation pt 1', desc: 'Participant demographics, raw results, SUS scores', ch: 'Ch 5' },
-  { week: 10, start: '2026-04-13', title: 'Evaluation pt 2', desc: 'TTF analysis, performance metrics, qualitative findings', ch: 'Ch 5' },
-  { week: 11, start: '2026-04-20', title: 'Results synthesis', desc: 'Complete results with data visualizations and statistical analysis', ch: 'Ch 5' },
-  { week: 12, start: '2026-04-27', title: 'Discussion pt 1', desc: 'Findings mapped to research questions, implications for practice', ch: 'Ch 6' },
-  { week: 13, start: '2026-05-04', title: 'Discussion pt 2', desc: 'Limitations, future work, DSR contributions to knowledge', ch: 'Ch 6' },
-  { week: 14, start: '2026-05-11', title: 'Conclusion + revised Introduction', desc: 'Final conclusion draft, revised introduction reflecting complete study', ch: 'Ch 1 & 7' },
-  { week: 15, start: '2026-05-18', title: 'Full draft assembly', desc: 'All chapters integrated into cohesive document', ch: 'All' },
-  { week: 16, start: '2026-05-25', title: 'Advisor review period', desc: 'Buffer week for comprehensive advisor review', ch: null },
-  { week: 17, start: '2026-06-01', title: 'Revisions round 1', desc: 'Address advisor feedback, strengthen weak sections', ch: 'All' },
-  { week: 18, start: '2026-06-08', title: 'Revisions round 2', desc: 'Final revisions, abstract, front matter, references check', ch: 'All' },
-  { week: 19, start: '2026-06-15', title: 'Final polished draft', desc: 'Submission-quality thesis delivered to advisor', ch: 'All' },
-  { week: 20, start: '2026-06-22', title: 'Committee copies & defense prep', desc: 'Distribute to committee, prepare defense presentation', ch: null },
+  // Phase 1: Writing & Building (Weeks 1-5)
+  {
+    week_number: 1, week_start: '2026-02-09', title: 'Introduction full draft (Ch.1)',
+    description: 'Ch.1 Introduction — problem statement, research gap, objectives, RQs. RAG Pipeline: ingest FEMA/CPTED docs, chunking strategy, Pinecone setup.',
+    chapter: 'Ch.1', status: 'upcoming'
+  },
+  {
+    week_number: 2, week_start: '2026-02-16', title: 'Lit Review sections 1-2 draft',
+    description: 'Lit Review §1-2: Expertise Gap in K-12 + TTF in the AI Era. RAG Pipeline: test retrieval quality, refine embeddings, validate on sample queries.',
+    chapter: 'Ch.2', status: 'upcoming'
+  },
+  {
+    week_number: 3, week_start: '2026-02-23', title: 'Complete Lit Review draft (Ch.2)',
+    description: 'Lit Review §3-4: AI Scaffolding & RAG + Trust Calibration. Agent Engineering: system prompt design, expert persona, RAG integration.',
+    chapter: 'Ch.2', status: 'upcoming'
+  },
+  {
+    week_number: 4, week_start: '2026-03-02', title: 'Methodology full draft (Ch.3)',
+    description: 'Ch.3 Methodology — DSR framework, three cycles, evaluation design. UI Build: citation engine, confidence indicators, assessment form interface.',
+    chapter: 'Ch.3', status: 'upcoming'
+  },
+  {
+    week_number: 5, week_start: '2026-03-09', title: '★ Chs. 1-3 finalized; artifact ready for study',
+    description: 'Revise & polish Intro, Lit Review, Methodology based on advisor feedback. Full integration testing; end-to-end system validation; study prep (scenarios, Gold Standard).',
+    chapter: 'Ch.1-3', status: 'upcoming'
+  },
+  // Phase 2: Evaluation Study (Weeks 6-8)
+  {
+    week_number: 6, week_start: '2026-03-16', title: 'Ch.4 outline + study session progress update',
+    description: 'Begin Ch.4 Artifact Design — document system architecture, RAG pipeline, agent design. Run experiment sessions: control group (static form) + treatment group (AI Expert).',
+    chapter: 'Ch.4', status: 'upcoming'
+  },
+  {
+    week_number: 7, week_start: '2026-03-23', title: 'Ch.4 draft + study data collection complete',
+    description: 'Continue Ch.4 — UI design decisions, trust scaffolding features, screenshots. Complete remaining sessions; collect all survey data (TTF, trust scales) + accuracy scores.',
+    chapter: 'Ch.4', status: 'upcoming'
+  },
+  {
+    week_number: 8, week_start: '2026-03-30', title: '★ Ch.4 final + analysis results tables/figures',
+    description: 'Finalize Ch.4 Artifact Design chapter. Data analysis: compare TTF scores, trust measures, assessment accuracy vs. Gold Standard.',
+    chapter: 'Ch.4', status: 'upcoming'
+  },
+  // Phase 3: Results & Discussion (Weeks 9-12)
+  {
+    week_number: 9, week_start: '2026-04-06', title: 'Results chapter draft (Ch.5)',
+    description: 'Ch.5 Results — statistical findings, comparison tables, participant demographics. Generate final visualizations (charts, graphs) for results chapter.',
+    chapter: 'Ch.5', status: 'upcoming'
+  },
+  {
+    week_number: 10, week_start: '2026-04-13', title: 'Discussion: findings interpretation + TTF implications',
+    description: 'Ch.6 Discussion — interpret findings through TTF lens, artifact contributions. Supplementary analysis if needed; address any data gaps.',
+    chapter: 'Ch.6', status: 'upcoming'
+  },
+  {
+    week_number: 11, week_start: '2026-04-20', title: 'Complete Discussion chapter draft (Ch.6)',
+    description: 'Ch.6 cont\'d — theoretical contributions, practical implications, limitations, future work. Clean up codebase, document for reproducibility.',
+    chapter: 'Ch.6', status: 'upcoming'
+  },
+  {
+    week_number: 12, week_start: '2026-04-27', title: '★ Complete thesis draft submitted to committee',
+    description: 'Full thesis assembly — abstract, table of contents, references, appendices, formatting. Final artifact documentation and appendix materials.',
+    chapter: 'All', status: 'upcoming'
+  },
+  // Phase 4: Review & Revisions (Weeks 13-16)
+  {
+    week_number: 13, week_start: '2026-05-04', title: 'Self-review pass; prep revision tracking doc',
+    description: 'Buffer week — committee reviewing; work on any sections that need strengthening.',
+    chapter: null, status: 'upcoming'
+  },
+  {
+    week_number: 14, week_start: '2026-05-11', title: 'Polished figures/tables; tightened prose',
+    description: 'Buffer week — committee reviewing; refine figures/tables, tighten arguments.',
+    chapter: null, status: 'upcoming'
+  },
+  {
+    week_number: 15, week_start: '2026-05-18', title: 'Revised draft addressing major feedback',
+    description: 'Incorporate committee feedback — major structural/content revisions.',
+    chapter: null, status: 'upcoming'
+  },
+  {
+    week_number: 16, week_start: '2026-05-25', title: '★ Final revised thesis submitted to committee',
+    description: 'Incorporate committee feedback — minor edits, formatting, citation cleanup.',
+    chapter: null, status: 'upcoming'
+  },
+  // Phase 5: Defense Prep (Weeks 17-18)
+  {
+    week_number: 17, week_start: '2026-06-01', title: 'Defense slide deck draft',
+    description: 'Build defense presentation (20-25 slides); draft talking points.',
+    chapter: null, status: 'upcoming'
+  },
+  {
+    week_number: 18, week_start: '2026-06-08', title: '★ Final thesis + defense presentation ready',
+    description: 'Practice defense; incorporate any final committee notes; submit final document.',
+    chapter: null, status: 'upcoming'
+  },
 ]
 
 async function seed() {
   console.log('Clearing existing deliverables...')
   const { error: deleteError } = await supabase.from('advisor_deliverables').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-  if (deleteError) console.error('Error clearing:', deleteError)
-
-  console.log('Inserting deliverables...')
-  for (const d of deliverables) {
-    const { error } = await supabase.from('advisor_deliverables').insert({
-      week_number: d.week,
-      week_start: d.start,
-      title: d.title,
-      description: d.desc,
-      chapter: d.ch,
-      status: d.status || 'upcoming'
-    })
-    if (error) {
-      console.error(`Error inserting week ${d.week}:`, error)
-    } else {
-      console.log(`Inserted week ${d.week}`)
-    }
+  if (deleteError) {
+    console.error('Delete error:', deleteError.message)
   }
-  console.log('Done!')
+
+  console.log('Inserting 18-week timeline...')
+  const { data, error } = await supabase.from('advisor_deliverables').insert(deliverables).select()
+  if (error) {
+    console.error('Insert error:', error.message)
+    process.exit(1)
+  }
+  console.log(`✅ Seeded ${data.length} deliverables`)
 }
 
 seed()
