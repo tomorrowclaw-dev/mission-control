@@ -10,13 +10,11 @@ import NotionTasks from '@/components/NotionTasks'
 import ContentIdeas from '@/components/ContentIdeas'
 import AdvisorDeliverables from '@/components/AdvisorDeliverables'
 import DailyBriefs from '@/components/DailyBriefs'
-import MeetingNotes from '@/components/MeetingNotes'
-import CalendarView from '@/components/CalendarView'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'meetings' | 'deliverables' | 'briefs' | 'calendar'
+type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'deliverables' | 'briefs'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('timeline')
@@ -81,12 +79,10 @@ export default function Dashboard() {
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: 'timeline', label: 'Timeline', icon: '◆' },
-    { key: 'calendar', label: 'Calendar', icon: '◈' },
     { key: 'deliverables', label: 'Deliverables', icon: '◆' },
     { key: 'writing', label: 'Writing', icon: '◇' },
     { key: 'papers', label: 'Research', icon: '◈' },
     { key: 'briefs', label: 'Briefs', icon: '◉' },
-    { key: 'meetings', label: 'Meetings', icon: '◉' },
     { key: 'content', label: 'Content', icon: '◎' },
   ]
 
@@ -223,16 +219,6 @@ export default function Dashboard() {
                 <TimelineView milestones={milestones} />
               )}
 
-              {activeTab === 'calendar' && (
-                <div>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">📅</div>
-                    <h2 className="font-display text-lg">Schedule</h2>
-                  </div>
-                  <CalendarView />
-                </div>
-              )}
-
               {activeTab === 'deliverables' && (
                 <AdvisorDeliverables deliverables={deliverables} />
               )}
@@ -284,15 +270,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {activeTab === 'meetings' && (
-                <div>
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">🎙️</div>
-                    <h2 className="font-display text-lg">Meeting Notes</h2>
-                  </div>
-                  <MeetingNotes />
-                </div>
-              )}
             </div>
           </div>
 

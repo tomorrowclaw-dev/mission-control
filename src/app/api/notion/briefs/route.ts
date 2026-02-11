@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { NotionPage, NotionTitleProperty, NotionDateProperty } from '@/types/notion'
 
-const NOTION_DB_ID = '3004b298-1cd6-8170-b824-ecb53bb98335'
+const NOTION_DB_ID = '3044b298-1cd6-8114-87ea-d90a9d0a0e08'
 const NOTION_API_KEY = process.env.NOTION_API_KEY
 const NOTION_VERSION = '2022-06-28'
 
