@@ -91,7 +91,7 @@ export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverable
 
       {/* Timeline */}
       <div className="space-y-8 pl-2">
-        {groupedDeliverables.map((group, groupIdx) => (
+        {groupedDeliverables.map((group) => (
           <div key={group.label} className="relative">
             {/* Phase Header */}
             <div className="sticky top-20 z-10 bg-[#06060b]/95 backdrop-blur-sm py-2 mb-4 border-b border-zinc-800/50">
@@ -101,7 +101,7 @@ export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverable
             </div>
 
             <div className="space-y-3 relative border-l border-zinc-800/50 ml-2.5 pl-6 pb-6">
-               {group.items.map((item, itemIdx) => {
+               {group.items.map((item) => {
                  const weekStart = parseISO(item.week_start)
                  const weekEnd = addDays(weekStart, 6)
                  const isCurrentWeek = isWithinInterval(now, { start: weekStart, end: weekEnd })

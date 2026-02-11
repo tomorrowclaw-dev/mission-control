@@ -36,14 +36,24 @@ export async function GET() {
   }
 }
 
-function parseTasks(blocks: any[]) {
+interface NotionBlock {
+  type: string;
+  [key: string]: unknown;
+}
+
+interface RichTextItem {
+  plain_text: string;
+}
+
+function parseTasks(blocks: NotionBlock[]) {
   const tasks = []
   let currentSection: 'main' | 'backlog' | null = null
 
   for (const block of blocks) {
     // Check for headers
     if (block.type === 'heading_2') {
-      const text = block.heading_2.rich_text.map((t: any) => t.plain_text).join('').toLowerCase()
+      const heading2Data = block.heading_2 as { rich_text?: RichTextItem[] }
+      const text = heading2Data?.rich_text?.map((t: RichTextItem) => t.plain_text).join('').toLowerCase() || ''
       if (text.includes('main tasks')) {
         currentSection = 'main'
       } else if (text.includes('backlogged tasks')) {
@@ -54,12 +64,13 @@ function parseTasks(blocks: any[]) {
     } 
     // Check for to-do items
     else if (block.type === 'to_do' && currentSection) {
-      const text = block.to_do.rich_text.map((t: any) => t.plain_text).join('')
+      const todoData = block.to_do as { rich_text?: RichTextItem[], checked?: boolean }
+      const text = todoData?.rich_text?.map((t: RichTextItem) => t.plain_text).join('') || ''
       if (text) {
         tasks.push({
           id: block.id,
           text,
-          isChecked: block.to_do.checked,
+          isChecked: todoData?.checked || false,
           section: currentSection
         })
       }

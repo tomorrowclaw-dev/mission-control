@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { NotionPage, NotionTitleProperty, NotionDateProperty, NotionMultiSelectProperty } from '@/types/notion'
 
 const NOTION_DB_ID = '3004b298-1cd6-8193-8efe-f7d116dd8ce4'
 const NOTION_API_KEY = process.env.NOTION_API_KEY
@@ -39,16 +40,20 @@ export async function GET() {
     }
 
     const data = await response.json()
-    const events = data.results.map((page: any) => {
-      const title = page.properties?.Name?.title?.[0]?.plain_text
-        || page.properties?.Title?.title?.[0]?.plain_text
+    const events = data.results.map((page: NotionPage) => {
+      const nameProp = page.properties.Name as NotionTitleProperty | undefined
+      const titleProp = page.properties.Title as NotionTitleProperty | undefined
+      const title = nameProp?.title?.[0]?.plain_text
+        || titleProp?.title?.[0]?.plain_text
         || 'Untitled Event'
 
-      const dateObj = page.properties?.Date?.date
+      const dateProp = page.properties.Date as NotionDateProperty | undefined
+      const dateObj = dateProp?.date
       const start = dateObj?.start || page.created_time
       const end = dateObj?.end || null
 
-      const tags = page.properties?.Tags?.multi_select?.map((t: any) => t.name) || []
+      const tagsProp = page.properties.Tags as NotionMultiSelectProperty | undefined
+      const tags = tagsProp?.multi_select?.map((t) => t.name) || []
 
       return { id: page.id, title, start, end, tags }
     })

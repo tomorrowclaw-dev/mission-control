@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { format, parseISO, isToday, isTomorrow, isPast, isFuture, startOfDay, addDays } from 'date-fns'
+import { format, parseISO, isToday, isTomorrow, isPast, startOfDay } from 'date-fns'
 import { Calendar, Clock } from 'lucide-react'
 
 interface CalendarEvent {
@@ -57,7 +57,7 @@ export default function CalendarView() {
 
   // Group events by day
   const now = new Date()
-  const today = startOfDay(now)
+  startOfDay(now)
 
   const grouped: { label: string; sublabel: string; events: CalendarEvent[]; isToday: boolean }[] = []
   const dayMap = new Map<string, CalendarEvent[]>()

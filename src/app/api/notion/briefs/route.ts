@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { NotionPage, NotionTitleProperty, NotionDateProperty } from '@/types/notion'
 
 const NOTION_DB_ID = '3004b298-1cd6-8170-b824-ecb53bb98335'
 const NOTION_API_KEY = process.env.NOTION_API_KEY
@@ -31,13 +32,16 @@ export async function GET() {
     }
 
     const data = await response.json()
-    const briefs = await Promise.all(data.results.map(async (page: any) => {
-      const title = page.properties?.Name?.title?.[0]?.plain_text
-        || page.properties?.Title?.title?.[0]?.plain_text
+    const briefs = await Promise.all(data.results.map(async (page: NotionPage) => {
+      const nameProp = page.properties.Name as NotionTitleProperty | undefined
+      const titleProp = page.properties.Title as NotionTitleProperty | undefined
+      const title = nameProp?.title?.[0]?.plain_text
+        || titleProp?.title?.[0]?.plain_text
         || 'Untitled Brief'
       
       const created = page.created_time
-      const date = page.properties?.Date?.date?.start || created
+      const dateProp = page.properties.Date as NotionDateProperty | undefined
+      const date = dateProp?.date?.start || created
 
       // Fetch page content (blocks)
       let content = ''
@@ -66,12 +70,22 @@ export async function GET() {
   }
 }
 
-function extractText(blocks: any[]): string {
-  return blocks.map((block: any) => {
+interface NotionBlock {
+  type: string;
+  [key: string]: unknown;
+}
+
+interface RichTextItem {
+  plain_text: string;
+}
+
+function extractText(blocks: NotionBlock[]): string {
+  return blocks.map((block: NotionBlock) => {
     const type = block.type
-    const richText = block[type]?.rich_text
+    const blockData = block[type] as { rich_text?: RichTextItem[] }
+    const richText = blockData?.rich_text
     if (richText) {
-      return richText.map((t: any) => t.plain_text).join('')
+      return richText.map((t: RichTextItem) => t.plain_text).join('')
     }
     return ''
   }).filter(Boolean).join('\n')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { differenceInDays, format } from 'date-fns'
+import { format } from 'date-fns'
 import CountdownTimer from '@/components/CountdownTimer'
 import TimelineView from '@/components/TimelineView'
 import WritingProgress from '@/components/WritingProgress'

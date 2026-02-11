@@ -13,7 +13,7 @@ const statements = sql.split(';').map(s => s.trim()).filter(s => s.length > 0 &&
 
 for (const stmt of statements) {
   console.log(`Running: ${stmt.substring(0, 60)}...`)
-  const { error } = await supabase.rpc('', {}).then(() => ({})).catch(() => ({}))
+  await supabase.rpc('', {}).then(() => ({})).catch(() => ({}))
 }
 
 // Use the SQL endpoint directly
