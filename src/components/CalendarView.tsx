@@ -56,27 +56,6 @@ const PHASE_COLORS: Record<string, string> = {
   defense: 'var(--phase-defense)',
 }
 
-const _EVENT_TYPE_STYLES: Record<EventType, { dot: string; bg: string; text: string; border: string }> = {
-  milestone: {
-    dot: 'bg-[var(--accent)]',
-    bg: 'bg-[var(--accent-muted)]',
-    text: 'text-[var(--accent)]',
-    border: 'border-[var(--accent)]/20',
-  },
-  deadline: {
-    dot: 'bg-[var(--danger)]',
-    bg: 'bg-[var(--danger)]/10',
-    text: 'text-[var(--danger)]',
-    border: 'border-[var(--danger)]/20',
-  },
-  cron: {
-    dot: 'bg-[var(--phase-data)]',
-    bg: 'bg-[var(--phase-data)]/8',
-    text: 'text-[var(--phase-data)]',
-    border: 'border-[var(--phase-data)]/15',
-  },
-}
-
 // ─── Defense Date ───
 const DEFENSE_DATE = '2026-06-28'
 
