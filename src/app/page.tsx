@@ -181,9 +181,9 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="p-4 lg:p-5 space-y-4">
-          {/* Stats row — hidden on Crew HQ tab */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 animate-in">
+        <main className={activeTab === 'crew' ? 'p-2' : 'p-4 lg:p-5 space-y-4'}>
+          {/* Stats row */}
+          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-2 animate-in ${activeTab === 'crew' ? 'hidden' : ''}`}>
             <CountdownTimer targetDate={defenseDate} label="Defense Day" variant="hero" />
 
             <div className="instrument p-4">
