@@ -12,11 +12,14 @@ import NotionTasks from '@/components/NotionTasks'
 import ContentIdeas from '@/components/ContentIdeas'
 import AdvisorDeliverables from '@/components/AdvisorDeliverables'
 import DailyBriefs from '@/components/DailyBriefs'
+import ActivityFeed from '@/components/ActivityFeed'
+import ScheduledTasks from '@/components/ScheduledTasks'
+import GlobalSearch from '@/components/GlobalSearch'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'deliverables' | 'briefs'
+type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'deliverables' | 'briefs' | 'activity' | 'schedule' | 'search'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('timeline')
@@ -86,6 +89,9 @@ export default function Dashboard() {
     { key: 'papers', label: 'Research', icon: '◈' },
     { key: 'briefs', label: 'Briefs', icon: '◉' },
     { key: 'content', label: 'Content', icon: '◎' },
+    { key: 'activity', label: 'Activity', icon: '●' },
+    { key: 'schedule', label: 'Schedule', icon: '◈' },
+    { key: 'search', label: 'Search', icon: '◉' },
   ]
 
   const phaseInfo: Record<string, { label: string; color: string; description: string }> = {
@@ -277,6 +283,10 @@ export default function Dashboard() {
                   <ContentIdeas ideas={contentIdeas} />
                 </div>
               )}
+
+              {activeTab === 'activity' && <ActivityFeed />}
+              {activeTab === 'schedule' && <ScheduledTasks />}
+              {activeTab === 'search' && <GlobalSearch />}
 
             </div>
           </div>
