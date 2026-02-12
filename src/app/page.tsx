@@ -287,8 +287,8 @@ export default function Dashboard() {
       {/* Footer */}
       <footer className="border-t border-zinc-800/30 mt-16">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <span className="text-[11px] text-zinc-700 font-mono">mission-control v0.2</span>
-          <span className="text-[11px] text-zinc-700">Next.js · Supabase · Notion · 🐙</span>
+          <span className="text-[11px] text-zinc-700 font-mono">mission-control v0.3</span>
+          <span className="text-[11px] text-zinc-700">Ship research, not chaos.</span>
         </div>
       </footer>
     </div>
