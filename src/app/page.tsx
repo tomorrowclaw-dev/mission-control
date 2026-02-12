@@ -202,13 +202,13 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="instrument p-4 overflow-y-auto max-h-[180px]">
+            <div className="instrument p-3 overflow-y-auto max-h-[160px]">
               <NotionTasks />
             </div>
           </div>
 
           {/* Content area — full width */}
-          <div key={activeTab} className="min-h-[500px] animate-in" style={{ animationDelay: '100ms' }}>
+          <div key={activeTab} className="animate-in" style={{ animationDelay: '100ms' }}>
             {activeTab === 'activity' && <ActivityFeed />}
             {activeTab === 'schedule' && <CalendarView />}
             {activeTab === 'search' && <GlobalSearch />}
@@ -236,15 +236,7 @@ export default function Dashboard() {
           </div>
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-[var(--border)] mt-8">
-          <div className="max-w-5xl px-6 lg:px-8 py-4 flex items-center justify-between">
-            <span className="text-[9px] text-[var(--text-dim)] font-mono opacity-50">mission-control v1.1</span>
-            <span className="text-[9px] text-[var(--text-dim)] italic font-body opacity-40">
-              {['Ship research, not chaos.', 'One milestone at a time.', 'Trust the process.', 'Build. Evaluate. Write. Defend.', 'The artifact is the argument.'][Math.floor(Date.now() / 86400000) % 5]}
-            </span>
-          </div>
-        </footer>
+        {/* no footer — maximize viewport space */}
       </div>
     </div>
   )
