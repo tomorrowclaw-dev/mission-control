@@ -101,7 +101,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="border-b border-zinc-800/40 sticky top-0 z-50 bg-[#06060b]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 bg-[#06060b]/90 backdrop-blur-md header-border">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -123,16 +123,22 @@ export default function Dashboard() {
               <ThemeToggle />
             </div>
           </div>
+          {/* Alive indicator */}
+          <div className="flex items-center gap-2 mt-2 sm:mt-0">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-wider">Live</span>
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-8">
         {/* Countdown + Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 animate-in">
-          <CountdownTimer targetDate={defenseDate} label="Defense Day" variant="hero" />
-          {nextMilestone && (
-            <CountdownTimer targetDate={nextMilestone.due_date} label={nextMilestone.title} />
-          )}
+          <div className="sm:col-span-2">
+            <CountdownTimer targetDate={defenseDate} label="Defense Day" variant="hero" />
+          </div>
 
           {/* Milestones stat */}
           <div className="card-gradient p-4">
