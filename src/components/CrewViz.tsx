@@ -2,7 +2,7 @@
 
 export default function CrewViz() {
   return (
-    <div className="w-full bg-[#08080c] rounded-xl overflow-hidden" style={{ aspectRatio: '480 / 320' }}>
+    <div className="fixed top-0 right-0 bottom-0 bg-[#08080c]" style={{ left: '240px' }}>
       <iframe
         src="/crew-viz.html"
         className="w-full h-full border-0 block"
