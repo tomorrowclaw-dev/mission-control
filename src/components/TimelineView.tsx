@@ -109,8 +109,8 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
       {/* Visual Timeline Header */}
       <div className="mb-8 animate-in">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-zinc-300">18-Week Timeline</h3>
-          <div className="text-xs text-zinc-500 font-mono">Week {currentWeek} of {totalWeeks}</div>
+          <h3 className="text-sm font-semibold text-[var(--text)]">18-Week Timeline</h3>
+          <div className="text-xs text-[var(--text-dim)] font-mono">Week {currentWeek} of {totalWeeks}</div>
         </div>
         
         {/* Timeline Track */}
@@ -136,7 +136,7 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
           </div>
           
           {/* Phase markers */}
-          <div className="absolute top-3 left-0 right-0 flex justify-between text-[8px] text-zinc-600 font-mono">
+          <div className="absolute top-3 left-0 right-0 flex justify-between text-[8px] text-[var(--text-dim)] font-mono">
             <span>Week 1</span>
             <span>Week 6</span>
             <span>Week 12</span>
@@ -207,7 +207,7 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span className={`text-sm font-medium ${isOverdue ? 'text-red-400' : 'text-zinc-200'}`}>
+                              <span className={`text-sm font-medium ${isOverdue ? 'text-red-400' : 'text-[var(--text)]'}`}>
                                 {m.title}
                               </span>
                               
@@ -225,18 +225,18 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
                             </div>
                             
                             {m.description && (
-                              <p className="text-[11px] text-zinc-400 group-hover:text-zinc-300 transition-colors leading-relaxed">
+                              <p className="text-[11px] text-[var(--text-secondary)] group-hover:text-[var(--text)] transition-colors leading-relaxed">
                                 {m.description}
                               </p>
                             )}
                           </div>
                           
                           <div className="text-right shrink-0">
-                            <div className={`text-sm font-mono font-medium ${isOverdue ? 'text-red-400' : 'text-zinc-400'}`}>
+                            <div className={`text-sm font-mono font-medium ${isOverdue ? 'text-red-400' : 'text-[var(--text-secondary)]'}`}>
                               {format(dueDate, 'MMM d')}
                             </div>
                             {m.week_start && (
-                              <div className="text-[10px] text-zinc-600 font-mono mt-0.5">
+                              <div className="text-[10px] text-[var(--text-dim)] font-mono mt-0.5">
                                 Week {Math.ceil(differenceInWeeks(new Date(m.week_start), startDate)) + 1}
                               </div>
                             )}

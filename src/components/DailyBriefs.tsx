@@ -40,7 +40,7 @@ export default function DailyBriefs() {
   if (loading) {
     return (
       <div className="card-glass p-12 text-center">
-        <div className="animate-pulse text-zinc-500 text-sm font-mono">Loading briefs...</div>
+        <div className="animate-pulse text-[var(--text-dim)] text-sm font-mono">Loading briefs...</div>
       </div>
     )
   }
@@ -48,14 +48,14 @@ export default function DailyBriefs() {
   if (briefs.length === 0) {
     return (
       <div className="card-glass p-12 text-center border border-dashed border-zinc-700/70 bg-zinc-900/20">
-        <div className="w-16 h-16 rounded-2xl bg-zinc-800/30 border border-dashed border-zinc-700/60 flex items-center justify-center text-3xl text-zinc-500 mx-auto">
+        <div className="w-16 h-16 rounded-2xl bg-zinc-800/30 border border-dashed border-zinc-700/60 flex items-center justify-center text-3xl text-[var(--text-dim)] mx-auto">
           📰
         </div>
-        <h3 className="font-display text-xl mt-5 text-zinc-300">No Daily Briefs Yet</h3>
-        <p className="text-sm text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
+        <h3 className="font-display text-xl mt-5 text-[var(--text)]">No Daily Briefs Yet</h3>
+        <p className="text-sm text-[var(--text-dim)] mt-2 max-w-sm mx-auto leading-relaxed">
           Brief archives will show up here after the next sync from Notion.
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-zinc-500 font-mono bg-zinc-800/20 rounded-full px-4 py-2 border border-zinc-700/50">
+        <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-[var(--text-dim)] font-mono bg-zinc-800/20 rounded-full px-4 py-2 border border-zinc-700/50">
           <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/60" />
           Create today&apos;s brief in Notion to get started
         </div>
@@ -77,18 +77,18 @@ export default function DailyBriefs() {
                 <Newspaper size={14} className="text-indigo-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-body text-sm text-zinc-200 truncate">{brief.title}</div>
-                <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                <div className="font-body text-sm text-[var(--text)] truncate">{brief.title}</div>
+                <div className="text-[11px] text-[var(--text-dim)] font-mono mt-0.5">
                   {format(parseISO(brief.date), 'EEEE, MMMM d, yyyy')}
                 </div>
               </div>
-              <div className="text-zinc-600 shrink-0">
+              <div className="text-[var(--text-dim)] shrink-0">
                 {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               </div>
             </button>
             {isExpanded && (
               <div className="px-5 pb-5 border-t border-zinc-800/30">
-                <div className="mt-4 text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap font-body">
+                <div className="mt-4 text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap font-body">
                   {brief.content || 'No content available.'}
                 </div>
               </div>

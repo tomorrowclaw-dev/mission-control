@@ -76,12 +76,12 @@ export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverable
              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">🗓️</div>
              <div>
                <h2 className="font-display text-lg">Advisor Deliverables</h2>
-               <p className="text-[11px] text-zinc-500 font-mono">Weekly targets & submission schedule</p>
+               <p className="text-[11px] text-[var(--text-dim)] font-mono">Weekly targets & submission schedule</p>
              </div>
           </div>
           <div className="text-right">
-             <div className="text-2xl font-mono font-bold text-indigo-400">{completedWeeks}<span className="text-zinc-600 text-lg">/{totalWeeks}</span></div>
-             <div className="text-[10px] uppercase tracking-wider text-zinc-500">weeks complete</div>
+             <div className="text-2xl font-mono font-bold text-indigo-400">{completedWeeks}<span className="text-[var(--text-dim)] text-lg">/{totalWeeks}</span></div>
+             <div className="text-[10px] uppercase tracking-wider text-[var(--text-dim)]">weeks complete</div>
           </div>
         </div>
         <div className="h-1.5 bg-zinc-800/80 rounded-full overflow-hidden">
@@ -95,7 +95,7 @@ export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverable
           <div key={group.label} className="relative">
             {/* Phase Header */}
             <div className="sticky top-20 z-10 bg-[#06060b]/95 backdrop-blur-sm py-2 mb-4 border-b border-zinc-800/50">
-               <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500">
+               <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-[var(--text-dim)]">
                  {group.label}
                </h3>
             </div>
@@ -133,33 +133,33 @@ export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverable
                        <div className="flex-1 min-w-0">
                          <div className="flex items-center gap-2 mb-1">
                            <span className={`text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border 
-                             ${isCurrentWeek ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-500'}
+                             ${isCurrentWeek ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300' : 'bg-zinc-800/50 border-zinc-700 text-[var(--text-dim)]'}
                            `}>
                              Week {item.week_number}
                            </span>
-                           <span className="text-[10px] text-zinc-500 font-mono">
+                           <span className="text-[10px] text-[var(--text-dim)] font-mono">
                              {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d')}
                            </span>
                            {item.chapter && (
-                             <span className="ml-auto text-[10px] font-mono text-zinc-400 bg-zinc-800/50 px-1.5 py-0.5 rounded border border-zinc-800">
+                             <span className="ml-auto text-[10px] font-mono text-[var(--text-secondary)] bg-zinc-800/50 px-1.5 py-0.5 rounded border border-zinc-800">
                                {item.chapter === 'All' ? 'Complete Draft' : item.chapter}
                              </span>
                            )}
                          </div>
                          
-                         <h4 className={`font-medium ${isPast ? 'text-zinc-400' : 'text-zinc-200'}`}>
+                         <h4 className={`font-medium ${isPast ? 'text-[var(--text-secondary)]' : 'text-[var(--text)]'}`}>
                            {item.title}
                          </h4>
                          
                          {item.description && (
-                           <p className="text-sm text-zinc-500 mt-1 leading-relaxed">
+                           <p className="text-sm text-[var(--text-dim)] mt-1 leading-relaxed">
                              {item.description}
                            </p>
                          )}
 
                          {item.status !== 'upcoming' && item.status !== 'complete' && (
-                           <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-zinc-400">
-                             Status: <span className="text-zinc-300">{item.status.replace('_', ' ')}</span>
+                           <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-[var(--text-secondary)]">
+                             Status: <span className="text-[var(--text)]">{item.status.replace('_', ' ')}</span>
                            </div>
                          )}
                        </div>

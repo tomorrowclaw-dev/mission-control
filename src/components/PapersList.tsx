@@ -25,7 +25,7 @@ const tagColors: Record<string, string> = {
   'calibration': 'bg-amber-500/12 text-amber-400 border-amber-500/20',
   'architecture': 'bg-emerald-500/12 text-emerald-400 border-emerald-500/20',
   'education': 'bg-pink-500/12 text-pink-400 border-pink-500/20',
-  'theory': 'bg-zinc-500/12 text-zinc-400 border-zinc-500/20',
+  'theory': 'bg-zinc-500/12 text-[var(--text-secondary)] border-zinc-500/20',
   'domain': 'bg-red-500/12 text-red-400 border-red-500/20',
   'risk-assessment': 'bg-red-500/12 text-red-400 border-red-500/20',
   'AI': 'bg-indigo-500/12 text-indigo-400 border-indigo-500/20',
@@ -111,7 +111,7 @@ export default function PapersList({ papers }: PapersListProps) {
       case 'cited': return 'bg-green-500/12 text-green-400 border-green-500/20'
       case 'reviewed': return 'bg-blue-500/12 text-blue-400 border-blue-500/20'
       case 'reading': return 'bg-amber-500/12 text-amber-400 border-amber-500/20'
-      default: return 'bg-zinc-500/12 text-zinc-400 border-zinc-500/20'
+      default: return 'bg-zinc-500/12 text-[var(--text-secondary)] border-zinc-500/20'
     }
   }
 
@@ -121,13 +121,13 @@ export default function PapersList({ papers }: PapersListProps) {
       <div className="space-y-3">
         {/* Search bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--text-dim)]" />
           <input
             type="text"
             placeholder="Search papers, authors, or tags..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-zinc-200 placeholder-zinc-500 focus:border-indigo-500/50 focus:bg-zinc-800/70 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-[var(--text)] placeholder-zinc-500 focus:border-indigo-500/50 focus:bg-zinc-800/70 transition-all"
           />
         </div>
 
@@ -141,7 +141,7 @@ export default function PapersList({ papers }: PapersListProps) {
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
                   filterBy === status
                     ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30 border border-transparent'
+                    : 'text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-zinc-800/30 border border-transparent'
                 }`}
               >
                 {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)} ({count})
@@ -152,7 +152,7 @@ export default function PapersList({ papers }: PapersListProps) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-xs text-zinc-300 focus:border-indigo-500/50 transition-all"
+            className="px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-xs text-[var(--text)] focus:border-indigo-500/50 transition-all"
           >
             <option value="date">Sort by Date</option>
             <option value="title">Sort by Title</option>
@@ -162,7 +162,7 @@ export default function PapersList({ papers }: PapersListProps) {
         </div>
 
         {/* Results count */}
-        <div className="text-xs text-zinc-500 font-mono">
+        <div className="text-xs text-[var(--text-dim)] font-mono">
           Showing {filteredAndSortedPapers.length} of {papers.length} papers
           {searchQuery && ` matching "${searchQuery}"`}
         </div>
@@ -183,7 +183,7 @@ export default function PapersList({ papers }: PapersListProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <h4 className="font-display text-[15px] leading-snug text-zinc-200 group-hover:text-white transition-colors">
+                      <h4 className="font-display text-[15px] leading-snug text-[var(--text)] group-hover:text-[var(--text)] transition-colors">
                         {paper.title}
                       </h4>
                       
@@ -202,7 +202,7 @@ export default function PapersList({ papers }: PapersListProps) {
                             <button
                               key={status}
                               onClick={() => handleStatusUpdate(paper.id, status)}
-                              className="block w-full text-left px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+                              className="block w-full text-left px-2 py-1 text-xs text-[var(--text)] hover:bg-zinc-800 rounded transition-colors"
                             >
                               {status.charAt(0).toUpperCase() + status.slice(1)}
                             </button>
@@ -212,9 +212,9 @@ export default function PapersList({ papers }: PapersListProps) {
                     </div>
                   </div>
                   
-                  <p className="text-[11px] text-zinc-500 font-mono">
+                  <p className="text-[11px] text-[var(--text-dim)] font-mono">
                     {paper.authors} {paper.year && `(${paper.year})`}
-                    {paper.source && <span className="text-zinc-600"> · {paper.source}</span>}
+                    {paper.source && <span className="text-[var(--text-dim)]"> · {paper.source}</span>}
                   </p>
                 </div>
                 
@@ -222,7 +222,7 @@ export default function PapersList({ papers }: PapersListProps) {
                   {/* Expand/collapse button */}
                   <button
                     onClick={() => setExpandedPaper(isExpanded ? null : paper.id)}
-                    className="p-1 rounded-md bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/70 transition-all"
+                    className="p-1 rounded-md bg-zinc-800/50 text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-zinc-800/70 transition-all"
                   >
                     <RotateCw className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                   </button>
@@ -232,7 +232,7 @@ export default function PapersList({ papers }: PapersListProps) {
                       href={`https://doi.org/${paper.doi}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[10px] px-2 py-1 rounded-md bg-zinc-800/50 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-500/10 border border-zinc-700/50 hover:border-indigo-500/30 transition-all font-mono"
+                      className="text-[10px] px-2 py-1 rounded-md bg-zinc-800/50 text-[var(--text-dim)] hover:text-indigo-400 hover:bg-indigo-500/10 border border-zinc-700/50 hover:border-indigo-500/30 transition-all font-mono"
                     >
                       DOI ↗
                     </a>
@@ -243,7 +243,7 @@ export default function PapersList({ papers }: PapersListProps) {
               {/* Expandable content */}
               <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96 mt-3' : 'max-h-0'}`}>
                 {paper.summary && (
-                  <p className="text-[12px] text-zinc-400 leading-relaxed mb-3">{paper.summary}</p>
+                  <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed mb-3">{paper.summary}</p>
                 )}
 
                 {paper.relevance_notes && (
@@ -260,7 +260,7 @@ export default function PapersList({ papers }: PapersListProps) {
                     key={tag}
                     onClick={() => setSearchQuery(tag)}
                     className={`text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border transition-all hover:scale-105 cursor-pointer ${
-                      tagColors[tag] || 'bg-zinc-700/30 text-zinc-400 border-zinc-600/30'
+                      tagColors[tag] || 'bg-zinc-700/30 text-[var(--text-secondary)] border-zinc-600/30'
                     }`}
                   >
                     {tag}
@@ -270,7 +270,7 @@ export default function PapersList({ papers }: PapersListProps) {
                 {!isExpanded && paper.tags.length > 5 && (
                   <button
                     onClick={() => setExpandedPaper(paper.id)}
-                    className="text-[9px] px-2 py-0.5 rounded-full bg-zinc-700/30 text-zinc-500 border border-zinc-600/30 hover:text-zinc-400 transition-colors"
+                    className="text-[9px] px-2 py-0.5 rounded-full bg-zinc-700/30 text-[var(--text-dim)] border border-zinc-600/30 hover:text-[var(--text-secondary)] transition-colors"
                   >
                     +{paper.tags.length - 5} more
                   </button>
@@ -282,7 +282,7 @@ export default function PapersList({ papers }: PapersListProps) {
         
         {filteredAndSortedPapers.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-zinc-500 text-sm mb-2">No papers found</div>
+            <div className="text-[var(--text-dim)] text-sm mb-2">No papers found</div>
             <button
               onClick={() => {
                 setSearchQuery('')

@@ -18,7 +18,7 @@ const CATEGORY_STYLES: Record<string, string> = {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  idea: 'bg-zinc-700/30 text-zinc-400 border-zinc-600/30',
+  idea: 'bg-zinc-700/30 text-[var(--text-secondary)] border-zinc-600/30',
   drafted: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   scheduled: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   posted: 'bg-green-500/10 text-green-400 border-green-500/20',
@@ -43,14 +43,14 @@ export default function ContentIdeas({ ideas }: { ideas: ContentIdea[] }) {
   if (ideas.length === 0) {
     return (
       <div className="card-glass p-12 text-center border border-dashed border-zinc-700/70 bg-zinc-900/20">
-        <div className="w-16 h-16 rounded-2xl bg-zinc-800/30 border border-dashed border-zinc-700/60 flex items-center justify-center text-3xl text-zinc-500 mx-auto">
+        <div className="w-16 h-16 rounded-2xl bg-zinc-800/30 border border-dashed border-zinc-700/60 flex items-center justify-center text-3xl text-[var(--text-dim)] mx-auto">
           💡
         </div>
-        <h3 className="font-display text-xl mt-5 text-zinc-300">No Content Ideas Yet</h3>
-        <p className="text-sm text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
+        <h3 className="font-display text-xl mt-5 text-[var(--text)]">No Content Ideas Yet</h3>
+        <p className="text-sm text-[var(--text-dim)] mt-2 max-w-sm mx-auto leading-relaxed">
           Your content pipeline will appear here once ideas sync in from Notion.
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-zinc-500 font-mono bg-zinc-800/20 rounded-full px-4 py-2 border border-zinc-700/50">
+        <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-[var(--text-dim)] font-mono bg-zinc-800/20 rounded-full px-4 py-2 border border-zinc-700/50">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60" />
           Add a new idea in Notion to populate this list
         </div>
@@ -76,8 +76,8 @@ export default function ContentIdeas({ ideas }: { ideas: ContentIdea[] }) {
             onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
               filter === f.key
-                ? 'bg-zinc-800/80 text-white border border-zinc-700/50 shadow-lg shadow-black/20'
-                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30 border border-transparent'
+                ? 'bg-zinc-800/80 text-[var(--text)] border border-zinc-700/50 shadow-lg shadow-black/20'
+                : 'text-[var(--text-dim)] hover:text-[var(--text)] hover:bg-zinc-800/30 border border-transparent'
             }`}
           >
             {f.label}
@@ -86,16 +86,16 @@ export default function ContentIdeas({ ideas }: { ideas: ContentIdea[] }) {
         ))}
         <div className="flex-1" />
         <div className="flex items-center gap-3 text-[11px] font-mono">
-          <span className="text-zinc-600">🐦 {ideas.filter(i => i.platform === 'twitter').length}</span>
-          <span className="text-zinc-600">💼 {ideas.filter(i => i.platform === 'linkedin').length}</span>
-          <span className="text-zinc-600">📢 {ideas.filter(i => i.platform === 'both').length}</span>
+          <span className="text-[var(--text-dim)]">🐦 {ideas.filter(i => i.platform === 'twitter').length}</span>
+          <span className="text-[var(--text-dim)]">💼 {ideas.filter(i => i.platform === 'linkedin').length}</span>
+          <span className="text-[var(--text-dim)]">📢 {ideas.filter(i => i.platform === 'both').length}</span>
         </div>
       </div>
 
       {/* Ideas grouped by week */}
       {Object.entries(grouped).map(([week, weekIdeas]) => (
         <div key={week}>
-          <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-mono mb-3">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--text-dim)] font-mono mb-3">
             {week === 'Unscheduled' ? 'Unscheduled' : `Week of ${new Date(week + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
           </div>
           <div className="grid gap-3">
@@ -109,24 +109,24 @@ export default function ContentIdeas({ ideas }: { ideas: ContentIdea[] }) {
 
                   <div className="flex-1 min-w-0">
                     {/* Title */}
-                    <h3 className="text-sm font-medium text-zinc-200 leading-snug">{idea.title}</h3>
+                    <h3 className="text-sm font-medium text-[var(--text)] leading-snug">{idea.title}</h3>
 
                     {/* Hook preview */}
                     {idea.hook && (
-                      <p className="text-[12px] text-zinc-500 mt-1.5 leading-relaxed line-clamp-2 italic">
+                      <p className="text-[12px] text-[var(--text-dim)] mt-1.5 leading-relaxed line-clamp-2 italic">
                         &ldquo;{idea.hook}&rdquo;
                       </p>
                     )}
 
                     {/* Tags */}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${CATEGORY_STYLES[idea.category] || 'bg-zinc-800 text-zinc-400 border-zinc-700'}`}>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${CATEGORY_STYLES[idea.category] || 'bg-zinc-800 text-[var(--text-secondary)] border-zinc-700'}`}>
                         {idea.category.replace('-', ' ')}
                       </span>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${STATUS_STYLES[idea.status] || ''}`}>
                         {idea.status}
                       </span>
-                      <span className="text-[10px] font-mono text-zinc-600">
+                      <span className="text-[10px] font-mono text-[var(--text-dim)]">
                         {idea.platform === 'twitter' ? 'X / Twitter' : idea.platform === 'linkedin' ? 'LinkedIn' : 'X + LinkedIn'}
                       </span>
                     </div>

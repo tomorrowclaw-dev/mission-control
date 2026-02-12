@@ -74,7 +74,7 @@ export default function Dashboard() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-5xl mb-4">🐙</div>
-          <div className="text-zinc-500 font-body text-sm tracking-wide animate-pulse">
+          <div className="text-[var(--text-dim)] font-body text-sm tracking-wide animate-pulse">
             Initializing Mission Control...
           </div>
         </div>
@@ -120,14 +120,14 @@ export default function Dashboard() {
                 <div className="relative z-10">
                   <div className="flex items-baseline gap-1">
                     <span className="font-mono text-3xl font-bold text-[var(--accent)]">{completedMilestones}</span>
-                    <span className="font-mono text-sm text-zinc-500">/ {totalMilestones}</span>
+                    <span className="font-mono text-sm text-[var(--text-dim)]">/ {totalMilestones}</span>
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">Milestones complete</div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--text-dim)] mt-1">Milestones complete</div>
                   <div className="mt-3">
                     <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full progress-bar" style={{ width: `${totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0}%` }} />
                     </div>
-                    <div className="text-[10px] text-zinc-600 font-mono mt-1">{totalMilestones > 0 ? ((completedMilestones / totalMilestones) * 100).toFixed(1) : '0.0'}%</div>
+                    <div className="text-[10px] text-[var(--text-dim)] font-mono mt-1">{totalMilestones > 0 ? ((completedMilestones / totalMilestones) * 100).toFixed(1) : '0.0'}%</div>
                   </div>
                 </div>
               </div>
@@ -136,14 +136,14 @@ export default function Dashboard() {
                 <div className="relative z-10">
                   <div className="flex items-baseline gap-1">
                     <span className="font-mono text-3xl font-bold text-[var(--accent)]">{(totalWords/1000).toFixed(1)}</span>
-                    <span className="font-mono text-sm text-zinc-500">k words</span>
+                    <span className="font-mono text-sm text-[var(--text-dim)]">k words</span>
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">of {(targetWords/1000).toFixed(0)}k target</div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--text-dim)] mt-1">of {(targetWords/1000).toFixed(0)}k target</div>
                   <div className="mt-3">
                     <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full progress-bar" style={{ width: `${wordPercent}%` }} />
                     </div>
-                    <div className="text-[10px] text-zinc-600 font-mono mt-1">{wordPercent.toFixed(1)}%</div>
+                    <div className="text-[10px] text-[var(--text-dim)] font-mono mt-1">{wordPercent.toFixed(1)}%</div>
                   </div>
                 </div>
               </div>
@@ -152,10 +152,10 @@ export default function Dashboard() {
                 <div className="relative z-10">
                   <div className="flex items-baseline gap-1">
                     <span className="font-mono text-3xl font-bold text-[var(--accent)]">{papers.length}</span>
-                    <span className="font-mono text-sm text-zinc-500">items</span>
+                    <span className="font-mono text-sm text-[var(--text-dim)]">items</span>
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">Synced from Notion</div>
-                  <div className="mt-3 text-[10px] text-zinc-600 font-mono">Research library + weekly tasks</div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--text-dim)] mt-1">Synced from Notion</div>
+                  <div className="mt-3 text-[10px] text-[var(--text-dim)] font-mono">Research library + weekly tasks</div>
                 </div>
               </div>
             </div>
@@ -304,8 +304,8 @@ export default function Dashboard() {
               🐙
             </div>
             <div>
-              <h1 className="font-display text-lg tracking-tight text-white">Mission Control</h1>
-              <p className="text-xs text-zinc-400 font-mono tracking-wide mt-0.5">
+              <h1 className="font-display text-lg tracking-tight text-[var(--text)]">Mission Control</h1>
+              <p className="text-xs text-[var(--text-secondary)] font-mono tracking-wide mt-0.5">
                 K-12 Risk Assessment
               </p>
             </div>
@@ -327,7 +327,7 @@ export default function Dashboard() {
                 <span className="text-sm">{item.icon}</span>
                 <div className="flex-1 text-left">
                   <div>{item.label}</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">{item.description}</div>
+                  <div className="text-xs text-[var(--text-dim)] mt-0.5">{item.description}</div>
                 </div>
               </button>
             ))}
@@ -348,7 +348,7 @@ export default function Dashboard() {
                 <span className="text-sm">{item.icon}</span>
                 <div className="flex-1 text-left">
                   <div>{item.label}</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">{item.description}</div>
+                  <div className="text-xs text-[var(--text-dim)] mt-0.5">{item.description}</div>
                 </div>
               </button>
             ))}
@@ -358,7 +358,7 @@ export default function Dashboard() {
         {/* Footer */}
         <div className="sidebar-footer">
           <div className="space-y-3">
-            <div className="text-xs text-zinc-500">
+            <div className="text-xs text-[var(--text-dim)]">
               <div>James Heldridge · UNL</div>
               <div className="flex items-center gap-2 mt-2">
                 <div className="status-indicator"></div>
@@ -385,7 +385,7 @@ export default function Dashboard() {
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="text-sm text-zinc-400">
+                <div className="text-sm text-[var(--text-secondary)]">
                   {format(now, 'EEEE, MMMM d, yyyy')}
                 </div>
               </div>
@@ -433,18 +433,18 @@ export default function Dashboard() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20">
           <div className="bg-surface border border-zinc-700 rounded-xl p-4 w-full max-w-2xl mx-4">
             <div className="flex items-center gap-3 p-2">
-              <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
                 type="text"
                 placeholder="Search papers, notes, tasks..."
-                className="flex-1 bg-transparent border-none outline-none text-white placeholder-zinc-400"
+                className="flex-1 bg-transparent border-none outline-none text-[var(--text)] placeholder-zinc-400"
                 autoFocus
               />
               <button
                 onClick={() => setGlobalSearchOpen(false)}
-                className="text-zinc-400 hover:text-white"
+                className="text-[var(--text-secondary)] hover:text-[var(--text)]"
               >
                 <span className="kbd">ESC</span>
               </button>

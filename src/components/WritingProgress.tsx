@@ -133,7 +133,7 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
       default: return { 
         bar: 'bg-zinc-700', 
         dot: 'bg-zinc-600', 
-        label: 'text-zinc-500',
+        label: 'text-[var(--text-dim)]',
         spark: '#71717a'
       }
     }
@@ -157,7 +157,7 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
             <div className="font-mono text-4xl font-bold text-indigo-400">
               {totalCurrent.toLocaleString()}
             </div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 mt-1">
+            <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--text-dim)] mt-1">
               of {totalTarget.toLocaleString()} words
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
                 {weeklyChange >= 0 ? '↗' : '↘'} {Math.abs(parseInt(weeklyChangePercent))}%
               </div>
             </div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 mt-1">
+            <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--text-dim)] mt-1">
               words this week
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
             <div className="font-mono text-2xl font-bold text-amber-400">
               {weeklyStats.streak}
             </div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 mt-1">
+            <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--text-dim)] mt-1">
               day streak
             </div>
           </div>
@@ -199,8 +199,8 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
             </div>
           </div>
           <div className="flex justify-between items-center mt-2">
-            <div className="text-[11px] text-zinc-500 font-mono">{overallPercent.toFixed(1)}% complete</div>
-            <div className="text-[11px] text-zinc-600 font-mono">
+            <div className="text-[11px] text-[var(--text-dim)] font-mono">{overallPercent.toFixed(1)}% complete</div>
+            <div className="text-[11px] text-[var(--text-dim)] font-mono">
               {(totalTarget - totalCurrent).toLocaleString()} remaining
             </div>
           </div>
@@ -210,8 +210,8 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
       {/* Enhanced per-section breakdown */}
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-sm font-semibold text-zinc-300">Chapter Progress</h4>
-          <div className="text-[10px] text-zinc-600 font-mono">8-week trend</div>
+          <h4 className="text-sm font-semibold text-[var(--text)]">Chapter Progress</h4>
+          <div className="text-[10px] text-[var(--text-dim)] font-mono">8-week trend</div>
         </div>
         
         {sections.map((section, idx) => {
@@ -235,7 +235,7 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
                 {/* Section info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">
+                    <span className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--text)] transition-colors">
                       {section.title}
                     </span>
                     <span className={`text-[10px] font-semibold uppercase tracking-wider shrink-0 ${colors.label}`}>
@@ -267,15 +267,15 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
                 <div className="text-right min-w-[80px]">
                   {section.target_word_count ? (
                     <>
-                      <div className="text-sm font-mono font-semibold text-zinc-300">
+                      <div className="text-sm font-mono font-semibold text-[var(--text)]">
                         {displayWords > 0 ? (displayWords / 1000).toFixed(1) : '—'}k
                       </div>
-                      <div className="text-[10px] text-zinc-500 font-mono">
+                      <div className="text-[10px] text-[var(--text-dim)] font-mono">
                         of {(section.target_word_count / 1000).toFixed(0)}k
                       </div>
                     </>
                   ) : (
-                    <div className="text-[10px] text-zinc-600 font-mono">—</div>
+                    <div className="text-[10px] text-[var(--text-dim)] font-mono">—</div>
                   )}
                 </div>
               </div>
@@ -287,18 +287,18 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
       {/* Weekly insights */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-4 border-t border-zinc-800/30">
         <div className="text-center">
-          <div className="text-lg font-mono font-bold text-zinc-400">{weeklyStats.average.toLocaleString()}</div>
-          <div className="text-[10px] text-zinc-600 uppercase tracking-wider">avg/week</div>
+          <div className="text-lg font-mono font-bold text-[var(--text-secondary)]">{weeklyStats.average.toLocaleString()}</div>
+          <div className="text-[10px] text-[var(--text-dim)] uppercase tracking-wider">avg/week</div>
         </div>
         <div className="text-center">
-          <div className="text-lg font-mono font-bold text-zinc-400">{weeklyStats.bestDay.toLocaleString()}</div>
-          <div className="text-[10px] text-zinc-600 uppercase tracking-wider">best day</div>
+          <div className="text-lg font-mono font-bold text-[var(--text-secondary)]">{weeklyStats.bestDay.toLocaleString()}</div>
+          <div className="text-[10px] text-[var(--text-dim)] uppercase tracking-wider">best day</div>
         </div>
         <div className="text-center md:col-span-1 col-span-2">
-          <div className="text-lg font-mono font-bold text-zinc-400">
+          <div className="text-lg font-mono font-bold text-[var(--text-secondary)]">
             {Math.ceil((totalTarget - totalCurrent) / weeklyStats.average)}
           </div>
-          <div className="text-[10px] text-zinc-600 uppercase tracking-wider">weeks left</div>
+          <div className="text-[10px] text-[var(--text-dim)] uppercase tracking-wider">weeks left</div>
         </div>
       </div>
     </div>

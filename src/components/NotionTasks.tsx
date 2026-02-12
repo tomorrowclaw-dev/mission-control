@@ -43,8 +43,8 @@ export default function NotionTasks() {
     return (
       <div className="card-glass p-6 h-full min-h-[300px] flex items-center justify-center notion-loading-shimmer relative overflow-hidden">
         <div className="text-center space-y-3 relative z-10">
-          <div className="text-4xl text-zinc-500/80">📝</div>
-          <div className="text-zinc-500 text-sm font-mono">Syncing tasks from Notion...</div>
+          <div className="text-4xl text-[var(--text-dim)]/80">📝</div>
+          <div className="text-[var(--text-dim)] text-sm font-mono">Syncing tasks from Notion...</div>
         </div>
       </div>
     )
@@ -64,12 +64,12 @@ export default function NotionTasks() {
               <div className="flex items-center gap-2 mt-1.5">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500/60 animate-pulse" />
-                  <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                  <span className="text-[10px] text-[var(--text-dim)] font-mono uppercase tracking-wider">
                     Notion Sync
                   </span>
                 </div>
-                <span className="text-zinc-700">·</span>
-                <span className="text-[10px] text-zinc-600 font-mono">
+                <span className="text-[var(--text-dim)]">·</span>
+                <span className="text-[10px] text-[var(--text-dim)] font-mono">
                   {completedCount}/{totalCount} complete
                 </span>
               </div>
@@ -78,7 +78,7 @@ export default function NotionTasks() {
           <button 
             onClick={fetchTasks}
             disabled={isRefreshing}
-            className={`p-2 rounded-lg bg-zinc-800/30 hover:bg-zinc-700/50 text-zinc-500 hover:text-zinc-300 border border-zinc-700/30 hover:border-zinc-600/50 transition-all ${isRefreshing ? 'animate-spin' : 'hover:scale-105'}`}
+            className={`p-2 rounded-lg bg-zinc-800/30 hover:bg-zinc-700/50 text-[var(--text-dim)] hover:text-[var(--text)] border border-zinc-700/30 hover:border-zinc-600/50 transition-all ${isRefreshing ? 'animate-spin' : 'hover:scale-105'}`}
             title="Refresh tasks"
           >
             <RotateCw size={14} />
@@ -95,7 +95,7 @@ export default function NotionTasks() {
               />
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[9px] text-zinc-600 font-mono">Progress</span>
+              <span className="text-[9px] text-[var(--text-dim)] font-mono">Progress</span>
               <span className="text-[9px] text-emerald-400 font-mono font-semibold">
                 {completionPercent.toFixed(0)}%
               </span>
@@ -109,9 +109,9 @@ export default function NotionTasks() {
         {/* Main Tasks */}
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-400 font-bold">Main Tasks</div>
+            <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--text-secondary)] font-bold">Main Tasks</div>
             <div className="flex-1 h-px bg-gradient-to-r from-zinc-700/50 to-transparent" />
-            <span className="text-[9px] text-zinc-600 font-mono">
+            <span className="text-[9px] text-[var(--text-dim)] font-mono">
               {mainTasks.filter(t => !t.isChecked).length} active
             </span>
           </div>
@@ -123,8 +123,8 @@ export default function NotionTasks() {
             ) : (
               <div className="text-center py-6">
                 <div className="text-3xl mb-2">🎉</div>
-                <div className="text-sm text-zinc-500">No main tasks</div>
-                <div className="text-xs text-zinc-600 mt-1">You're all caught up!</div>
+                <div className="text-sm text-[var(--text-dim)]">No main tasks</div>
+                <div className="text-xs text-[var(--text-dim)] mt-1">You're all caught up!</div>
               </div>
             )}
           </div>
@@ -134,9 +134,9 @@ export default function NotionTasks() {
         {backlogTasks.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-3 mt-6">
-              <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-bold">Backlog</div>
+              <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--text-dim)] font-bold">Backlog</div>
               <div className="flex-1 h-px bg-gradient-to-r from-zinc-700/30 to-transparent" />
-              <span className="text-[9px] text-zinc-600 font-mono">
+              <span className="text-[9px] text-[var(--text-dim)] font-mono">
                 {backlogTasks.length} items
               </span>
             </div>
@@ -151,12 +151,12 @@ export default function NotionTasks() {
       
       {/* Enhanced footer */}
       <div className="mt-4 pt-4 border-t border-zinc-800/30 flex items-center justify-between">
-        <div className="text-[10px] text-zinc-600 font-mono">
+        <div className="text-[10px] text-[var(--text-dim)] font-mono">
           {lastSynced
             ? `Last sync: ${lastSynced.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
             : 'Synced from Notion'}
         </div>
-        <div className="text-[10px] text-zinc-700 font-mono">
+        <div className="text-[10px] text-[var(--text-dim)] font-mono">
           Notion · Auto-refresh
         </div>
       </div>
@@ -192,7 +192,7 @@ function TaskItem({ task, index, isBacklog = false }: { task: NotionTask, index:
     >
       {/* Enhanced checkbox with animations */}
       <div className={`mt-0.5 transition-all duration-300 ${
-        task.isChecked ? 'text-green-400' : isHovered ? 'text-zinc-300 scale-110' : 'text-zinc-500'
+        task.isChecked ? 'text-green-400' : isHovered ? 'text-[var(--text)] scale-110' : 'text-[var(--text-dim)]'
       }`}>
         {task.isChecked ? (
           <div className="relative">
@@ -210,7 +210,7 @@ function TaskItem({ task, index, isBacklog = false }: { task: NotionTask, index:
             {isHovered && (
               <Check 
                 size={12} 
-                className="absolute inset-0 m-auto text-zinc-400 animate-in opacity-40" 
+                className="absolute inset-0 m-auto text-[var(--text-secondary)] animate-in opacity-40" 
               />
             )}
           </div>
@@ -221,10 +221,10 @@ function TaskItem({ task, index, isBacklog = false }: { task: NotionTask, index:
       <div className="flex-1 min-w-0">
         <span className={`text-sm leading-relaxed transition-all duration-300 ${
           task.isChecked 
-            ? 'line-through text-zinc-500' 
+            ? 'line-through text-[var(--text-dim)]' 
             : isHovered 
             ? 'text-zinc-100' 
-            : 'text-zinc-300'
+            : 'text-[var(--text)]'
         }`}>
           {task.text}
         </span>
