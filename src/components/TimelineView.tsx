@@ -122,17 +122,12 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
             />
           </div>
           
-          {/* "You are here" marker */}
+          {/* Current position dot */}
           <div 
             className="absolute top-0 transform -translate-x-1/2 -translate-y-0.5"
             style={{ left: `${progressPercent}%` }}
           >
-            <div className="w-3 h-3 bg-indigo-400 rounded-full border-2 border-white/20 shadow-lg animate-pulse" />
-            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-              <span className="text-[9px] px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-400 font-semibold uppercase tracking-wider">
-                You Are Here
-              </span>
-            </div>
+            <div className="w-3 h-3 bg-indigo-400 rounded-full border-2 border-white/20 shadow-lg" />
           </div>
           
           {/* Phase markers */}
