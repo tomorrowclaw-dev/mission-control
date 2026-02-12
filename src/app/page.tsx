@@ -293,8 +293,10 @@ export default function Dashboard() {
       {/* Footer */}
       <footer className="border-t border-zinc-800/30 mt-16">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <span className="text-[11px] text-zinc-700 font-mono">mission-control v0.3</span>
-          <span className="text-[11px] text-zinc-700">Ship research, not chaos.</span>
+          <span className="text-[11px] text-zinc-700 font-mono">mission-control v0.4</span>
+          <span className="text-[11px] text-zinc-600 italic font-body">
+            {['Ship research, not chaos.', 'One milestone at a time.', 'Trust the process.', 'Build → Evaluate → Write → Defend.', 'The artifact is the argument.'][Math.floor(Date.now() / 86400000) % 5]}
+          </span>
         </div>
       </footer>
     </div>
