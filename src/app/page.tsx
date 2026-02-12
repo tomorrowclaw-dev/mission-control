@@ -153,6 +153,11 @@ export default function Dashboard() {
           ))}
         </nav>
 
+        {/* Tasks widget */}
+        <div className="px-3 pb-3 overflow-y-auto max-h-[300px]">
+          <NotionTasks />
+        </div>
+
         {/* Sidebar footer */}
         <div className="p-4 border-t border-[var(--border)] space-y-3">
           <div className="flex items-center gap-2">
@@ -187,7 +192,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="p-6 lg:p-8 max-w-5xl space-y-6">
+        <main className="p-6 lg:p-8 space-y-6">
           {/* Stats row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in">
             <CountdownTimer targetDate={defenseDate} label="Defense Day" variant="hero" />
@@ -227,41 +232,32 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Content area */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div key={activeTab} className="lg:col-span-2 min-h-[500px] animate-in" style={{ animationDelay: '100ms' }}>
-              {activeTab === 'activity' && <ActivityFeed />}
-              {activeTab === 'schedule' && <CalendarView />}
-              {activeTab === 'search' && <GlobalSearch />}
-              {activeTab === 'crew' && <CrewViz />}
+          {/* Content area — full width */}
+          <div key={activeTab} className="min-h-[500px] animate-in" style={{ animationDelay: '100ms' }}>
+            {activeTab === 'activity' && <ActivityFeed />}
+            {activeTab === 'schedule' && <CalendarView />}
+            {activeTab === 'search' && <GlobalSearch />}
+            {activeTab === 'crew' && <CrewViz />}
 
-              {activeTab === 'timeline' && (
-                <div className="space-y-6">
-                  <div className={`rounded-2xl bg-gradient-to-r ${phase.color} border p-5`}>
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg">🔧</div>
-                      <div className="flex-1">
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">Current Phase</div>
-                        <div className="font-display text-lg mt-0.5">{phase.label}</div>
-                        <div className="text-[12px] text-zinc-400 mt-0.5">{phase.description}</div>
-                      </div>
-                      <div className="text-right hidden sm:block">
-                        <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Progress</div>
-                        <div className="text-sm text-zinc-300 mt-0.5 font-body">Week {(() => { const weekNum = Math.ceil((now.getTime() - new Date('2026-02-09').getTime()) / (7 * 24 * 60 * 60 * 1000)); return Math.max(1, Math.min(weekNum, 18)); })()} of 18</div>
-                      </div>
+            {activeTab === 'timeline' && (
+              <div className="space-y-6">
+                <div className={`rounded-2xl bg-gradient-to-r ${phase.color} border p-5`}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg">🔧</div>
+                    <div className="flex-1">
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">Current Phase</div>
+                      <div className="font-display text-lg mt-0.5">{phase.label}</div>
+                      <div className="text-[12px] text-zinc-400 mt-0.5">{phase.description}</div>
+                    </div>
+                    <div className="text-right hidden sm:block">
+                      <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Progress</div>
+                      <div className="text-sm text-zinc-300 mt-0.5 font-body">Week {(() => { const weekNum = Math.ceil((now.getTime() - new Date('2026-02-09').getTime()) / (7 * 24 * 60 * 60 * 1000)); return Math.max(1, Math.min(weekNum, 18)); })()} of 18</div>
                     </div>
                   </div>
-                  <TimelineView milestones={milestones} />
                 </div>
-              )}
-            </div>
-
-            {/* Right column: tasks */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6 animate-in" style={{ animationDelay: '200ms' }}>
-                <NotionTasks />
+                <TimelineView milestones={milestones} />
               </div>
-            </div>
+            )}
           </div>
         </main>
 
