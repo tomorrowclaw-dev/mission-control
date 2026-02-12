@@ -14,12 +14,15 @@ canvas{display:block;width:100vw;height:100vh;image-rendering:pixelated;image-re
 <canvas id="c"></canvas>
 <script>
 const C=document.getElementById('c'), X=C.getContext('2d');
-const IW=384, IH=256;
+const SCALE=2;
+const IW=384*SCALE, IH=256*SCALE;
 C.width=IW; C.height=IH;
 X.imageSmoothingEnabled=false;
+X.setTransform(SCALE,0,0,SCALE,0,0);
 
 const TILE=16;
-const COLS=Math.ceil(IW/TILE), ROWS=Math.ceil(IH/TILE);
+const LW=IW/SCALE, LH=IH/SCALE;
+const COLS=Math.ceil(LW/TILE), ROWS=Math.ceil(LH/TILE);
 
 const COL_FLOOR_A='#1a1a22';
 const COL_FLOOR_B='#16161e';
@@ -309,8 +312,8 @@ function updateChars(){
           }
           ch.atDesk=false;
         }
-        ch.tx=Math.max(TILE,Math.min(IW-TILE*2,ch.tx))|0;
-        ch.ty=Math.max(TILE*2,Math.min(IH-TILE*3,ch.ty))|0;
+        ch.tx=Math.max(TILE,Math.min(LW-TILE*2,ch.tx))|0;
+        ch.ty=Math.max(TILE*2,Math.min(LH-TILE*3,ch.ty))|0;
       }
     }
   });
@@ -318,9 +321,9 @@ function updateChars(){
 
 function drawStatusBar(){
   X.fillStyle='#0c0c12';
-  X.fillRect(0,IH-14,IW,14);
+  X.fillRect(0,LH-14,LW,14);
   X.fillStyle='#1a1a24';
-  X.fillRect(0,IH-14,IW,1);
+  X.fillRect(0,LH-14,LW,1);
 
   chars.forEach((ch,i)=>{
     const bx=i*(IW/4), by=IH-12;
@@ -340,23 +343,23 @@ function drawStatusBar(){
   X.fillStyle=liveMode?'#44dd66':'#555';
   X.font='5px monospace';
   X.textAlign='right';
-  X.fillText((liveMode?'● LIVE':'○ SIM')+' '+t,IW-2,IH-6);
+  X.fillText((liveMode?'● LIVE':'○ SIM')+' '+t,LW-2,LH-6);
 }
 
 function drawHeader(){
   X.fillStyle='#0c0c12';
-  X.fillRect(0,0,IW,10);
+  X.fillRect(0,0,LW,10);
   X.fillStyle='#1a1a24';
-  X.fillRect(0,10,IW,1);
+  X.fillRect(0,10,LW,1);
   X.fillStyle='#8866cc';
   X.font='bold 6px monospace';
   X.textAlign='center';
-  X.fillText('OPENCLAW HQ',IW/2,7);
+  X.fillText('OPENCLAW HQ',LW/2,7);
 }
 
 function draw(){
   frame++;
-  X.clearRect(0,0,IW,IH);
+  X.clearRect(0,0,LW,LH);
   drawFloor();
   drawHeader();
   drawWhiteboard();
