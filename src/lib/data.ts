@@ -37,7 +37,15 @@ export async function getMeetingNotes(): Promise<MeetingNote[]> {
   return data as MeetingNote[]
 }
 
-export async function updateMilestoneStatus(id: string, status: Milestone['status']) {
+export async function updateDeliverableStatus(id: string, status: string) {
+  const { error } = await supabase
+    .from('advisor_deliverables')
+    .update({ status })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function updateMilestoneStatus(id: string, status: string) {
   const { error } = await supabase
     .from('milestones')
     .update({ status })
@@ -45,10 +53,10 @@ export async function updateMilestoneStatus(id: string, status: Milestone['statu
   if (error) throw error
 }
 
-export async function updateWritingWordCount(id: string, current_word_count: number) {
+export async function updateWritingWordCount(id: string, wordCount: number) {
   const { error } = await supabase
     .from('writing_sections')
-    .update({ current_word_count })
+    .update({ current_word_count: wordCount })
     .eq('id', id)
   if (error) throw error
 }

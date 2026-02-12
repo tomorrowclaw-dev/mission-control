@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { WritingSection } from '@/lib/types'
+import { updateWritingWordCount } from '@/lib/data'
 
 interface WritingProgressProps {
   sections: WritingSection[]
@@ -9,14 +10,65 @@ interface WritingProgressProps {
 
 export default function WritingProgress({ sections }: WritingProgressProps) {
   const [loaded, setLoaded] = useState(false)
+  const [localSections, setLocalSections] = useState<WritingSection[]>(sections)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draftWordCount, setDraftWordCount] = useState('')
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({})
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 80)
     return () => clearTimeout(timer)
   }, [])
 
-  const totalTarget = sections.reduce((sum, s) => sum + (s.target_word_count || 0), 0)
-  const totalCurrent = sections.reduce((sum, s) => sum + s.current_word_count, 0)
+  useEffect(() => {
+    setLocalSections(sections)
+  }, [sections])
+
+  const beginEditing = (section: WritingSection) => {
+    if (savingIds[section.id]) return
+    setError(null)
+    setEditingId(section.id)
+    setDraftWordCount(String(section.current_word_count))
+  }
+
+  const saveWordCount = async (sectionId: string) => {
+    const parsed = Number(draftWordCount.replace(/,/g, '').trim())
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      setError('Please enter a valid non-negative word count.')
+      return
+    }
+
+    const nextWordCount = Math.round(parsed)
+    const previousWordCount = localSections.find((section) => section.id === sectionId)?.current_word_count
+    if (typeof previousWordCount !== 'number') return
+
+    setError(null)
+    setEditingId(null)
+    setLocalSections((prev) =>
+      prev.map((section) =>
+        section.id === sectionId ? { ...section, current_word_count: nextWordCount } : section
+      )
+    )
+    setSavingIds((prev) => ({ ...prev, [sectionId]: true }))
+
+    try {
+      await updateWritingWordCount(sectionId, nextWordCount)
+    } catch (err) {
+      setLocalSections((prev) =>
+        prev.map((section) =>
+          section.id === sectionId ? { ...section, current_word_count: previousWordCount } : section
+        )
+      )
+      console.error('Failed to update word count:', err)
+      setError('Could not save word count. Changes were reverted.')
+    } finally {
+      setSavingIds((prev) => ({ ...prev, [sectionId]: false }))
+    }
+  }
+
+  const totalTarget = localSections.reduce((sum, s) => sum + (s.target_word_count || 0), 0)
+  const totalCurrent = localSections.reduce((sum, s) => sum + s.current_word_count, 0)
   const overallPercent = totalTarget > 0 ? (totalCurrent / totalTarget) * 100 : 0
 
   const statusColor = (status: string) => {
@@ -58,7 +110,12 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
 
       {/* Per-section breakdown */}
       <div className="space-y-3">
-        {sections.map((section, idx) => {
+        {error && (
+          <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs text-red-300 font-mono">
+            {error}
+          </div>
+        )}
+        {localSections.map((section, idx) => {
           const colors = statusColor(section.status)
           const percent = section.target_word_count
             ? (section.current_word_count / section.target_word_count) * 100
@@ -87,7 +144,39 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
                     />
                   </div>
                   <span className="text-[10px] text-zinc-500 font-mono w-14 text-right shrink-0">
-                    {section.current_word_count > 0 ? `${(section.current_word_count / 1000).toFixed(1)}k` : '—'}/{(section.target_word_count / 1000).toFixed(0)}k
+                    {editingId === section.id ? (
+                      <input
+                        type="number"
+                        min={0}
+                        autoFocus
+                        value={draftWordCount}
+                        onChange={(event) => setDraftWordCount(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault()
+                            void saveWordCount(section.id)
+                          }
+                          if (event.key === 'Escape') {
+                            setEditingId(null)
+                            setError(null)
+                          }
+                        }}
+                        className="w-16 text-right bg-zinc-900 border border-zinc-700 rounded px-1 py-0.5 text-zinc-200"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => beginEditing(section)}
+                        disabled={savingIds[section.id]}
+                        className={`transition-colors ${
+                          savingIds[section.id] ? 'opacity-60 cursor-wait' : 'hover:text-zinc-300'
+                        }`}
+                        title="Click to edit word count"
+                      >
+                        {section.current_word_count > 0 ? `${(section.current_word_count / 1000).toFixed(1)}k` : '—'}
+                      </button>
+                    )}
+                    /{(section.target_word_count / 1000).toFixed(0)}k
                   </span>
                 </>
               ) : (

@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { format, addDays, differenceInCalendarDays, isWithinInterval, parseISO } from 'date-fns'
 import { AdvisorDeliverable } from '@/lib/types'
+import { updateDeliverableStatus } from '@/lib/data'
 
 interface AdvisorDeliverablesProps {
   deliverables: AdvisorDeliverable[]
@@ -16,6 +18,7 @@ const PHASES = [
 ]
 
 const doneStatuses: AdvisorDeliverable['status'][] = ['complete', 'submitted', 'feedback_received']
+const deliverableStatusCycle: AdvisorDeliverable['status'][] = ['upcoming', 'in_progress', 'submitted', 'feedback_received', 'complete']
 
 const statusClasses: Record<AdvisorDeliverable['status'], { pill: string; dot: string; label: string }> = {
   complete: { pill: 'bg-green-500/12 text-green-400 border-green-500/25', dot: 'bg-green-400', label: 'Complete' },
@@ -56,19 +59,71 @@ function getUrgency(weekEnd: Date, status: AdvisorDeliverable['status']) {
 }
 
 export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverablesProps) {
+  const [localDeliverables, setLocalDeliverables] = useState<AdvisorDeliverable[]>(deliverables)
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({})
+  const [recentlyUpdatedId, setRecentlyUpdatedId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const now = new Date()
 
+  useEffect(() => {
+    setLocalDeliverables(deliverables)
+  }, [deliverables])
+
+  const getNextStatus = (status: AdvisorDeliverable['status']) => {
+    const currentIndex = deliverableStatusCycle.indexOf(status)
+    if (currentIndex === -1) return 'upcoming'
+    return deliverableStatusCycle[(currentIndex + 1) % deliverableStatusCycle.length]
+  }
+
+  const handleStatusToggle = async (id: string) => {
+    if (savingIds[id]) return
+
+    let previousStatus: AdvisorDeliverable['status'] | null = null
+    let nextStatus: AdvisorDeliverable['status'] | null = null
+
+    setError(null)
+    setLocalDeliverables((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item
+        previousStatus = item.status
+        const computedNext = getNextStatus(item.status)
+        nextStatus = computedNext
+        return { ...item, status: computedNext }
+      })
+    )
+
+    if (!previousStatus || !nextStatus) return
+
+    setSavingIds((prev) => ({ ...prev, [id]: true }))
+    setRecentlyUpdatedId(id)
+    setTimeout(() => {
+      setRecentlyUpdatedId((current) => (current === id ? null : current))
+    }, 260)
+
+    try {
+      await updateDeliverableStatus(id, nextStatus)
+    } catch (err) {
+      setLocalDeliverables((prev) =>
+        prev.map((item) => (item.id === id && previousStatus ? { ...item, status: previousStatus } : item))
+      )
+      console.error('Failed to update deliverable status:', err)
+      setError('Could not save deliverable status. Changes were reverted.')
+    } finally {
+      setSavingIds((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
   const totalWeeks = 18
-  const completedWeeks = deliverables.filter((deliverable) => doneStatuses.includes(deliverable.status)).length
-  const inProgressCount = deliverables.filter((deliverable) => deliverable.status === 'in_progress').length
-  const overdueCount = deliverables.filter((deliverable) => {
+  const completedWeeks = localDeliverables.filter((deliverable) => doneStatuses.includes(deliverable.status)).length
+  const inProgressCount = localDeliverables.filter((deliverable) => deliverable.status === 'in_progress').length
+  const overdueCount = localDeliverables.filter((deliverable) => {
     const weekEnd = addDays(parseISO(deliverable.week_start), 6)
     return differenceInCalendarDays(weekEnd, now) < 0 && !doneStatuses.includes(deliverable.status)
   }).length
   const progressPercent = Math.round((completedWeeks / totalWeeks) * 100)
 
   const groupedDeliverables = PHASES.map((phase) => {
-    const items = deliverables.filter((deliverable) => deliverable.week_number >= phase.start && deliverable.week_number <= phase.end)
+    const items = localDeliverables.filter((deliverable) => deliverable.week_number >= phase.start && deliverable.week_number <= phase.end)
     const completed = items.filter((deliverable) => doneStatuses.includes(deliverable.status)).length
     const phaseProgress = items.length > 0 ? Math.round((completed / items.length) * 100) : 0
 
@@ -113,6 +168,11 @@ export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverable
       </div>
 
       <div className="space-y-7 pl-2">
+        {error && (
+          <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs text-red-300 font-mono">
+            {error}
+          </div>
+        )}
         {groupedDeliverables.map((group) => (
           <div key={group.label} className="relative">
             <div className="sticky top-20 z-10 bg-[#06060b]/95 backdrop-blur-sm py-2 mb-3 border-b border-zinc-800/50">
@@ -163,9 +223,17 @@ export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverable
                             {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d')}
                           </span>
 
-                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${statusClasses[item.status].pill}`}>
+                          <button
+                            type="button"
+                            onClick={() => handleStatusToggle(item.id)}
+                            disabled={savingIds[item.id]}
+                            className={`text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all duration-200 ${statusClasses[item.status].pill} ${
+                              savingIds[item.id] ? 'opacity-60 cursor-wait' : 'hover:brightness-110'
+                            } ${recentlyUpdatedId === item.id ? 'scale-105' : ''}`}
+                            title="Click to cycle status"
+                          >
                             {statusClasses[item.status].label}
-                          </span>
+                          </button>
 
                           <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${urgency.className}`}>
                             {urgency.label}

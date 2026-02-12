@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { format, isPast, isWithinInterval, addDays } from 'date-fns'
 import { Milestone, PHASE_LABELS } from '@/lib/types'
+import { updateMilestoneStatus } from '@/lib/data'
 
 interface TimelineViewProps {
   milestones: Milestone[]
@@ -16,6 +18,10 @@ const phaseAccent: Record<string, { border: string; bg: string; dot: string; tex
 }
 
 export default function TimelineView({ milestones }: TimelineViewProps) {
+  const [localMilestones, setLocalMilestones] = useState<Milestone[]>(milestones)
+  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({})
+  const [recentlyUpdatedId, setRecentlyUpdatedId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const now = new Date()
   const timelineStart = new Date('2026-02-09')
   const msInWeek = 7 * 24 * 60 * 60 * 1000
@@ -36,7 +42,57 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
     'defense': { past: 'bg-rose-400', future: 'bg-rose-500/25' },
   }
 
-  const grouped = milestones.reduce<Record<string, Milestone[]>>((acc, m) => {
+  useEffect(() => {
+    setLocalMilestones(milestones)
+  }, [milestones])
+
+  const milestoneStatusCycle: Milestone['status'][] = ['not_started', 'in_progress', 'complete']
+
+  const getNextStatus = (status: Milestone['status']) => {
+    const currentIndex = milestoneStatusCycle.indexOf(status)
+    if (currentIndex === -1) return 'not_started'
+    return milestoneStatusCycle[(currentIndex + 1) % milestoneStatusCycle.length]
+  }
+
+  const handleStatusToggle = async (id: string) => {
+    if (savingIds[id]) return
+
+    let previousStatus: Milestone['status'] | null = null
+    let nextStatus: Milestone['status'] | null = null
+
+    setError(null)
+    setLocalMilestones((prev) =>
+      prev.map((m) => {
+        if (m.id !== id) return m
+        previousStatus = m.status
+        const computedNext = getNextStatus(m.status)
+        nextStatus = computedNext
+        return { ...m, status: computedNext }
+      })
+    )
+
+    if (!previousStatus || !nextStatus) return
+
+    setSavingIds((prev) => ({ ...prev, [id]: true }))
+    setRecentlyUpdatedId(id)
+    setTimeout(() => {
+      setRecentlyUpdatedId((current) => (current === id ? null : current))
+    }, 260)
+
+    try {
+      await updateMilestoneStatus(id, nextStatus)
+    } catch (err) {
+      setLocalMilestones((prev) =>
+        prev.map((m) => (m.id === id && previousStatus ? { ...m, status: previousStatus } : m))
+      )
+      console.error('Failed to update milestone status:', err)
+      setError('Could not save milestone status. Changes were reverted.')
+    } finally {
+      setSavingIds((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
+  const grouped = localMilestones.reduce<Record<string, Milestone[]>>((acc, m) => {
     if (!acc[m.phase]) acc[m.phase] = []
     acc[m.phase].push(m)
     return acc
@@ -53,6 +109,11 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
 
   return (
     <div className="space-y-8">
+      {error && (
+        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs text-red-300 font-mono">
+          {error}
+        </div>
+      )}
       <div className="card-glass p-4 sm:p-5 animate-in">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
@@ -114,7 +175,17 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
                     }`}
                     style={{ animationDelay: `${(groupIdx * 100) + (idx * 40)}ms` }}
                   >
-                    {statusIcon(m.status)}
+                    <button
+                      type="button"
+                      onClick={() => handleStatusToggle(m.id)}
+                      disabled={savingIds[m.id]}
+                      className={`shrink-0 transition-all duration-200 ${
+                        savingIds[m.id] ? 'opacity-60 cursor-wait' : 'hover:scale-105'
+                      } ${recentlyUpdatedId === m.id ? 'scale-110' : ''}`}
+                      title="Click to cycle status"
+                    >
+                      {statusIcon(m.status)}
+                    </button>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={`text-sm font-medium ${isOverdue ? 'text-red-400' : 'text-zinc-200'}`}>
