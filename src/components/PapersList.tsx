@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, Filter, RotateCw, Check, Eye, BookOpen } from 'lucide-react'
+import { Search, RotateCw, Check, Eye, BookOpen } from 'lucide-react'
 import { Paper } from '@/lib/types'
 
 interface PapersListProps {
@@ -48,7 +48,7 @@ export default function PapersList({ papers }: PapersListProps) {
 
   // Filter and sort papers
   const filteredAndSortedPapers = useMemo(() => {
-    let filtered = papers.filter(paper => {
+    const filtered = papers.filter(paper => {
       // Search filter
       const matchesSearch = searchQuery === '' || 
         paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

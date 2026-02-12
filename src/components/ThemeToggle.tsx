@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react'
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window === 'undefined') return 'dark'
+    const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
+    return saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+  })
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
-    const preferred = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
-    setTheme(preferred)
-    document.documentElement.classList.toggle('light', preferred === 'light')
-    document.documentElement.classList.toggle('dark', preferred === 'dark')
-  }, [])
+    document.documentElement.classList.toggle('light', theme === 'light')
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
 
   const toggle = () => {
     const next = theme === 'dark' ? 'light' : 'dark'

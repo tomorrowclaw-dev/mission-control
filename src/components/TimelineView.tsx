@@ -55,7 +55,7 @@ const phaseAccent: Record<string, {
 export default function TimelineView({ milestones }: TimelineViewProps) {
   const now = new Date()
   const startDate = new Date('2026-02-09') // Project start date
-  const endDate = new Date('2026-06-28') // Defense date
+  // Defense date: 2026-06-28
   const currentWeek = Math.max(1, Math.min(18, Math.ceil(differenceInWeeks(now, startDate)) + 1))
   
   // Sort milestones by due date

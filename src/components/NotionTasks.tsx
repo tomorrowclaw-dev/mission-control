@@ -124,7 +124,7 @@ export default function NotionTasks() {
               <div className="text-center py-6">
                 <div className="text-3xl mb-2">🎉</div>
                 <div className="text-sm text-[var(--text-dim)]">No main tasks</div>
-                <div className="text-xs text-[var(--text-dim)] mt-1">You're all caught up!</div>
+                <div className="text-xs text-[var(--text-dim)] mt-1">You&apos;re all caught up!</div>
               </div>
             )}
           </div>
