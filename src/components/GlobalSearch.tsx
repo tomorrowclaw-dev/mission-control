@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo, ReactNode } from 'react'
 
 interface SearchResult {
   id: string
@@ -23,7 +23,7 @@ const CATEGORY_META: Record<string, { label: string; icon: string; color: string
   task:      { label: 'Tasks',     icon: '📝', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
 }
 
-function highlightText(text: string, query: string) {
+function highlightText(text: string, query: string): ReactNode {
   if (!query.trim() || !text) return text
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${escaped})`, 'gi')
@@ -50,7 +50,6 @@ export default function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
-  // ⌘K focus, Esc clear
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -87,7 +86,6 @@ export default function GlobalSearch() {
     }
   }, [])
 
-  // Debounced search on input change
   const handleChange = useCallback((val: string) => {
     setQuery(val)
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -99,7 +97,6 @@ export default function GlobalSearch() {
     debounceRef.current = setTimeout(() => doSearch(val), 300)
   }, [doSearch])
 
-  // Group results by type
   const grouped: GroupedResults = useMemo(() => {
     const g: GroupedResults = {}
     for (const r of results) {
@@ -113,7 +110,6 @@ export default function GlobalSearch() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">🔍</div>
         <div>
@@ -122,7 +118,6 @@ export default function GlobalSearch() {
         </div>
       </div>
 
-      {/* Search input */}
       <div className="relative group">
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 transition-colors group-focus-within:text-indigo-400">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -152,7 +147,6 @@ export default function GlobalSearch() {
         </div>
       </div>
 
-      {/* Categorized Results */}
       {searched && !loading && totalCount === 0 && (
         <div className="text-center py-12">
           <div className="text-3xl mb-3 opacity-40">∅</div>
@@ -174,7 +168,6 @@ export default function GlobalSearch() {
             const items = grouped[cat]
             return (
               <div key={cat} className="space-y-2">
-                {/* Category header */}
                 <div className="flex items-center gap-2">
                   <span className={`text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${meta.color}`}>
                     {meta.icon} {meta.label}
@@ -183,14 +176,12 @@ export default function GlobalSearch() {
                   <span className="text-[10px] text-zinc-600 font-mono">{items.length}</span>
                 </div>
 
-                {/* Result cards */}
                 {items.map((r, i) => (
                   <div
                     key={r.id}
                     className="card p-4 hover:bg-zinc-800/50 transition-all animate-in cursor-default group/card relative overflow-hidden"
                     style={{ animationDelay: `${i * 30}ms` }}
                   >
-                    {/* Subtle left accent */}
                     <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${
                       cat === 'paper' ? 'bg-blue-500/40' :
                       cat === 'milestone' ? 'bg-violet-500/40' :
@@ -231,7 +222,6 @@ export default function GlobalSearch() {
         </div>
       )}
 
-      {/* Empty state with suggested searches */}
       {!searched && (
         <div className="text-center py-16 space-y-4">
           <div className="relative inline-block">
