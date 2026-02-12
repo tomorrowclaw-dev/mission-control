@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { WritingSection } from '@/lib/types'
 
 interface WritingProgressProps {
@@ -7,6 +8,13 @@ interface WritingProgressProps {
 }
 
 export default function WritingProgress({ sections }: WritingProgressProps) {
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoaded(true), 80)
+    return () => clearTimeout(timer)
+  }, [])
+
   const totalTarget = sections.reduce((sum, s) => sum + (s.target_word_count || 0), 0)
   const totalCurrent = sections.reduce((sum, s) => sum + s.current_word_count, 0)
   const overallPercent = totalTarget > 0 ? (totalCurrent / totalTarget) * 100 : 0
@@ -40,8 +48,8 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
         <div className="mt-4 max-w-md mx-auto">
           <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full progress-bar"
-              style={{ width: `${overallPercent}%` }}
+              className={`h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full progress-bar ${overallPercent > 50 ? 'bar-glow-indigo' : ''}`}
+              style={{ width: `${loaded ? overallPercent : 0}%` }}
             />
           </div>
           <div className="text-[11px] text-zinc-500 font-mono mt-1.5">{overallPercent.toFixed(1)}% complete</div>
@@ -55,6 +63,7 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
           const percent = section.target_word_count
             ? (section.current_word_count / section.target_word_count) * 100
             : 0
+          const clampedPercent = Math.min(percent, 100)
 
           return (
             <div
@@ -73,8 +82,8 @@ export default function WritingProgress({ sections }: WritingProgressProps) {
                 <>
                   <div className="w-24 h-1.5 bg-zinc-800/80 rounded-full overflow-hidden shrink-0">
                     <div
-                      className={`h-full rounded-full progress-bar ${colors.bar}`}
-                      style={{ width: `${Math.min(percent, 100)}%` }}
+                      className={`h-full rounded-full progress-bar ${colors.bar} ${clampedPercent > 50 ? 'bar-glow' : ''}`}
+                      style={{ width: `${loaded ? clampedPercent : 0}%` }}
                     />
                   </div>
                   <span className="text-[10px] text-zinc-500 font-mono w-14 text-right shrink-0">

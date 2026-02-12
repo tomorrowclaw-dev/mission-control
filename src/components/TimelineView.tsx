@@ -17,6 +17,25 @@ const phaseAccent: Record<string, { border: string; bg: string; dot: string; tex
 
 export default function TimelineView({ milestones }: TimelineViewProps) {
   const now = new Date()
+  const timelineStart = new Date('2026-02-09')
+  const msInWeek = 7 * 24 * 60 * 60 * 1000
+  const currentWeek = Math.max(1, Math.min(18, Math.floor((now.getTime() - timelineStart.getTime()) / msInWeek) + 1))
+  const markerLeft = ((currentWeek - 0.5) / 18) * 100
+  const phaseByWeek = [
+    'build', 'build', 'build', 'build',
+    'data-collection', 'data-collection', 'data-collection', 'data-collection',
+    'analysis', 'analysis', 'analysis', 'analysis',
+    'writing', 'writing', 'writing', 'writing',
+    'defense', 'defense',
+  ] as const
+  const weekSegmentColor: Record<typeof phaseByWeek[number], { past: string; future: string }> = {
+    'build': { past: 'bg-violet-400', future: 'bg-violet-500/25' },
+    'data-collection': { past: 'bg-blue-400', future: 'bg-blue-500/25' },
+    'analysis': { past: 'bg-emerald-400', future: 'bg-emerald-500/25' },
+    'writing': { past: 'bg-amber-400', future: 'bg-amber-500/25' },
+    'defense': { past: 'bg-rose-400', future: 'bg-rose-500/25' },
+  }
+
   const grouped = milestones.reduce<Record<string, Milestone[]>>((acc, m) => {
     if (!acc[m.phase]) acc[m.phase] = []
     acc[m.phase].push(m)
@@ -34,6 +53,37 @@ export default function TimelineView({ milestones }: TimelineViewProps) {
 
   return (
     <div className="space-y-8">
+      <div className="card-glass p-4 sm:p-5 animate-in">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">18 Week Track</div>
+            <div className="text-sm text-zinc-300 mt-1">Week {currentWeek} of 18</div>
+          </div>
+          <span className="text-[10px] px-2 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 font-semibold uppercase tracking-wider">
+            You are here
+          </span>
+        </div>
+        <div className="relative mt-5">
+          <div className="h-3 rounded-full bg-zinc-900/70 border border-zinc-800/70 p-0.5 flex gap-0.5">
+            {phaseByWeek.map((phase, idx) => {
+              const color = weekSegmentColor[phase]
+              return (
+                <div
+                  key={`${phase}-${idx + 1}`}
+                  className={`h-full flex-1 rounded-[2px] transition-all duration-500 ${
+                    idx + 1 <= currentWeek ? color.past : color.future
+                  }`}
+                />
+              )
+            })}
+          </div>
+          <div className="absolute -top-2" style={{ left: `calc(${markerLeft}% - 1px)` }}>
+            <div className="w-0.5 h-7 bg-white/80" />
+            <div className="mt-1 -ml-6 text-[9px] text-zinc-400 font-mono whitespace-nowrap">Week {currentWeek}</div>
+          </div>
+        </div>
+      </div>
+
       {Object.entries(grouped).map(([phase, items], groupIdx) => {
         const colors = phaseAccent[phase]
         return (
