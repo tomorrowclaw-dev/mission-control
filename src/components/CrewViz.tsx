@@ -7,7 +7,7 @@ export default function CrewViz() {
         className="rounded-xl overflow-hidden shadow-2xl"
         style={{
           width: '100%',
-          maxWidth: '1400px',
+          maxWidth: '100%',
           aspectRatio: '3 / 2',
           background: '#0e0d14',
         }}
