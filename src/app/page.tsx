@@ -15,11 +15,12 @@ import DailyBriefs from '@/components/DailyBriefs'
 import ActivityFeed from '@/components/ActivityFeed'
 import CalendarView from '@/components/CalendarView'
 import GlobalSearch from '@/components/GlobalSearch'
+import CrewViz from '@/components/CrewViz'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'deliverables' | 'briefs' | 'activity' | 'schedule' | 'search'
+type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'deliverables' | 'briefs' | 'activity' | 'schedule' | 'search' | 'crew'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('activity')
@@ -86,6 +87,7 @@ export default function Dashboard() {
     { key: 'activity', label: 'Activity', icon: '●', group: 'dashboard' },
     { key: 'schedule', label: 'Schedule', icon: '◈', group: 'dashboard' },
     { key: 'search', label: 'Search', icon: '◉', group: 'dashboard' },
+    { key: 'crew', label: 'Crew HQ', icon: '🐙', group: 'dashboard' },
     { key: 'timeline', label: 'Thesis', icon: '◆', group: 'thesis' },
   ]
 
@@ -218,6 +220,7 @@ export default function Dashboard() {
               {activeTab === 'activity' && <ActivityFeed />}
               {activeTab === 'schedule' && <CalendarView />}
               {activeTab === 'search' && <GlobalSearch />}
+              {activeTab === 'crew' && <CrewViz />}
 
               {activeTab === 'timeline' && (
                 <div className="space-y-6">
