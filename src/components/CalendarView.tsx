@@ -13,7 +13,6 @@ import {
   isSameMonth,
   isSameDay,
   isToday,
-  parseISO,
   getDay,
 } from 'date-fns'
 import { getMilestones } from '@/lib/data'
@@ -57,7 +56,7 @@ const PHASE_COLORS: Record<string, string> = {
   defense: 'var(--phase-defense)',
 }
 
-const EVENT_TYPE_STYLES: Record<EventType, { dot: string; bg: string; text: string; border: string }> = {
+const _EVENT_TYPE_STYLES: Record<EventType, { dot: string; bg: string; text: string; border: string }> = {
   milestone: {
     dot: 'bg-[var(--accent)]',
     bg: 'bg-[var(--accent-muted)]',

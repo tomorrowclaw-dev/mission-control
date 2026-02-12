@@ -6,18 +6,13 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import CountdownTimer from '@/components/CountdownTimer'
 import TimelineView from '@/components/TimelineView'
-import WritingProgress from '@/components/WritingProgress'
-import PapersList from '@/components/PapersList'
 import NotionTasks from '@/components/NotionTasks'
-import ContentIdeas from '@/components/ContentIdeas'
-import AdvisorDeliverables from '@/components/AdvisorDeliverables'
-import DailyBriefs from '@/components/DailyBriefs'
 import ActivityFeed from '@/components/ActivityFeed'
 import CalendarView from '@/components/CalendarView'
 import GlobalSearch from '@/components/GlobalSearch'
 import CrewViz from '@/components/CrewViz'
-import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
-import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
+import { getMilestones, getWritingSections } from '@/lib/data'
+import { Milestone, WritingSection } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
 type Tab = 'timeline' | 'writing' | 'papers' | 'content' | 'deliverables' | 'briefs' | 'activity' | 'schedule' | 'search' | 'crew'
@@ -26,26 +21,17 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('activity')
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [sections, setSections] = useState<WritingSection[]>([])
-  const [papers, setPapers] = useState<Paper[]>([])
-  const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([])
-  const [deliverables, setDeliverables] = useState<AdvisorDeliverable[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       try {
-        const [m, s, p, c, d] = await Promise.all([
+        const [m, s] = await Promise.all([
           getMilestones(), 
           getWritingSections(), 
-          getPapers(), 
-          getContentIdeas(),
-          getAdvisorDeliverables()
         ])
         setMilestones(m)
         setSections(s)
-        setPapers(p)
-        setContentIdeas(c)
-        setDeliverables(d)
       } catch (err) {
         console.error('Failed to load data:', err)
       } finally {

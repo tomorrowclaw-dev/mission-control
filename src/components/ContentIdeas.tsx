@@ -45,6 +45,23 @@ export default function ContentIdeas({ ideas }: { ideas: ContentIdea[] }) {
     { key: 'posted', label: 'Posted', count: ideas.filter((idea) => idea.status === 'posted').length },
   ]
 
+  const grouped = filtered.reduce<Record<string, ContentIdea[]>>((acc, idea) => {
+    const week = idea.week_of || 'Unscheduled'
+    if (!acc[week]) acc[week] = []
+    acc[week].push(idea)
+    return acc
+  }, {})
+
+  const sortedGroups = useMemo(
+    () =>
+      Object.entries(grouped).sort(([left], [right]) => {
+        if (left === 'Unscheduled') return 1
+        if (right === 'Unscheduled') return -1
+        return right.localeCompare(left)
+      }),
+    [grouped]
+  )
+
   if (ideas.length === 0) {
     return (
       <div className="card-glass p-12 text-center">
@@ -62,23 +79,6 @@ export default function ContentIdeas({ ideas }: { ideas: ContentIdea[] }) {
       </div>
     )
   }
-
-  const grouped = filtered.reduce<Record<string, ContentIdea[]>>((acc, idea) => {
-    const week = idea.week_of || 'Unscheduled'
-    if (!acc[week]) acc[week] = []
-    acc[week].push(idea)
-    return acc
-  }, {})
-
-  const sortedGroups = useMemo(
-    () =>
-      Object.entries(grouped).sort(([left], [right]) => {
-        if (left === 'Unscheduled') return 1
-        if (right === 'Unscheduled') return -1
-        return right.localeCompare(left)
-      }),
-    [grouped]
-  )
 
   return (
     <div className="space-y-6">
