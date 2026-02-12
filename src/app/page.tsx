@@ -12,11 +12,12 @@ import AdvisorDeliverables from '@/components/AdvisorDeliverables'
 import DailyBriefs from '@/components/DailyBriefs'
 import MeetingNotes from '@/components/MeetingNotes'
 import CalendarView from '@/components/CalendarView'
+import CrewViz from '@/components/CrewViz'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'activity' | 'schedule' | 'search' | 'thesis'
+type Tab = 'activity' | 'schedule' | 'search' | 'crew' | 'thesis'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('activity')
@@ -97,6 +98,7 @@ export default function Dashboard() {
     { key: 'activity', label: 'Activity', icon: '📡', description: 'Timeline, progress, briefs' },
     { key: 'schedule', label: 'Schedule', icon: '📅', description: 'Calendar and meetings' },
     { key: 'search', label: 'Search', icon: '🔍', description: 'Find papers and content' },
+    { key: 'crew', label: 'Crew HQ', icon: '🐙', description: 'AI crew visualization' },
   ]
 
   const thesisItems = [
@@ -238,6 +240,9 @@ export default function Dashboard() {
             </div>
           </div>
         )
+
+      case 'crew':
+        return <CrewViz />
 
       case 'thesis':
         return (
