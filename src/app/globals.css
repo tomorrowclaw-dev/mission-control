@@ -39,7 +39,7 @@
 
   /* Typography */
   --font-display: 'Syne', system-ui, sans-serif;
-  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
 
   /* Glass & Effects */
@@ -218,6 +218,20 @@ body::before {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--glass-border-hover);
 }
 
+.instrument {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.instrument:hover {
+  border-color: var(--glass-border-hover);
+  transform: translateY(-1px);
+  transition: all 0.15s ease;
+}
+
 .card-gradient {
   position: relative;
   background: var(--card);
@@ -281,19 +295,13 @@ body::before {
 }
 
 /* ─── Animations ─── */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes animate-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-in {
-  animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: animate-in 0.2s ease-out both;
 }
 
 @keyframes fadeSlide {
@@ -309,6 +317,19 @@ body::before {
 
 .fade-slide {
   animation: fadeSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.notion-loading-shimmer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: shimmer 1.6s infinite;
 }
 
 /* ─── Interactive Elements ─── */

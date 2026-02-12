@@ -1,14 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { ChevronDown, Search } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Search, Filter, RotateCw, Check, Eye, BookOpen } from 'lucide-react'
 import { Paper } from '@/lib/types'
 
 interface PapersListProps {
   papers: Paper[]
 }
-
-type PaperFilter = 'all' | 'unread' | 'reviewed' | 'cited'
 
 const tagColors: Record<string, string> = {
   'TTF': 'bg-purple-500/12 text-purple-400 border-purple-500/20',
@@ -33,142 +31,202 @@ const tagColors: Record<string, string> = {
   'AI': 'bg-indigo-500/12 text-indigo-400 border-indigo-500/20',
 }
 
-const statusStyles: Record<NonNullable<Paper['review_status']> | 'unread', string> = {
-  unread: 'bg-zinc-500/12 text-zinc-400 border-zinc-500/20',
-  reading: 'bg-amber-500/12 text-amber-400 border-amber-500/20',
-  reviewed: 'bg-blue-500/12 text-blue-400 border-blue-500/20',
-  cited: 'bg-green-500/12 text-green-400 border-green-500/20',
-}
-
-const normalizeFilterStatus = (status: Paper['review_status']): Exclude<PaperFilter, 'all'> => {
-  if (status === 'reviewed') return 'reviewed'
-  if (status === 'cited') return 'cited'
-  return 'unread'
-}
+type SortOption = 'date' | 'title' | 'relevance' | 'status'
+type FilterOption = 'all' | 'unread' | 'reading' | 'reviewed' | 'cited'
 
 export default function PapersList({ papers }: PapersListProps) {
-  const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState<PaperFilter>('all')
-  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({})
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<SortOption>('date')
+  const [filterBy, setFilterBy] = useState<FilterOption>('all')
+  const [expandedPaper, setExpandedPaper] = useState<string | null>(null)
 
-  const filterCounts = useMemo(
-    () => ({
-      all: papers.length,
-      unread: papers.filter((paper) => normalizeFilterStatus(paper.review_status) === 'unread').length,
-      reviewed: papers.filter((paper) => normalizeFilterStatus(paper.review_status) === 'reviewed').length,
-      cited: papers.filter((paper) => normalizeFilterStatus(paper.review_status) === 'cited').length,
-    }),
-    [papers]
-  )
+  // Mock function to simulate status updates
+  const handleStatusUpdate = (paperId: string, newStatus: string) => {
+    console.log(`Updating paper ${paperId} to status: ${newStatus}`)
+    // In a real app, this would make an API call to update the status
+  }
 
-  const filteredPapers = useMemo(() => {
-    const loweredQuery = query.trim().toLowerCase()
+  // Filter and sort papers
+  const filteredAndSortedPapers = useMemo(() => {
+    let filtered = papers.filter(paper => {
+      // Search filter
+      const matchesSearch = searchQuery === '' || 
+        paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (paper.authors || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        paper.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
 
-    return papers.filter((paper) => {
-      const passesFilter = filter === 'all' || normalizeFilterStatus(paper.review_status) === filter
+      // Status filter
+      const matchesFilter = filterBy === 'all' || 
+        (!paper.review_status && filterBy === 'unread') ||
+        (paper.review_status === filterBy)
 
-      if (!passesFilter) return false
-      if (!loweredQuery) return true
-
-      const haystack = [
-        paper.title,
-        paper.authors,
-        paper.source,
-        paper.summary,
-        paper.key_arguments,
-        paper.relevance_notes,
-        ...paper.tags,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-
-      return haystack.includes(loweredQuery)
+      return matchesSearch && matchesFilter
     })
-  }, [papers, filter, query])
 
-  const filters: { key: PaperFilter; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'unread', label: 'Unread' },
-    { key: 'reviewed', label: 'Reviewed' },
-    { key: 'cited', label: 'Cited' },
-  ]
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'title':
+          return a.title.localeCompare(b.title)
+        case 'date':
+          return (b.year || 0) - (a.year || 0)
+        case 'status':
+          const statusOrder = { 'unread': 0, 'reading': 1, 'reviewed': 2, 'cited': 3 }
+          const aStatus = a.review_status || 'unread'
+          const bStatus = b.review_status || 'unread'
+          return statusOrder[bStatus as keyof typeof statusOrder] - statusOrder[aStatus as keyof typeof statusOrder]
+        case 'relevance':
+          // Sort by relevance notes presence, then alphabetically
+          if (a.relevance_notes && !b.relevance_notes) return -1
+          if (!a.relevance_notes && b.relevance_notes) return 1
+          return a.title.localeCompare(b.title)
+        default:
+          return 0
+      }
+    })
 
-  const toggleExpanded = (paperId: string) => {
-    setExpandedIds((current) => ({
-      ...current,
-      [paperId]: !current[paperId],
-    }))
+    return filtered
+  }, [papers, searchQuery, sortBy, filterBy])
+
+  const statusCounts = useMemo(() => {
+    const counts = { all: papers.length, unread: 0, reading: 0, reviewed: 0, cited: 0 }
+    papers.forEach(paper => {
+      const status = paper.review_status || 'unread'
+      counts[status as keyof typeof counts]++
+    })
+    return counts
+  }, [papers])
+
+  const getStatusIcon = (status?: string) => {
+    switch (status) {
+      case 'cited': return <Check className="w-3 h-3" />
+      case 'reviewed': return <Eye className="w-3 h-3" />
+      case 'reading': return <BookOpen className="w-3 h-3" />
+      default: return <div className="w-3 h-3 rounded-full bg-zinc-600" />
+    }
+  }
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'cited': return 'bg-green-500/12 text-green-400 border-green-500/20'
+      case 'reviewed': return 'bg-blue-500/12 text-blue-400 border-blue-500/20'
+      case 'reading': return 'bg-amber-500/12 text-amber-400 border-amber-500/20'
+      default: return 'bg-zinc-500/12 text-zinc-400 border-zinc-500/20'
+    }
   }
 
   return (
     <div className="space-y-4">
-      <div className="card-glass p-3 sm:p-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <label className="relative flex-1">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search title, author, source, tags..."
-              className="w-full rounded-xl border border-zinc-700/60 bg-zinc-900/40 pl-9 pr-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20"
-            />
-          </label>
-          <div className="flex items-center gap-2 flex-wrap">
-            {filters.map((item) => (
+      {/* Enhanced filters and search */}
+      <div className="space-y-3">
+        {/* Search bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <input
+            type="text"
+            placeholder="Search papers, authors, or tags..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-zinc-800/50 border border-zinc-700/50 text-sm text-zinc-200 placeholder-zinc-500 focus:border-indigo-500/50 focus:bg-zinc-800/70 transition-all"
+          />
+        </div>
+
+        {/* Filter tabs and sort */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-between">
+          <div className="flex flex-wrap gap-1">
+            {Object.entries(statusCounts).map(([status, count]) => (
               <button
-                key={item.key}
-                onClick={() => setFilter(item.key)}
-                className={`px-3 py-2 rounded-lg text-xs font-semibold tracking-wide border transition-all ${
-                  filter === item.key
-                    ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35'
-                    : 'bg-zinc-800/40 text-zinc-500 border-zinc-700/50 hover:text-zinc-300 hover:border-zinc-600/70'
+                key={status}
+                onClick={() => setFilterBy(status as FilterOption)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  filterBy === status
+                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30 border border-transparent'
                 }`}
               >
-                {item.label}
-                <span className="ml-1.5 font-mono text-[10px] opacity-70">{filterCounts[item.key]}</span>
+                {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)} ({count})
               </button>
             ))}
           </div>
+          
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-700/50 text-xs text-zinc-300 focus:border-indigo-500/50 transition-all"
+          >
+            <option value="date">Sort by Date</option>
+            <option value="title">Sort by Title</option>
+            <option value="status">Sort by Status</option>
+            <option value="relevance">Sort by Relevance</option>
+          </select>
+        </div>
+
+        {/* Results count */}
+        <div className="text-xs text-zinc-500 font-mono">
+          Showing {filteredAndSortedPapers.length} of {papers.length} papers
+          {searchQuery && ` matching "${searchQuery}"`}
         </div>
       </div>
 
-      {filteredPapers.length === 0 && (
-        <div className="card-glass p-8 text-center text-sm text-zinc-500">
-          No papers match your search/filter.
-        </div>
-      )}
-
+      {/* Papers grid */}
       <div className="grid gap-3">
-        {filteredPapers.map((paper, idx) => {
-          const status = paper.review_status || 'unread'
-          const abstract = paper.summary || paper.key_arguments
-          const isExpanded = Boolean(expandedIds[paper.id])
-
+        {filteredAndSortedPapers.map((paper, idx) => {
+          const isExpanded = expandedPaper === paper.id
+          
           return (
             <div
               key={paper.id}
-              className="card p-5 relative overflow-hidden card-shine group animate-in"
-              style={{ animationDelay: `${idx * 45}ms` }}
+              className="card p-5 relative overflow-hidden card-shine group animate-in hover:border-zinc-600/50 transition-all duration-300"
+              style={{ animationDelay: `${idx * 50}ms` }}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-display text-[15px] leading-snug text-zinc-200 group-hover:text-white transition-colors">
-                      {paper.title}
-                    </h4>
-                    <span
-                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wider border shrink-0 ${statusStyles[status]}`}
-                    >
-                      {status}
-                    </span>
+                  <div className="flex items-start gap-3 mb-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <h4 className="font-display text-[15px] leading-snug text-zinc-200 group-hover:text-white transition-colors">
+                        {paper.title}
+                      </h4>
+                      
+                      {/* Interactive status badge */}
+                      <div className="relative group/status">
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wider border shrink-0 cursor-pointer transition-all ${getStatusColor(paper.review_status || "unread")}`}>
+                          <span className="flex items-center gap-1">
+                            {getStatusIcon(paper.review_status || "unread")}
+                            {paper.review_status || 'unread'}
+                          </span>
+                        </span>
+                        
+                        {/* Quick status update dropdown */}
+                        <div className="absolute top-full left-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg p-1 space-y-1 opacity-0 group-hover/status:opacity-100 pointer-events-none group-hover/status:pointer-events-auto transition-opacity z-10 min-w-24">
+                          {['unread', 'reading', 'reviewed', 'cited'].map((status) => (
+                            <button
+                              key={status}
+                              onClick={() => handleStatusUpdate(paper.id, status)}
+                              className="block w-full text-left px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+                            >
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-zinc-500 mt-1.5 font-mono">
+                  
+                  <p className="text-[11px] text-zinc-500 font-mono">
                     {paper.authors} {paper.year && `(${paper.year})`}
                     {paper.source && <span className="text-zinc-600"> · {paper.source}</span>}
                   </p>
                 </div>
+                
                 <div className="flex items-center gap-2 shrink-0">
+                  {/* Expand/collapse button */}
+                  <button
+                    onClick={() => setExpandedPaper(isExpanded ? null : paper.id)}
+                    className="p-1 rounded-md bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/70 transition-all"
+                  >
+                    <RotateCw className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  </button>
+                  
                   {paper.doi && (
                     <a
                       href={`https://doi.org/${paper.doi}`}
@@ -179,45 +237,63 @@ export default function PapersList({ papers }: PapersListProps) {
                       DOI ↗
                     </a>
                   )}
-                  {abstract && (
-                    <button
-                      onClick={() => toggleExpanded(paper.id)}
-                      className="text-[10px] px-2 py-1 rounded-md bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50 hover:border-zinc-600/80 transition-all font-mono inline-flex items-center gap-1"
-                    >
-                      Abstract
-                      <ChevronDown size={12} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                    </button>
-                  )}
                 </div>
               </div>
 
-              {isExpanded && abstract && (
-                <div className="mt-3 rounded-xl border border-zinc-700/40 bg-zinc-900/35 px-3 py-2.5 text-[12px] text-zinc-400 leading-relaxed">
-                  {abstract}
-                </div>
-              )}
+              {/* Expandable content */}
+              <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96 mt-3' : 'max-h-0'}`}>
+                {paper.summary && (
+                  <p className="text-[12px] text-zinc-400 leading-relaxed mb-3">{paper.summary}</p>
+                )}
 
-              {paper.relevance_notes && (
-                <p className="text-[11px] text-indigo-400/70 mt-2.5 leading-relaxed pl-3 border-l-2 border-indigo-500/20">
-                  {paper.relevance_notes}
-                </p>
-              )}
+                {paper.relevance_notes && (
+                  <p className="text-[11px] text-indigo-400/60 leading-relaxed pl-3 border-l-2 border-indigo-500/20 mb-3">
+                    {paper.relevance_notes}
+                  </p>
+                )}
+              </div>
 
+              {/* Tags */}
               <div className="flex flex-wrap gap-1.5 mt-3">
-                {paper.tags.map((tag) => (
-                  <span
+                {paper.tags.slice(0, isExpanded ? undefined : 5).map((tag) => (
+                  <button
                     key={tag}
-                    className={`text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border ${
+                    onClick={() => setSearchQuery(tag)}
+                    className={`text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider border transition-all hover:scale-105 cursor-pointer ${
                       tagColors[tag] || 'bg-zinc-700/30 text-zinc-400 border-zinc-600/30'
                     }`}
                   >
                     {tag}
-                  </span>
+                  </button>
                 ))}
+                
+                {!isExpanded && paper.tags.length > 5 && (
+                  <button
+                    onClick={() => setExpandedPaper(paper.id)}
+                    className="text-[9px] px-2 py-0.5 rounded-full bg-zinc-700/30 text-zinc-500 border border-zinc-600/30 hover:text-zinc-400 transition-colors"
+                  >
+                    +{paper.tags.length - 5} more
+                  </button>
+                )}
               </div>
             </div>
           )
         })}
+        
+        {filteredAndSortedPapers.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-zinc-500 text-sm mb-2">No papers found</div>
+            <button
+              onClick={() => {
+                setSearchQuery('')
+                setFilterBy('all')
+              }}
+              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

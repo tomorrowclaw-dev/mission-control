@@ -73,7 +73,7 @@ export default function CountdownTimer({ targetDate, label, variant = 'default' 
 
   if (variant === 'hero') {
     return (
-      <div className={`instrument p-4 ${styles.border} ${styles.glow} relative overflow-hidden group transition-all duration-500`}>
+      <div className={`card-gradient p-5 ${styles.border} ${styles.glow} relative overflow-hidden group transition-all duration-500`}>
         {/* Dramatic background gradient for urgency */}
         <div className={`absolute inset-0 bg-gradient-to-br ${styles.bg} transition-all duration-700 group-hover:opacity-80`} />
         

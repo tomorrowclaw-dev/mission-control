@@ -3,20 +3,15 @@
 import { useState, useEffect } from 'react'
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    // Initialize theme from localStorage/system preference on first render
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
-      return saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
-    }
-    return 'dark'
-  })
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
-    // Apply theme to document on mount and theme changes
-    document.documentElement.classList.toggle('light', theme === 'light')
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-  }, [theme])
+    const saved = localStorage.getItem('theme') as 'dark' | 'light' | null
+    const preferred = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+    setTheme(preferred)
+    document.documentElement.classList.toggle('light', preferred === 'light')
+    document.documentElement.classList.toggle('dark', preferred === 'dark')
+  }, [])
 
   const toggle = () => {
     const next = theme === 'dark' ? 'light' : 'dark'

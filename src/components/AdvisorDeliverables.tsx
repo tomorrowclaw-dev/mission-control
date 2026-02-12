@@ -1,259 +1,172 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { format, addDays, differenceInCalendarDays, isWithinInterval, parseISO } from 'date-fns'
+import { format, addDays, isWithinInterval, parseISO } from 'date-fns'
 import { AdvisorDeliverable } from '@/lib/types'
-import { updateDeliverableStatus } from '@/lib/data'
 
 interface AdvisorDeliverablesProps {
   deliverables: AdvisorDeliverable[]
 }
 
 const PHASES = [
-  { start: 1, end: 5, label: 'Phase 1: Writing & Building' },
-  { start: 6, end: 8, label: 'Phase 2: Evaluation Study' },
-  { start: 9, end: 12, label: 'Phase 3: Results & Discussion' },
-  { start: 13, end: 16, label: 'Phase 4: Review & Revisions' },
-  { start: 17, end: 18, label: 'Phase 5: Defense Prep' },
+  { start: 1, end: 5, label: "Phase 1: Writing & Building" },
+  { start: 6, end: 8, label: "Phase 2: Evaluation Study" },
+  { start: 9, end: 12, label: "Phase 3: Results & Discussion" },
+  { start: 13, end: 16, label: "Phase 4: Review & Revisions" },
+  { start: 17, end: 18, label: "Phase 5: Defense Prep" },
 ]
 
-const doneStatuses: AdvisorDeliverable['status'][] = ['complete', 'submitted', 'feedback_received']
-const deliverableStatusCycle: AdvisorDeliverable['status'][] = ['upcoming', 'in_progress', 'submitted', 'feedback_received', 'complete']
-
-const statusClasses: Record<AdvisorDeliverable['status'], { pill: string; dot: string; label: string }> = {
-  complete: { pill: 'bg-green-500/12 text-green-400 border-green-500/25', dot: 'bg-green-400', label: 'Complete' },
-  feedback_received: { pill: 'bg-violet-500/12 text-violet-400 border-violet-500/25', dot: 'bg-violet-400', label: 'Feedback' },
-  submitted: { pill: 'bg-amber-500/12 text-amber-400 border-amber-500/25', dot: 'bg-amber-400', label: 'Submitted' },
-  in_progress: { pill: 'bg-blue-500/12 text-blue-400 border-blue-500/25', dot: 'bg-blue-400', label: 'In Progress' },
-  upcoming: { pill: 'bg-zinc-700/30 text-zinc-400 border-zinc-600/30', dot: 'bg-zinc-500', label: 'Upcoming' },
-}
-
-function getUrgency(weekEnd: Date, status: AdvisorDeliverable['status']) {
-  if (doneStatuses.includes(status)) {
-    return {
-      label: 'Delivered',
-      className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    }
-  }
-
-  const daysLeft = differenceInCalendarDays(weekEnd, new Date())
-
-  if (daysLeft < 0) {
-    return {
-      label: `${Math.abs(daysLeft)}d overdue`,
-      className: 'bg-red-500/12 text-red-400 border-red-500/25',
-    }
-  }
-
-  if (daysLeft <= 3) {
-    return {
-      label: `Due in ${daysLeft}d`,
-      className: 'bg-amber-500/12 text-amber-400 border-amber-500/25',
-    }
-  }
-
-  return {
-    label: `Due in ${daysLeft}d`,
-    className: 'bg-zinc-700/30 text-zinc-400 border-zinc-600/30',
-  }
-}
-
 export default function AdvisorDeliverables({ deliverables }: AdvisorDeliverablesProps) {
-  const [localDeliverables, setLocalDeliverables] = useState<AdvisorDeliverable[]>(deliverables)
-  const [savingIds, setSavingIds] = useState<Record<string, boolean>>({})
-  const [recentlyUpdatedId, setRecentlyUpdatedId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const now = new Date()
-
-  useEffect(() => {
-    setLocalDeliverables(deliverables)
-  }, [deliverables])
-
-  const getNextStatus = (status: AdvisorDeliverable['status']) => {
-    const currentIndex = deliverableStatusCycle.indexOf(status)
-    if (currentIndex === -1) return 'upcoming'
-    return deliverableStatusCycle[(currentIndex + 1) % deliverableStatusCycle.length]
-  }
-
-  const handleStatusToggle = async (id: string) => {
-    if (savingIds[id]) return
-
-    let previousStatus: AdvisorDeliverable['status'] | null = null
-    let nextStatus: AdvisorDeliverable['status'] | null = null
-
-    setError(null)
-    setLocalDeliverables((prev) =>
-      prev.map((item) => {
-        if (item.id !== id) return item
-        previousStatus = item.status
-        const computedNext = getNextStatus(item.status)
-        nextStatus = computedNext
-        return { ...item, status: computedNext }
-      })
-    )
-
-    if (!previousStatus || !nextStatus) return
-
-    setSavingIds((prev) => ({ ...prev, [id]: true }))
-    setRecentlyUpdatedId(id)
-    setTimeout(() => {
-      setRecentlyUpdatedId((current) => (current === id ? null : current))
-    }, 260)
-
-    try {
-      await updateDeliverableStatus(id, nextStatus)
-    } catch (err) {
-      setLocalDeliverables((prev) =>
-        prev.map((item) => (item.id === id && previousStatus ? { ...item, status: previousStatus } : item))
-      )
-      console.error('Failed to update deliverable status:', err)
-      setError('Could not save deliverable status. Changes were reverted.')
-    } finally {
-      setSavingIds((prev) => ({ ...prev, [id]: false }))
-    }
-  }
-
+  
+  // Progress stats
   const totalWeeks = 18
-  const completedWeeks = localDeliverables.filter((deliverable) => doneStatuses.includes(deliverable.status)).length
-  const inProgressCount = localDeliverables.filter((deliverable) => deliverable.status === 'in_progress').length
-  const overdueCount = localDeliverables.filter((deliverable) => {
-    const weekEnd = addDays(parseISO(deliverable.week_start), 6)
-    return differenceInCalendarDays(weekEnd, now) < 0 && !doneStatuses.includes(deliverable.status)
-  }).length
+  const completedWeeks = deliverables.filter(d => d.status === 'complete' || d.status === 'submitted' || d.status === 'feedback_received').length
   const progressPercent = Math.round((completedWeeks / totalWeeks) * 100)
 
-  const groupedDeliverables = PHASES.map((phase) => {
-    const items = localDeliverables.filter((deliverable) => deliverable.week_number >= phase.start && deliverable.week_number <= phase.end)
-    const completed = items.filter((deliverable) => doneStatuses.includes(deliverable.status)).length
-    const phaseProgress = items.length > 0 ? Math.round((completed / items.length) * 100) : 0
-
-    return {
-      ...phase,
-      items,
-      phaseProgress,
-      completed,
+  // Status Indicators
+  const getStatusIndicator = (status: AdvisorDeliverable['status']) => {
+    switch (status) {
+      case 'complete': 
+        return (
+          <div className="w-5 h-5 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center">
+            <svg className="w-3 h-3 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+        )
+      case 'feedback_received':
+        return (
+          <div className="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/40 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-violet-400" />
+          </div>
+        )
+      case 'submitted':
+        return (
+          <div className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-amber-400" />
+          </div>
+        )
+      case 'in_progress':
+        return (
+          <div className="w-5 h-5 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+          </div>
+        )
+      default: // upcoming
+        return (
+          <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+            <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+          </div>
+        )
     }
-  }).filter((group) => group.items.length > 0)
+  }
+
+  // Group by phases
+  const groupedDeliverables = PHASES.map(phase => ({
+    ...phase,
+    items: deliverables.filter(d => d.week_number >= phase.start && d.week_number <= phase.end)
+  })).filter(g => g.items.length > 0)
 
   return (
     <div className="space-y-8 animate-in">
+      {/* Header / Progress */}
       <div className="card-glass p-6">
-        <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/12 border border-indigo-500/25 flex items-center justify-center text-sm">🗓️</div>
-            <div>
-              <h2 className="font-display text-lg">Advisor Deliverables</h2>
-              <p className="text-[11px] text-zinc-500 font-mono">Weekly targets, submission cadence, and urgency windows</p>
-            </div>
+             <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">🗓️</div>
+             <div>
+               <h2 className="font-display text-lg">Advisor Deliverables</h2>
+               <p className="text-[11px] text-zinc-500 font-mono">Weekly targets & submission schedule</p>
+             </div>
           </div>
-
           <div className="text-right">
-            <div className="text-2xl font-mono font-bold text-indigo-400">
-              {completedWeeks}
-              <span className="text-zinc-600 text-lg">/{totalWeeks}</span>
-            </div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-500">weeks complete</div>
+             <div className="text-2xl font-mono font-bold text-indigo-400">{completedWeeks}<span className="text-zinc-600 text-lg">/{totalWeeks}</span></div>
+             <div className="text-[10px] uppercase tracking-wider text-zinc-500">weeks complete</div>
           </div>
         </div>
-
         <div className="h-1.5 bg-zinc-800/80 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-400 rounded-full progress-bar" style={{ width: `${progressPercent}%` }} />
-        </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-2 text-[10px] font-mono">
-          <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/35 p-2 text-zinc-400">{progressPercent}% track</div>
-          <div className="rounded-lg border border-blue-500/20 bg-blue-500/8 p-2 text-blue-300">{inProgressCount} in progress</div>
-          <div className="rounded-lg border border-red-500/20 bg-red-500/8 p-2 text-red-300">{overdueCount} overdue</div>
+           <div className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full progress-bar" style={{ width: `${progressPercent}%` }} />
         </div>
       </div>
 
-      <div className="space-y-7 pl-2">
-        {error && (
-          <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs text-red-300 font-mono">
-            {error}
-          </div>
-        )}
-        {groupedDeliverables.map((group) => (
+      {/* Timeline */}
+      <div className="space-y-8 pl-2">
+        {groupedDeliverables.map((group, groupIdx) => (
           <div key={group.label} className="relative">
-            <div className="sticky top-20 z-10 bg-[#06060b]/95 backdrop-blur-sm py-2 mb-3 border-b border-zinc-800/50">
-              <div className="flex items-center gap-3">
-                <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500">{group.label}</h3>
-                <span className="text-[10px] font-mono text-zinc-600">{group.completed}/{group.items.length}</span>
-                <div className="flex-1 h-1 rounded-full bg-zinc-800/80 overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400" style={{ width: `${group.phaseProgress}%` }} />
-                </div>
-              </div>
+            {/* Phase Header */}
+            <div className="sticky top-20 z-10 bg-[#06060b]/95 backdrop-blur-sm py-2 mb-4 border-b border-zinc-800/50">
+               <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500">
+                 {group.label}
+               </h3>
             </div>
 
-            <div className="space-y-3 relative border-l border-zinc-800/50 ml-2.5 pl-6 pb-4">
-              {group.items.map((item) => {
-                const weekStart = parseISO(item.week_start)
-                const weekEnd = addDays(weekStart, 6)
-                const isCurrentWeek = isWithinInterval(now, { start: weekStart, end: weekEnd })
-                const urgency = getUrgency(weekEnd, item.status)
+            <div className="space-y-3 relative border-l border-zinc-800/50 ml-2.5 pl-6 pb-6">
+               {group.items.map((item, itemIdx) => {
+                 const weekStart = parseISO(item.week_start)
+                 const weekEnd = addDays(weekStart, 6)
+                 const isCurrentWeek = isWithinInterval(now, { start: weekStart, end: weekEnd })
+                 const isPast = weekEnd < now && item.status === 'complete'
+                 
+                 return (
+                   <div 
+                     key={item.id}
+                     className={`relative rounded-xl border p-4 transition-all duration-200 
+                       ${isCurrentWeek 
+                         ? 'bg-indigo-500/5 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]' 
+                         : isPast
+                           ? 'bg-zinc-900/20 border-zinc-800/50 opacity-60 hover:opacity-100'
+                           : 'card-glass border-zinc-800/60 hover:border-zinc-700'
+                       }
+                     `}
+                   >
+                     {/* Connector line dot */}
+                     <div className="absolute -left-[31px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#06060b] border-2 border-zinc-700 z-10" />
+                     {isCurrentWeek && (
+                       <div className="absolute -left-[31px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse z-10" />
+                     )}
 
-                return (
-                  <div
-                    key={item.id}
-                    className={`relative rounded-xl border p-4 transition-all duration-200 ${
-                      isCurrentWeek
-                        ? 'bg-indigo-500/6 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.12)]'
-                        : 'card-glass border-zinc-800/60 hover:border-zinc-700'
-                    }`}
-                  >
-                    <div className="absolute -left-[31px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#06060b] border-2 border-zinc-700 z-10" />
-                    <div
-                      className={`absolute -left-[31px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full ${statusClasses[item.status].dot} ${
-                        isCurrentWeek ? 'shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse' : ''
-                      } z-10`}
-                    />
+                     <div className="flex items-start gap-3">
+                       <div className="mt-1 shrink-0">
+                         {getStatusIndicator(item.status)}
+                       </div>
+                       
+                       <div className="flex-1 min-w-0">
+                         <div className="flex items-center gap-2 mb-1">
+                           <span className={`text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border 
+                             ${isCurrentWeek ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-500'}
+                           `}>
+                             Week {item.week_number}
+                           </span>
+                           <span className="text-[10px] text-zinc-500 font-mono">
+                             {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d')}
+                           </span>
+                           {item.chapter && (
+                             <span className="ml-auto text-[10px] font-mono text-zinc-400 bg-zinc-800/50 px-1.5 py-0.5 rounded border border-zinc-800">
+                               {item.chapter === 'All' ? 'Complete Draft' : item.chapter}
+                             </span>
+                           )}
+                         </div>
+                         
+                         <h4 className={`font-medium ${isPast ? 'text-zinc-400' : 'text-zinc-200'}`}>
+                           {item.title}
+                         </h4>
+                         
+                         {item.description && (
+                           <p className="text-sm text-zinc-500 mt-1 leading-relaxed">
+                             {item.description}
+                           </p>
+                         )}
 
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                          <span
-                            className={`text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded border ${
-                              isCurrentWeek ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-500'
-                            }`}
-                          >
-                            Week {item.week_number}
-                          </span>
-
-                          <span className="text-[10px] text-zinc-500 font-mono">
-                            {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d')}
-                          </span>
-
-                          <button
-                            type="button"
-                            onClick={() => handleStatusToggle(item.id)}
-                            disabled={savingIds[item.id]}
-                            className={`text-[10px] font-mono px-2 py-0.5 rounded-full border transition-all duration-200 ${statusClasses[item.status].pill} ${
-                              savingIds[item.id] ? 'opacity-60 cursor-wait' : 'hover:brightness-110'
-                            } ${recentlyUpdatedId === item.id ? 'scale-105' : ''}`}
-                            title="Click to cycle status"
-                          >
-                            {statusClasses[item.status].label}
-                          </button>
-
-                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${urgency.className}`}>
-                            {urgency.label}
-                          </span>
-
-                          {item.chapter && (
-                            <span className="ml-auto text-[10px] font-mono text-zinc-400 bg-zinc-800/50 px-1.5 py-0.5 rounded border border-zinc-800">
-                              {item.chapter === 'All' ? 'Complete Draft' : item.chapter}
-                            </span>
-                          )}
-                        </div>
-
-                        <h4 className="font-medium text-zinc-200">{item.title}</h4>
-
-                        {item.description && <p className="text-sm text-zinc-500 mt-1 leading-relaxed">{item.description}</p>}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
+                         {item.status !== 'upcoming' && item.status !== 'complete' && (
+                           <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold text-zinc-400">
+                             Status: <span className="text-zinc-300">{item.status.replace('_', ' ')}</span>
+                           </div>
+                         )}
+                       </div>
+                     </div>
+                   </div>
+                 )
+               })}
             </div>
           </div>
         ))}

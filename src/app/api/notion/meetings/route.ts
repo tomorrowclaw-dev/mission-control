@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const NOTION_DB_ID = '3004b298-1cd6-8170-b824-ecb53bb98335'
+const NOTION_DB_ID = '3004b298-1cd6-819a-9e2c-c25925f89b20'
 const NOTION_API_KEY = process.env.NOTION_API_KEY
 const NOTION_VERSION = '2022-06-28'
 
@@ -18,8 +18,8 @@ export async function GET() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sorts: [{ property: 'Created', direction: 'descending' }],
-        page_size: 30,
+        sorts: [{ property: 'Date', direction: 'descending' }],
+        page_size: 50,
       }),
       next: { revalidate: 300 },
     })
@@ -27,19 +27,18 @@ export async function GET() {
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Notion API Error:', errorText)
-      return NextResponse.json({ error: 'Failed to fetch briefs' }, { status: response.status })
+      return NextResponse.json({ error: 'Failed to fetch meetings' }, { status: response.status })
     }
 
     const data = await response.json()
-    const briefs = await Promise.all(data.results.map(async (page: any) => {
+    const meetings = await Promise.all(data.results.map(async (page: any) => {
       const title = page.properties?.Name?.title?.[0]?.plain_text
         || page.properties?.Title?.title?.[0]?.plain_text
-        || 'Untitled Brief'
-      
-      const created = page.created_time
-      const date = page.properties?.Date?.date?.start || created
+        || 'Untitled Meeting'
 
-      // Fetch page content (blocks)
+      const date = page.properties?.Date?.date?.start || page.created_time
+
+      // Fetch page content
       let content = ''
       try {
         const blocksRes = await fetch(`https://api.notion.com/v1/blocks/${page.id}/children?page_size=100`, {
@@ -59,7 +58,7 @@ export async function GET() {
       return { id: page.id, title, date, content }
     }))
 
-    return NextResponse.json({ briefs })
+    return NextResponse.json({ meetings })
   } catch (error) {
     console.error('Server Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

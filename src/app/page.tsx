@@ -1,35 +1,49 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import CountdownTimer from '@/components/CountdownTimer'
 import TimelineView from '@/components/TimelineView'
+import WritingProgress from '@/components/WritingProgress'
+import PapersList from '@/components/PapersList'
 import NotionTasks from '@/components/NotionTasks'
-import ActivityFeed from '@/components/ActivityFeed'
+import ContentIdeas from '@/components/ContentIdeas'
+import AdvisorDeliverables from '@/components/AdvisorDeliverables'
+import DailyBriefs from '@/components/DailyBriefs'
+import MeetingNotes from '@/components/MeetingNotes'
 import CalendarView from '@/components/CalendarView'
-import GlobalSearch from '@/components/GlobalSearch'
-import CrewViz from '@/components/CrewViz'
-import { getMilestones, getWritingSections } from '@/lib/data'
-import { Milestone, WritingSection } from '@/lib/types'
+import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
+import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'activity' | 'schedule' | 'search' | 'crew' | 'timeline'
+type Tab = 'activity' | 'schedule' | 'search' | 'thesis'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('activity')
   const [milestones, setMilestones] = useState<Milestone[]>([])
   const [sections, setSections] = useState<WritingSection[]>([])
+  const [papers, setPapers] = useState<Paper[]>([])
+  const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([])
+  const [deliverables, setDeliverables] = useState<AdvisorDeliverable[]>([])
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
       try {
-        const [m, s] = await Promise.all([getMilestones(), getWritingSections()])
+        const [m, s, p, c, d] = await Promise.all([
+          getMilestones(), 
+          getWritingSections(), 
+          getPapers(), 
+          getContentIdeas(),
+          getAdvisorDeliverables()
+        ])
         setMilestones(m)
         setSections(s)
+        setPapers(p)
+        setContentIdeas(c)
+        setDeliverables(d)
       } catch (err) {
         console.error('Failed to load data:', err)
       } finally {
@@ -37,6 +51,21 @@ export default function Dashboard() {
       }
     }
     load()
+  }, [])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setGlobalSearchOpen(true)
+      }
+      if (e.key === 'Escape') {
+        setGlobalSearchOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   if (loading) {
@@ -55,189 +84,372 @@ export default function Dashboard() {
   const defenseDate = '2026-06-28'
   const now = new Date()
 
+  // Stats
   const completedMilestones = milestones.filter(m => m.status === 'complete').length
   const totalMilestones = milestones.length
-  const milestonePercent = totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0
+  const nextMilestone = milestones.find(m => m.status !== 'complete' && new Date(m.due_date) >= now)
 
   const totalWords = sections.reduce((sum, s) => sum + s.current_word_count, 0)
   const targetWords = sections.reduce((sum, s) => sum + (s.target_word_count || 0), 0)
-  const wordPercent = targetWords > 0 ? (totalWords / targetWords) * 100 : 0
+  const wordPercent = targetWords > 0 ? Math.min(100, (totalWords / targetWords) * 100) : 0
 
-  const nextMilestone = milestones.find(m => m.status !== 'complete' && new Date(m.due_date) >= now)
-  const currentPhase = nextMilestone?.phase || 'build'
-
-  const navItems: { key: Tab; label: string; icon: string; section: 'main' | 'thesis' }[] = [
-    { key: 'activity', label: 'Activity', icon: '●', section: 'main' },
-    { key: 'schedule', label: 'Schedule', icon: '◈', section: 'main' },
-    { key: 'search', label: 'Search', icon: '◉', section: 'main' },
-    { key: 'crew', label: 'Crew HQ', icon: '🐙', section: 'main' },
-    { key: 'timeline', label: 'Thesis', icon: '◆', section: 'thesis' },
+  const navigationItems = [
+    { key: 'activity', label: 'Activity', icon: '📡', description: 'Timeline, progress, briefs' },
+    { key: 'schedule', label: 'Schedule', icon: '📅', description: 'Calendar and meetings' },
+    { key: 'search', label: 'Search', icon: '🔍', description: 'Find papers and content' },
   ]
 
-  const phaseInfo: Record<string, { label: string; color: string; description: string }> = {
-    'build': { label: 'Writing & Building', color: 'from-violet-500/15 to-violet-500/0 border-violet-500/20', description: 'Write Chs. 1-3 while building the RAG pipeline and AI Expert artifact' },
-    'data-collection': { label: 'Evaluation Study', color: 'from-blue-500/15 to-blue-500/0 border-blue-500/20', description: 'Run experiment sessions, collect survey data, write Ch.4 Artifact Design' },
-    'analysis': { label: 'Results & Discussion', color: 'from-emerald-500/15 to-emerald-500/0 border-emerald-500/20', description: 'Write Chs. 5-6, assemble complete thesis draft for committee' },
-    'writing': { label: 'Review & Revisions', color: 'from-amber-500/15 to-amber-500/0 border-amber-500/20', description: 'Incorporate committee feedback, polish and finalize thesis' },
-    'defense': { label: 'Defense Prep', color: 'from-rose-500/15 to-rose-500/0 border-rose-500/20', description: 'Build defense presentation, practice, submit final document' },
+  const thesisItems = [
+    { key: 'thesis', label: 'Thesis', icon: '📋', description: 'Writing and deliverables' },
+  ]
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'activity':
+        return (
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="instrument p-4">
+                <CountdownTimer targetDate={defenseDate} label="Defense" variant="default" />
+              </div>
+
+              <div className="instrument p-4">
+                <div className="relative z-10">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-mono text-3xl font-bold text-[var(--accent)]">{completedMilestones}</span>
+                    <span className="font-mono text-sm text-zinc-500">/ {totalMilestones}</span>
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">Milestones complete</div>
+                  <div className="mt-3">
+                    <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full progress-bar" style={{ width: `${totalMilestones > 0 ? (completedMilestones / totalMilestones) * 100 : 0}%` }} />
+                    </div>
+                    <div className="text-[10px] text-zinc-600 font-mono mt-1">{totalMilestones > 0 ? ((completedMilestones / totalMilestones) * 100).toFixed(1) : '0.0'}%</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="instrument p-4">
+                <div className="relative z-10">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-mono text-3xl font-bold text-[var(--accent)]">{(totalWords/1000).toFixed(1)}</span>
+                    <span className="font-mono text-sm text-zinc-500">k words</span>
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">of {(targetWords/1000).toFixed(0)}k target</div>
+                  <div className="mt-3">
+                    <div className="h-2 bg-zinc-800/80 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full progress-bar" style={{ width: `${wordPercent}%` }} />
+                    </div>
+                    <div className="text-[10px] text-zinc-600 font-mono mt-1">{wordPercent.toFixed(1)}%</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="instrument p-4">
+                <div className="relative z-10">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-mono text-3xl font-bold text-[var(--accent)]">{papers.length}</span>
+                    <span className="font-mono text-sm text-zinc-500">items</span>
+                  </div>
+                  <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">Synced from Notion</div>
+                  <div className="mt-3 text-[10px] text-zinc-600 font-mono">Research library + weekly tasks</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline */}
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  ◆
+                </div>
+                <h2 className="font-display text-xl">Project Timeline</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <TimelineView milestones={milestones} />
+            </div>
+
+            {/* Daily Briefs */}
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-secondary/20 border border-secondary/20 flex items-center justify-center text-sm">
+                  📰
+                </div>
+                <h2 className="font-display text-xl">Daily Briefs</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <DailyBriefs />
+            </div>
+
+            {/* Content Ideas */}
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  💡
+                </div>
+                <h2 className="font-display text-xl">Content Pipeline</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <ContentIdeas ideas={contentIdeas} />
+            </div>
+          </div>
+        )
+
+      case 'schedule':
+        return (
+          <div className="space-y-6">
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  📅
+                </div>
+                <h2 className="font-display text-xl">Calendar</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <CalendarView />
+            </div>
+
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  🎙️
+                </div>
+                <h2 className="font-display text-xl">Meeting Notes</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <MeetingNotes />
+            </div>
+          </div>
+        )
+
+      case 'search':
+        return (
+          <div className="space-y-6">
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  📄
+                </div>
+                <h2 className="font-display text-xl">Research Library</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <PapersList papers={papers} />
+            </div>
+          </div>
+        )
+
+      case 'thesis':
+        return (
+          <div className="space-y-6">
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  ✍️
+                </div>
+                <h2 className="font-display text-xl">Writing Progress</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <WritingProgress sections={sections} />
+            </div>
+
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  📋
+                </div>
+                <h2 className="font-display text-xl">Advisor Deliverables</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <AdvisorDeliverables deliverables={deliverables} />
+            </div>
+          </div>
+        )
+
+      default:
+        return null
+    }
   }
 
-  const phase = phaseInfo[currentPhase]
-
   return (
-    <div className="min-h-screen flex">
-      {/* Mobile overlay */}
+    <div className="min-h-screen">
+      {/* Mobile Header */}
+      <div className="mobile-header">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="p-2 rounded-lg hover:bg-zinc-800/50 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div className="flex items-center gap-3">
+          <span className="text-xl">🐙</span>
+          <span className="font-display text-lg">Mission Control</span>
+        </div>
+        <div className="w-9" /> {/* Spacer */}
+      </div>
+
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+        {/* Logo */}
+        <div className="sidebar-logo">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/20 flex items-center justify-center text-lg">
+              🐙
+            </div>
+            <div>
+              <h1 className="font-display text-lg tracking-tight text-white">Mission Control</h1>
+              <p className="text-xs text-zinc-400 font-mono tracking-wide mt-0.5">
+                K-12 Risk Assessment
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          <div className="space-y-1">
+            {navigationItems.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => {
+                  setActiveTab(item.key as Tab)
+                  setSidebarOpen(false)
+                }}
+                className={`nav-item ${activeTab === item.key ? 'active' : ''}`}
+              >
+                <span className="text-sm">{item.icon}</span>
+                <div className="flex-1 text-left">
+                  <div>{item.label}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">{item.description}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="nav-divider" />
+
+          <div className="space-y-1">
+            {thesisItems.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => {
+                  setActiveTab(item.key as Tab)
+                  setSidebarOpen(false)
+                }}
+                className={`nav-item ${activeTab === item.key ? 'active' : ''}`}
+              >
+                <span className="text-sm">{item.icon}</span>
+                <div className="flex-1 text-left">
+                  <div>{item.label}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">{item.description}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        {/* Footer */}
+        <div className="sidebar-footer">
+          <div className="space-y-3">
+            <div className="text-xs text-zinc-500">
+              <div>James Heldridge · UNL</div>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="status-indicator"></div>
+                <span>Live</span>
+              </div>
+            </div>
+            <ThemeToggle />
+          </div>
+        </div>
+      </aside>
+
+      {/* Sidebar Overlay (Mobile) */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed top-0 left-0 bottom-0 w-60 z-50
-        bg-[var(--surface)] border-r border-[var(--border)]
-        flex flex-col
-        transition-transform duration-200 ease-out
-        lg:translate-x-0 lg:static lg:z-auto
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        {/* Logo */}
-        <div className="p-3 border-b border-[var(--border)]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center text-lg">
-              🐙
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Top Bar */}
+        <header className="sticky top-0 z-30 bg-surface/90 backdrop-blur-md border-b border-zinc-800/50">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-zinc-400">
+                  {format(now, 'EEEE, MMMM d, yyyy')}
+                </div>
+                <div className="hidden sm:block">
+                  <CountdownTimer targetDate={defenseDate} label="Defense" variant="default" />
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setGlobalSearchOpen(true)}
+                className="search-trigger"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span>Search...</span>
+                <span className="kbd">⌘K</span>
+              </button>
             </div>
-            <div>
-              <h1 className="font-display text-sm tracking-tight">Mission Control</h1>
-              <p className="text-[9px] text-[var(--text-dim)] font-mono tracking-wide">OpenClaw HQ</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
-          <div className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-dim)] font-mono px-3 py-2">Dashboard</div>
-          {navItems.filter(n => n.section === 'main').map(item => (
-            <button
-              key={item.key}
-              onClick={() => { setActiveTab(item.key); setSidebarOpen(false) }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                activeTab === item.key
-                  ? 'bg-[var(--accent-glow)] text-[var(--accent-bright)] border border-[var(--glass-border-hover)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] border border-transparent'
-              }`}
-            >
-              <span className="text-[10px] w-4 text-center">{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-
-          <div className="h-px bg-[var(--border)] my-3 mx-2" />
-
-          <div className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-dim)] font-mono px-3 py-2">Research</div>
-          {navItems.filter(n => n.section === 'thesis').map(item => (
-            <button
-              key={item.key}
-              onClick={() => { setActiveTab(item.key); setSidebarOpen(false) }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                activeTab === item.key
-                  ? 'bg-[var(--accent-glow)] text-[var(--accent-bright)] border border-[var(--glass-border-hover)]'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] border border-transparent'
-              }`}
-            >
-              <span className="text-[10px] w-4 text-center">{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Sidebar footer */}
-        <div className="px-3 py-2 border-t border-[var(--border)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[9px] text-[var(--text-dim)] font-mono">James · UNL</span>
-          </div>
-          <ThemeToggle />
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <div className="flex-1 min-w-0">
-        {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-30 bg-[var(--background)]/90 backdrop-blur-md border-b border-[var(--border)] px-4 py-3">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-lg hover:bg-[var(--card-hover)] transition-colors"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-              </svg>
-            </button>
-            <span className="font-display text-sm">Mission Control</span>
-            <ThemeToggle />
           </div>
         </header>
 
-        <main className={activeTab === 'crew' ? 'p-2' : 'p-4 lg:p-5 space-y-4'}>
-          {/* Stats row */}
-          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-2 animate-in ${activeTab === 'crew' ? 'hidden' : ''}`}>
-            <CountdownTimer targetDate={defenseDate} label="Defense Day" variant="hero" />
-
-            <div className="instrument p-4">
-              <div className="relative z-10">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-mono text-3xl font-bold text-[var(--accent)]">{completedMilestones}</span>
-                  <span className="font-mono text-lg text-zinc-600">/{totalMilestones}</span>
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">milestones</div>
-                <div className="mt-3">
-                  <div className="h-1 bg-zinc-800/80 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full progress-bar" style={{ width: `${milestonePercent}%` }} />
-                  </div>
-                  <div className="text-[10px] text-zinc-600 font-mono mt-1">{milestonePercent}%</div>
+        {/* Content Area */}
+        <div className="p-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+              {/* Main Content */}
+              <div className="xl:col-span-3">
+                <div key={activeTab} className="animate-in fade-slide">
+                  {renderContent()}
                 </div>
               </div>
-            </div>
 
-            <div className="instrument p-3 overflow-y-auto max-h-[160px]">
-              <NotionTasks />
-            </div>
-          </div>
-
-          {/* Content area — full width */}
-          <div key={activeTab} className="animate-in" style={{ animationDelay: '100ms' }}>
-            {activeTab === 'activity' && <ActivityFeed />}
-            {activeTab === 'schedule' && <CalendarView />}
-            {activeTab === 'search' && <GlobalSearch />}
-            {activeTab === 'crew' && <CrewViz />}
-
-            {activeTab === 'timeline' && (
-              <div className="space-y-6">
-                <div className={`rounded-2xl bg-gradient-to-r ${phase.color} border p-5`}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg">🔧</div>
-                    <div className="flex-1">
-                      <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">Current Phase</div>
-                      <div className="font-display text-lg mt-0.5">{phase.label}</div>
-                      <div className="text-[12px] text-zinc-400 mt-0.5">{phase.description}</div>
-                    </div>
-                    <div className="text-right hidden sm:block">
-                      <div className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Progress</div>
-                      <div className="text-sm text-zinc-300 mt-0.5 font-body">Week {(() => { const weekNum = Math.ceil((now.getTime() - new Date('2026-02-09').getTime()) / (7 * 24 * 60 * 60 * 1000)); return Math.max(1, Math.min(weekNum, 18)); })()} of 18</div>
-                    </div>
+              {/* Right Sidebar (Tasks - Activity tab only) */}
+              {activeTab === 'activity' && (
+                <div className="xl:col-span-1 order-first xl:order-last">
+                  <div className="right-sidebar">
+                    <NotionTasks />
                   </div>
                 </div>
-                <TimelineView milestones={milestones} />
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </main>
+        </div>
+      </main>
 
-        {/* no footer — maximize viewport space */}
-      </div>
+      {/* Global Search Modal */}
+      {globalSearchOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20">
+          <div className="bg-surface border border-zinc-700 rounded-xl p-4 w-full max-w-2xl mx-4">
+            <div className="flex items-center gap-3 p-2">
+              <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search papers, notes, tasks..."
+                className="flex-1 bg-transparent border-none outline-none text-white placeholder-zinc-400"
+                autoFocus
+              />
+              <button
+                onClick={() => setGlobalSearchOpen(false)}
+                className="text-zinc-400 hover:text-white"
+              >
+                <span className="kbd">ESC</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { RotateCw, Check } from 'lucide-react'
+import { RotateCw, Check, Circle, CheckCircle2 } from 'lucide-react'
 import { NotionTask } from '@/lib/types'
 
 export default function NotionTasks() {
@@ -33,104 +33,214 @@ export default function NotionTasks() {
     return () => clearInterval(interval)
   }, [fetchTasks])
 
-  const mainTasks = tasks.filter((task) => task.section === 'main')
-  const backlogTasks = tasks.filter((task) => task.section === 'backlog')
-  const completedTasks = tasks.filter((task) => task.isChecked).length
-  const openTasks = tasks.length - completedTasks
+  const mainTasks = tasks.filter(t => t.section === 'main')
+  const backlogTasks = tasks.filter(t => t.section === 'backlog')
+  const completedCount = tasks.filter(t => t.isChecked).length
+  const totalCount = tasks.length
+  const completionPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
 
   if (loading && tasks.length === 0) {
     return (
-      <div className="card-glass p-6 h-full min-h-[300px] flex items-center justify-center">
-        <div className="animate-pulse text-zinc-500 text-sm font-mono">Loading tasks...</div>
+      <div className="card-glass p-6 h-full min-h-[300px] flex items-center justify-center notion-loading-shimmer relative overflow-hidden">
+        <div className="text-center space-y-3 relative z-10">
+          <div className="text-4xl text-zinc-500/80">📝</div>
+          <div className="text-zinc-500 text-sm font-mono">Syncing tasks from Notion...</div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="card-glass p-6 h-full flex flex-col relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-emerald-500/[0.03] pointer-events-none" />
-
-      <div className="relative z-10 flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center text-sm">
-            📝
-          </div>
-          <div>
-            <h2 className="font-display text-lg leading-none">Weekly Tasks</h2>
-            <div className="flex items-center gap-2 mt-1.5 text-[10px] font-mono uppercase tracking-wider">
-              <span className="px-2 py-0.5 rounded-full bg-zinc-800/60 border border-zinc-700/60 text-zinc-400">{tasks.length} total</span>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400">{openTasks} open</span>
-              <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300">{completedTasks} done</span>
+    <div className="card-glass p-6 h-full flex flex-col relative overflow-hidden backdrop-blur-xl">
+      {/* Enhanced header with progress */}
+      <div className="mb-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/10 border border-indigo-500/20 flex items-center justify-center text-sm">
+              📝
             </div>
+            <div>
+              <h2 className="font-display text-lg leading-none">Weekly Tasks</h2>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500/60 animate-pulse" />
+                  <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                    Notion Sync
+                  </span>
+                </div>
+                <span className="text-zinc-700">·</span>
+                <span className="text-[10px] text-zinc-600 font-mono">
+                  {completedCount}/{totalCount} complete
+                </span>
+              </div>
+            </div>
+          </div>
+          <button 
+            onClick={fetchTasks}
+            disabled={isRefreshing}
+            className={`p-2 rounded-lg bg-zinc-800/30 hover:bg-zinc-700/50 text-zinc-500 hover:text-zinc-300 border border-zinc-700/30 hover:border-zinc-600/50 transition-all ${isRefreshing ? 'animate-spin' : 'hover:scale-105'}`}
+            title="Refresh tasks"
+          >
+            <RotateCw size={14} />
+          </button>
+        </div>
+        
+        {/* Progress bar */}
+        {totalCount > 0 && (
+          <div className="space-y-2">
+            <div className="h-1.5 bg-zinc-800/50 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${completionPercent}%` }}
+              />
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[9px] text-zinc-600 font-mono">Progress</span>
+              <span className="text-[9px] text-emerald-400 font-mono font-semibold">
+                {completionPercent.toFixed(0)}%
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Enhanced content */}
+      <div className="flex-1 space-y-6 overflow-y-auto pr-2 max-h-[400px] scrollbar-thin">
+        {/* Main Tasks */}
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-400 font-bold">Main Tasks</div>
+            <div className="flex-1 h-px bg-gradient-to-r from-zinc-700/50 to-transparent" />
+            <span className="text-[9px] text-zinc-600 font-mono">
+              {mainTasks.filter(t => !t.isChecked).length} active
+            </span>
+          </div>
+          <div className="space-y-2">
+            {mainTasks.length > 0 ? (
+              mainTasks.map((task, idx) => (
+                <TaskItem key={task.id} task={task} index={idx} />
+              ))
+            ) : (
+              <div className="text-center py-6">
+                <div className="text-3xl mb-2">🎉</div>
+                <div className="text-sm text-zinc-500">No main tasks</div>
+                <div className="text-xs text-zinc-600 mt-1">You're all caught up!</div>
+              </div>
+            )}
           </div>
         </div>
 
-        <button
-          onClick={fetchTasks}
-          disabled={isRefreshing}
-          className="p-2 rounded-lg bg-zinc-800/35 border border-zinc-700/45 hover:bg-zinc-800/55 text-zinc-500 hover:text-zinc-300 transition-colors"
-          title="Refresh"
-        >
-          <RotateCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
-        </button>
-      </div>
-
-      <div className="relative z-10 flex-1 space-y-5 overflow-y-auto pr-1 max-h-[420px]">
-        <TaskSection title="Main Tasks" tasks={mainTasks} emptyLabel="No main tasks" />
-        {backlogTasks.length > 0 && <TaskSection title="Backlog" tasks={backlogTasks} emptyLabel="No backlog items" />}
-      </div>
-
-      <div className="relative z-10 mt-4 pt-4 border-t border-zinc-800/40 text-[10px] text-zinc-600 font-mono flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
-          Synced from Notion
-        </span>
-        <span>Updated: {lastSynced ? lastSynced.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span>
-      </div>
-    </div>
-  )
-}
-
-function TaskSection({ title, tasks, emptyLabel }: { title: string; tasks: NotionTask[]; emptyLabel: string }) {
-  return (
-    <div>
-      <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-bold mb-2.5">{title}</div>
-      <div className="space-y-2">
-        {tasks.length > 0 ? (
-          tasks.map((task) => <TaskItem key={task.id} task={task} />)
-        ) : (
-          <div className="text-sm text-zinc-600 italic">{emptyLabel}</div>
+        {/* Backlog */}
+        {backlogTasks.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3 mt-6">
+              <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 font-bold">Backlog</div>
+              <div className="flex-1 h-px bg-gradient-to-r from-zinc-700/30 to-transparent" />
+              <span className="text-[9px] text-zinc-600 font-mono">
+                {backlogTasks.length} items
+              </span>
+            </div>
+            <div className="space-y-2">
+              {backlogTasks.map((task, idx) => (
+                <TaskItem key={task.id} task={task} index={idx} isBacklog />
+              ))}
+            </div>
+          </div>
         )}
       </div>
+      
+      {/* Enhanced footer */}
+      <div className="mt-4 pt-4 border-t border-zinc-800/30 flex items-center justify-between">
+        <div className="text-[10px] text-zinc-600 font-mono">
+          {lastSynced
+            ? `Last sync: ${lastSynced.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+            : 'Synced from Notion'}
+        </div>
+        <div className="text-[10px] text-zinc-700 font-mono">
+          Notion · Auto-refresh
+        </div>
+      </div>
     </div>
   )
 }
 
-function TaskItem({ task }: { task: NotionTask }) {
+function TaskItem({ task, index, isBacklog = false }: { task: NotionTask, index: number, isBacklog?: boolean }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const [justCompleted, setJustCompleted] = useState(false)
+
+  const handleTaskClick = () => {
+    if (!task.isChecked) {
+      setJustCompleted(true)
+      // In a real app, this would update the task status
+      setTimeout(() => setJustCompleted(false), 1000)
+    }
+  }
+
   return (
-    <div
-      className={`group flex items-start gap-3 p-2.5 rounded-lg border transition-all duration-200 ${
-        task.isChecked
-          ? 'border-emerald-500/20 bg-emerald-500/[0.04] opacity-70'
-          : 'border-zinc-700/30 bg-zinc-900/25 hover:bg-zinc-800/35 hover:border-zinc-600/50'
-      }`}
+    <div 
+      className={`group flex items-start gap-3 p-3 rounded-xl transition-all duration-300 cursor-pointer animate-in ${
+        task.isChecked 
+          ? 'opacity-60 bg-green-500/5' 
+          : isBacklog
+          ? 'hover:bg-zinc-800/20 border border-transparent hover:border-zinc-700/30'
+          : 'hover:bg-zinc-800/30 hover:translate-x-1 border border-transparent hover:border-zinc-700/30'
+      } ${justCompleted ? 'animate-pulse bg-green-500/20' : ''}`}
+      style={{ animationDelay: `${index * 50}ms` }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleTaskClick}
     >
-      <div
-        className={`mt-0.5 w-4 h-4 rounded-[5px] border flex items-center justify-center transition-all duration-200 ${
-          task.isChecked
-            ? 'border-emerald-400/70 bg-emerald-500/20 text-emerald-300 scale-100'
-            : 'border-zinc-600 text-zinc-600 group-hover:border-indigo-400/60 group-hover:text-indigo-300 scale-95'
-        }`}
-      >
-        <Check size={11} className={`transition-all duration-200 ${task.isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`} />
+      {/* Enhanced checkbox with animations */}
+      <div className={`mt-0.5 transition-all duration-300 ${
+        task.isChecked ? 'text-green-400' : isHovered ? 'text-zinc-300 scale-110' : 'text-zinc-500'
+      }`}>
+        {task.isChecked ? (
+          <div className="relative">
+            <CheckCircle2 size={16} className="animate-in" />
+            {justCompleted && (
+              <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-75" />
+            )}
+          </div>
+        ) : (
+          <div className="relative group/checkbox">
+            <Circle 
+              size={16} 
+              className={`transition-all ${isHovered ? 'stroke-2' : 'stroke-1'}`} 
+            />
+            {isHovered && (
+              <Check 
+                size={12} 
+                className="absolute inset-0 m-auto text-zinc-400 animate-in opacity-40" 
+              />
+            )}
+          </div>
+        )}
       </div>
-      <span
-        className={`text-sm leading-relaxed transition-colors ${
-          task.isChecked ? 'line-through text-zinc-500' : 'text-zinc-300 group-hover:text-zinc-100'
-        }`}
-      >
-        {task.text}
-      </span>
+      
+      {/* Enhanced task text */}
+      <div className="flex-1 min-w-0">
+        <span className={`text-sm leading-relaxed transition-all duration-300 ${
+          task.isChecked 
+            ? 'line-through text-zinc-500' 
+            : isHovered 
+            ? 'text-zinc-100' 
+            : 'text-zinc-300'
+        }`}>
+          {task.text}
+        </span>
+        
+        {/* Priority indicator (if needed) */}
+        {task.text.toLowerCase().includes('urgent') && !task.isChecked && (
+          <span className="inline-block ml-2 w-2 h-2 bg-red-400 rounded-full animate-pulse" />
+        )}
+      </div>
+      
+      {/* Task status indicator */}
+      {!task.isChecked && isHovered && !isBacklog && (
+        <div className="text-[9px] px-2 py-1 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/20 animate-in opacity-60">
+          Click to complete
+        </div>
+      )}
     </div>
   )
 }

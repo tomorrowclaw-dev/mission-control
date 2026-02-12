@@ -47,14 +47,18 @@ export default function DailyBriefs() {
 
   if (briefs.length === 0) {
     return (
-      <div className="card-glass p-12 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 flex items-center justify-center text-3xl mx-auto">
+      <div className="card-glass p-12 text-center border border-dashed border-zinc-700/70 bg-zinc-900/20">
+        <div className="w-16 h-16 rounded-2xl bg-zinc-800/30 border border-dashed border-zinc-700/60 flex items-center justify-center text-3xl text-zinc-500 mx-auto">
           📰
         </div>
-        <h3 className="font-display text-xl mt-5">Daily Briefs</h3>
+        <h3 className="font-display text-xl mt-5 text-zinc-300">No Daily Briefs Yet</h3>
         <p className="text-sm text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed">
-          No briefs archived yet. Clyde sends a daily morning brief that gets saved here.
+          Brief archives will show up here after the next sync from Notion.
         </p>
+        <div className="mt-6 inline-flex items-center gap-2 text-[11px] text-zinc-500 font-mono bg-zinc-800/20 rounded-full px-4 py-2 border border-zinc-700/50">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/60" />
+          Create today&apos;s brief in Notion to get started
+        </div>
       </div>
     )
   }
