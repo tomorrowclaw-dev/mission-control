@@ -7,37 +7,19 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0;background:#0e0d14;overflow:hidden}
-canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;width:100%;height:100%}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <script>
 const C=document.getElementById('c'), X=C.getContext('2d');
+const SCALE=3;
 const TILE=16;
 const LW=30*TILE, LH=20*TILE; // 480x320 logical
-let SCALE=3;
-
-function resizeCanvas(){
-  const ww=window.innerWidth, wh=window.innerHeight;
-  // Pick the largest integer scale that fits, minimum 1
-  SCALE=Math.max(1, Math.floor(Math.min(ww/LW, wh/LH)));
-  // If integer scale leaves >20% blank, use fractional to fill
-  const intW=LW*SCALE, intH=LH*SCALE;
-  if(intW < ww*0.8 || intH < wh*0.8){
-    SCALE=Math.min(ww/LW, wh/LH);
-  }
-  C.width=Math.round(LW*SCALE);
-  C.height=Math.round(LH*SCALE);
-  // Center the canvas
-  C.style.position='absolute';
-  C.style.left=((ww-C.width)/2)+'px';
-  C.style.top=((wh-C.height)/2)+'px';
-  X.imageSmoothingEnabled=false;
-  X.setTransform(SCALE,0,0,SCALE,0,0);
-}
-resizeCanvas();
-window.addEventListener('resize', ()=>{ resizeCanvas(); });
+C.width=LW*SCALE; C.height=LH*SCALE;
+X.imageSmoothingEnabled=false;
+X.setTransform(SCALE,0,0,SCALE,0,0);
 
 // ── PALETTE ──
 const PAL={
