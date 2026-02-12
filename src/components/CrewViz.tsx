@@ -15,7 +15,7 @@ export default function CrewViz() {
         <iframe
           src="/crew-viz.html"
           className="w-full border-0"
-          style={{ height: 'calc(100vh - 200px)', minHeight: '500px' }}
+          style={{ height: 'calc(100vh - 320px)' }}
           title="OpenClaw Crew HQ"
           allow="autoplay"
         />
