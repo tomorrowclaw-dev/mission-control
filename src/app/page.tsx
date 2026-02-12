@@ -104,7 +104,7 @@ export default function Dashboard() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo */}
-        <div className="p-5 border-b border-[var(--border)]">
+        <div className="p-3 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center text-lg">
               🐙
@@ -117,7 +117,7 @@ export default function Dashboard() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
           <div className="text-[9px] uppercase tracking-[0.2em] text-[var(--text-dim)] font-mono px-3 py-2">Dashboard</div>
           {navItems.filter(n => n.section === 'main').map(item => (
             <button
@@ -154,16 +154,10 @@ export default function Dashboard() {
         </nav>
 
         {/* Sidebar footer */}
-        <div className="p-4 border-t border-[var(--border)] space-y-3">
+        <div className="px-3 py-2 border-t border-[var(--border)] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[8px] font-mono text-emerald-400 uppercase tracking-wider">Live</span>
-            </div>
-          </div>
-          <div>
-            <div className="text-[11px] text-[var(--text-secondary)] font-body">James Heldridge</div>
-            <div className="text-[9px] text-[var(--text-dim)] font-mono">UNL · {format(now, 'MMM d, yyyy')}</div>
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[9px] text-[var(--text-dim)] font-mono">James · UNL</span>
           </div>
           <ThemeToggle />
         </div>
@@ -187,9 +181,9 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="p-6 lg:p-8 space-y-6">
+        <main className="p-4 lg:p-5 space-y-4">
           {/* Stats row — hidden on Crew HQ tab */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 animate-in">
             <CountdownTimer targetDate={defenseDate} label="Defense Day" variant="hero" />
 
             <div className="instrument p-4">
