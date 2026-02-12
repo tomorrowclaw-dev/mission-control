@@ -153,11 +153,6 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        {/* Tasks widget */}
-        <div className="px-3 pb-3 overflow-y-auto max-h-[300px]">
-          <NotionTasks />
-        </div>
-
         {/* Sidebar footer */}
         <div className="p-4 border-t border-[var(--border)] space-y-3">
           <div className="flex items-center gap-2">
@@ -213,22 +208,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="instrument p-4">
-              <div className="relative z-10">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-mono text-3xl font-bold text-[var(--accent)]">{(totalWords / 1000).toFixed(1)}</span>
-                  <span className="font-mono text-sm text-zinc-600">k words</span>
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">
-                  of {(targetWords / 1000).toFixed(0)}k target
-                </div>
-                <div className="mt-3">
-                  <div className="h-1 bg-zinc-800/80 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full progress-bar" style={{ width: `${wordPercent}%` }} />
-                  </div>
-                  <div className="text-[10px] text-zinc-600 font-mono mt-1">{wordPercent.toFixed(1)}%</div>
-                </div>
-              </div>
+            <div className="instrument p-4 overflow-y-auto max-h-[180px]">
+              <NotionTasks />
             </div>
           </div>
 
