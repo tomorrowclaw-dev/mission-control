@@ -3,10 +3,12 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  )
+}
 
 interface SearchResult {
   id: string
@@ -45,7 +47,7 @@ export async function GET(request: Request) {
 
   // 1. Search papers
   try {
-    const { data: papers } = await supabase
+    const { data: papers } = await getSupabase()
       .from('papers')
       .select('id, title, authors, year, summary, tags, review_status, url')
       .or(`title.ilike.${searchTerm},summary.ilike.${searchTerm},authors.ilike.${searchTerm},relevance_notes.ilike.${searchTerm},key_arguments.ilike.${searchTerm}`)
@@ -71,7 +73,7 @@ export async function GET(request: Request) {
 
   // 2. Search milestones
   try {
-    const { data: milestones } = await supabase
+    const { data: milestones } = await getSupabase()
       .from('milestones')
       .select('id, title, description, phase, due_date, status, priority, notes')
       .or(`title.ilike.${searchTerm},description.ilike.${searchTerm},notes.ilike.${searchTerm}`)
@@ -97,7 +99,7 @@ export async function GET(request: Request) {
 
   // 3. Search writing sections
   try {
-    const { data: sections } = await supabase
+    const { data: sections } = await getSupabase()
       .from('writing_sections')
       .select('id, title, chapter_order, status, current_word_count, target_word_count, notes, due_date')
       .or(`title.ilike.${searchTerm},notes.ilike.${searchTerm}`)
@@ -124,7 +126,7 @@ export async function GET(request: Request) {
 
   // 4. Search activity log
   try {
-    const { data: activities } = await supabase
+    const { data: activities } = await getSupabase()
       .from('activity_log')
       .select('id, created_at, crew, emoji, action, detail, station')
       .or(`action.ilike.${searchTerm},detail.ilike.${searchTerm},crew.ilike.${searchTerm}`)

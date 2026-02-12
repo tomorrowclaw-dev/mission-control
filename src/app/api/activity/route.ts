@@ -3,21 +3,22 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  )
+}
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('activity_log')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(100)
 
     if (error) {
-      // Table might not exist yet
       if (error.code === 'PGRST205') {
         return NextResponse.json([])
       }
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'crew and action are required' }, { status: 400 })
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('activity_log')
       .insert({ crew, emoji, action, detail, station, metadata })
       .select()
