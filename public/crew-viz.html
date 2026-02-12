@@ -4,1516 +4,411 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OpenClaw HQ</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:#0a0a1a;overflow:hidden;font-family:'Share Tech Mono',monospace;color:#c0c8e0}
-
-#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-
-#header{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 24px;background:rgba(10,10,30,.96);border-bottom:1px solid rgba(139,92,246,.2);z-index:10}
-#header h1{font-family:'Orbitron',sans-serif;font-size:20px;letter-spacing:4px;background:linear-gradient(90deg,#a78bfa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-#clock{font-family:'Orbitron',sans-serif;font-size:14px;color:#22d3ee}
-#status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#34d399;margin-right:8px;animation:pulse-dot 2s infinite}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
-
-#middle{flex:1 1 auto;display:flex;overflow:hidden;min-height:0}
-
-#canvas-area{flex:1 1 auto;position:relative;min-width:0}
-#canvas-area canvas{display:block;width:100%;height:100%}
-
-#sidebar{flex:0 0 260px;display:flex;flex-direction:column;background:rgba(10,10,30,.96);border-left:1px solid rgba(139,92,246,.2);overflow:hidden}
-#activity-header{padding:10px 14px 8px;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;color:#a78bfa;border-bottom:1px solid rgba(139,92,246,.15);display:flex;align-items:center;gap:8px;flex:0 0 auto}
-#activity-pulse{width:6px;height:6px;border-radius:50%;background:#34d399;animation:pulse-dot 2s infinite}
-#activity-list{flex:1 1 auto;overflow-y:auto;padding:6px 10px;scrollbar-width:thin;scrollbar-color:rgba(139,92,246,.2) transparent}
-#activity-list::-webkit-scrollbar{width:4px}
-#activity-list::-webkit-scrollbar-thumb{background:rgba(139,92,246,.25);border-radius:2px}
-.activity-entry{padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px;line-height:1.4;animation:fadeInEntry .4s ease}
-.activity-entry .ae-time{color:#64748b;font-size:8px}
-.activity-entry .ae-emoji{margin-right:4px}
-.activity-entry .ae-msg{color:#c0c8e0}
-@keyframes fadeInEntry{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-#next-events-sidebar{flex:0 0 auto;padding:10px 14px;border-top:1px solid rgba(139,92,246,.15);font-size:10px}
-#next-events-sidebar .ne-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:#a78bfa;margin-bottom:6px}
-#next-events-sidebar .ne-item{color:#64748b;padding:2px 0}
-
-#crew-bar{flex:0 0 auto;display:flex;gap:0;background:rgba(10,10,30,.94);border-top:1px solid rgba(139,92,246,.25);z-index:10}
-.crew-card{flex:1;display:flex;align-items:center;gap:8px;padding:8px 12px;border-right:1px solid rgba(139,92,246,.12);transition:background .2s}
-.crew-card:hover{background:rgba(139,92,246,.1)}
-.crew-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.crew-name{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px;color:#a78bfa}
-.crew-task{font-size:9px;color:#64748b;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.crew-status{font-size:8px;letter-spacing:1px;margin-top:1px}
-.crew-status.active{color:#34d399}
-.crew-status.idle{color:#64748b}
-.crew-status.scheduled{color:#facc15}
-
-#sound-toggle{position:fixed;top:12px;right:290px;z-index:20;background:rgba(20,20,40,.85);border:1px solid rgba(139,92,246,.3);border-radius:6px;padding:4px 10px;color:#a78bfa;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px)}
-#sound-toggle:hover{background:rgba(139,92,246,.15);border-color:rgba(139,92,246,.5)}
+html,body{height:100%;background:#0a0a0f;overflow:hidden}
+canvas{display:block;width:100vw;height:100vh;image-rendering:pixelated;image-rendering:crisp-edges}
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="header">
-    <h1>⚙ OPENCLAW HQ</h1>
-    <div style="display:flex;align-items:center;gap:16px">
-      <div id="conn-indicator" style="display:flex;align-items:center;gap:5px;font-size:9px;letter-spacing:1px;color:#64748b">
-        <span id="conn-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#64748b"></span>
-        <span id="conn-label">SIMULATED</span>
-      </div>
-      <div><span id="status-dot"></span><span id="clock"></span></div>
-    </div>
-  </div>
-  <div id="middle">
-    <div id="canvas-area"><canvas id="c"></canvas></div>
-    <div id="sidebar">
-      <div id="activity-header"><span id="activity-pulse"></span> Activity</div>
-      <div id="activity-list"></div>
-      <div id="next-events-sidebar">
-        <div class="ne-title">▸ NEXT EVENTS</div>
-        <div id="next-events-content" style="color:#64748b;font-size:10px">No upcoming events</div>
-      </div>
-    </div>
-  </div>
-  <div id="crew-bar"></div>
-</div>
-<button id="sound-toggle" onclick="toggleSound()">🔇 Sound</button>
+<canvas id="c"></canvas>
 <script>
-let liveMode = false;
-const C=document.getElementById('c'),X=C.getContext('2d');
-const canvasArea=document.getElementById('canvas-area');
-let W,H,dpr;
-function resize(){
-  dpr=window.devicePixelRatio||1;
-  W=canvasArea.clientWidth;
-  H=canvasArea.clientHeight;
-  C.width=W*dpr;C.height=H*dpr;
-  C.style.width=W+'px';C.style.height=H+'px';
-  X.setTransform(dpr,0,0,dpr,0,0);
-}
-resize();window.onresize=resize;
-new ResizeObserver(resize).observe(canvasArea);
+const C=document.getElementById('c'), X=C.getContext('2d');
+const IW=384, IH=256;
+C.width=IW; C.height=IH;
+X.imageSmoothingEnabled=false;
 
-// === DAY/NIGHT CYCLE ===
-function getDayNight(){
-  const h=new Date().getHours();
-  if(h>=22||h<6) return {ambient:.55, glowMult:1.8, label:'night'};
-  if(h>=6&&h<8) return {ambient:.75, glowMult:1.3, label:'dawn'};
-  if(h>=18&&h<22) return {ambient:.7, glowMult:1.4, label:'dusk'};
-  return {ambient:.95, glowMult:1.0, label:'day'};
-}
+const TILE=16;
+const COLS=Math.ceil(IW/TILE), ROWS=Math.ceil(IH/TILE);
 
-// === SOUND ENGINE ===
-let soundEnabled=false, audioCtx=null;
-function toggleSound(){
-  soundEnabled=!soundEnabled;
-  document.getElementById('sound-toggle').textContent=soundEnabled?'🔊 Sound':'🔇 Sound';
-  if(soundEnabled&&!audioCtx){
-    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  }
-}
-function playKeyClick(){
-  if(!soundEnabled||!audioCtx)return;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.type='square';o.frequency.value=800+Math.random()*400;
-  g.gain.value=0.015;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.04);
-  o.connect(g);g.connect(audioCtx.destination);
-  o.start();o.stop(audioCtx.currentTime+0.04);
-}
-function playHeartbeep(){
-  if(!soundEnabled||!audioCtx)return;
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.type='sine';o.frequency.value=880;
-  g.gain.value=0.02;g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.12);
-  o.connect(g);g.connect(audioCtx.destination);
-  o.start();o.stop(audioCtx.currentTime+0.12);
-}
-let lastKeyClick=0,lastHeartbeep=0;
+const COL_FLOOR_A='#1a1a22';
+const COL_FLOOR_B='#16161e';
+const COL_DESK='#2a2530';
+const COL_MONITOR_OFF='#111118';
+const COL_TABLE='#3a2a1a';
+const COL_CHAIR='#2a2225';
+const COL_PLANT_POT='#4a3020';
+const COL_PLANT='#1a4a2a';
 
-const WALL=24, QUARTERS_H=120, ROOM_TOP=()=>QUARTERS_H+8, FLOOR_W=()=>W-WALL*2, FLOOR_H=()=>H-WALL*2-QUARTERS_H-8;
+const CREW=[
+  {id:'clyde',name:'Clyde',emoji:'🐙',color:'#2dd4a0',darkColor:'#1a8a66',feature:'tentacles'},
+  {id:'sonnet',name:'Sonnet',emoji:'🎵',color:'#f08050',darkColor:'#a05030',feature:'note'},
+  {id:'flash',name:'GLM Flash',emoji:'⚡',color:'#40b0e0',darkColor:'#2070a0',feature:'bolt'},
+  {id:'qwen',name:'Qwen Coder',emoji:'🔧',color:'#9060d0',darkColor:'#5a3890',feature:'wrench'},
+];
 
-// === SYSTEM STATE ===
-const SYSTEM_STATE = {
-  clyde:  { status: 'active',    station: 'command',  task: 'Orchestrating crew' },
-  sonnet: { status: 'idle',      station: 'search',   task: 'Resting' },
-  flash:  { status: 'scheduled', station: 'comms',    task: 'Waiting for heartbeat' },
-  qwen:   { status: 'idle',      station: 'code',     task: 'Resting' },
+const DESKS=[
+  {cx:5, cy:2, crewIdx:0},
+  {cx:13,cy:2, crewIdx:1},
+  {cx:5, cy:6, crewIdx:2},
+  {cx:13,cy:6, crewIdx:3},
+];
+
+const TABLE_CX=9, TABLE_CY=12;
+const TABLE_SEATS=[
+  {dx:-2,dy:-1},{dx:2,dy:-1},{dx:-2,dy:1},{dx:2,dy:1}
+];
+
+const PLANTS=[{tx:1,ty:1},{tx:22,ty:1},{tx:1,ty:14},{tx:22,ty:14}];
+const COOLER={tx:21,ty:4};
+const WHITEBOARD={tx:8,ty:0,w:4,h:1};
+
+const SYSTEM_STATE={
+  clyde:{status:'active',station:'command',task:'Orchestrating crew'},
+  sonnet:{status:'idle',station:'search',task:'Resting'},
+  flash:{status:'scheduled',station:'comms',task:'Waiting for heartbeat'},
+  qwen:{status:'idle',station:'code',task:'Resting'},
 };
 
-const stations=[
-  {id:'command',label:'🧠 Command Center',color:'#a78bfa',glow:'rgba(167,139,250,.15)',x:.5,y:.38,w:.22,h:.18,monitors:4,home:'clyde'},
-  {id:'search',label:'🔍 Web Search',color:'#22d3ee',glow:'rgba(34,211,238,.12)',x:.18,y:.2,w:.14,h:.13,monitors:2,home:'sonnet'},
-  {id:'code',label:'💻 Code Lab',color:'#34d399',glow:'rgba(52,211,153,.12)',x:.78,y:.2,w:.15,h:.13,monitors:3,home:'qwen'},
-  {id:'comms',label:'📱 Comms',color:'#f472b6',glow:'rgba(244,114,182,.12)',x:.18,y:.58,w:.13,h:.12,monitors:2,home:'flash'},
-  {id:'brief',label:'📰 Daily Brief',color:'#fb923c',glow:'rgba(251,146,60,.12)',x:.78,y:.58,w:.14,h:.12,monitors:2,home:null},
-  {id:'notion',label:'📝 Notion',color:'#818cf8',glow:'rgba(129,140,248,.12)',x:.35,y:.64,w:.12,h:.11,monitors:2,home:null},
-  {id:'heartbeat',label:'💓 Heartbeat',color:'#f87171',glow:'rgba(248,113,113,.12)',x:.58,y:.64,w:.12,h:.11,monitors:1,home:null},
-];
+let liveMode=false;
+const crewIdMap={clyde:'clyde',sonnet:'sonnet',glmFlash:'flash',qwenCoder:'qwen'};
 
-const crewQuarters = { label: '🛏 Crew Quarters', color: '#d4a574', glow: 'rgba(212,165,116,.08)' };
-
-const beds = [
-  { id: 'clyde',  rx: .15, ry: .5, color: '#a78bfa', name: 'Clyde' },
-  { id: 'sonnet', rx: .38, ry: .5, color: '#ef4444', name: 'Sonnet' },
-  { id: 'flash',  rx: .62, ry: .5, color: '#facc15', name: 'Flash' },
-  { id: 'qwen',   rx: .85, ry: .5, color: '#22d3ee', name: 'Qwen' },
-];
-
-function sRect(s){return{x:WALL+s.x*FLOOR_W()-s.w*FLOOR_W()/2,y:ROOM_TOP()+s.y*FLOOR_H()-s.h*FLOOR_H()/2,w:s.w*FLOOR_W(),h:s.h*FLOOR_H()}}
-function qRect(){return{x:WALL,y:6,w:W-WALL*2,h:QUARTERS_H-6}}
-
-function bedPos(bedDef){
-  const q=qRect();
-  return { x: q.x + bedDef.rx * q.w, y: q.y + bedDef.ry * q.h };
-}
-
-// === FOOTPRINT TRAILS ===
-const footprints=[];
-function addFootprint(ch){
-  footprints.push({x:ch.px,y:ch.py,color:ch.color,birth:Date.now(),life:2500,size:ch.size*.12});
-}
-
-// === AMBIENT PARTICLES ===
-const particles=[];
-for(let i=0;i<40;i++){
-  particles.push({
-    x:Math.random()*2000, y:Math.random()*1200,
-    vx:(Math.random()-.5)*.15, vy:(Math.random()-.5)*.1-.02,
-    size:Math.random()*1.5+.5, alpha:Math.random()*.15+.05,
-    phase:Math.random()*Math.PI*2
-  });
-}
-
-// Characters
-const chars=[
-  {id:'clyde',name:'Clyde',model:'Opus',emoji:'🐙',color:'#a78bfa',size:48,speed:.6,task:'Orchestrating crew'},
-  {id:'sonnet',name:'Sonnet',model:'Sonnet',emoji:'🦞',color:'#ef4444',size:34,speed:.8,task:'Resting'},
-  {id:'flash',name:'Flash',model:'GLM',emoji:'⚡',color:'#facc15',size:26,speed:1.4,task:'Waiting'},
-  {id:'qwen',name:'Qwen',model:'Coder',emoji:'🦑',color:'#22d3ee',size:34,speed:.7,task:'Resting'},
-];
-
-chars.forEach(c=>{
-  c.funnyAnim=null; c.funnyTimer=0; c.funnyData={};
-  const state = SYSTEM_STATE[c.id];
-  const bed = beds.find(b=>b.id===c.id);
-  const bp = bedPos(bed);
-
-  if(state.status === 'active'){
-    const home = stations.find(s=>s.id===state.station)||stations[0];
-    const r = sRect(home);
-    c.px = r.x+r.w/2; c.py = r.y+r.h/2+r.h*.6;
-    c.tx = c.px; c.ty = c.py;
-    c.behavior = 'working';
-    c.deskId = state.station;
-    c.task = state.task;
-    c.workTimer = 999999;
-  } else if(state.status === 'scheduled'){
-    c.px = bp.x; c.py = bp.y;
-    c.tx = bp.x; c.ty = bp.y;
-    c.behavior = 'scheduled_waiting';
-    c.deskId = null;
-    c.task = 'Waiting for heartbeat';
-  } else {
-    c.px = bp.x; c.py = bp.y;
-    c.tx = bp.x; c.ty = bp.y;
-    c.behavior = 'sleeping';
-    c.deskId = null;
-    c.task = 'Resting';
-  }
-  c.angle = 0;
-  c.bubbleT = 0;
-  c.chatT = 0;
-  c.chatPartner = null;
-  c.zzzPhase = Math.random()*Math.PI*2;
-  c.sleepBob = Math.random()*Math.PI*2;
-  c.wakeTimer = 0;
-  c.workTimer = c.workTimer || 0;
-  c.simCooldown = Math.random()*600+300;
-  c.walkBounce = 0;
-  c.footprintCd = 0;
-  c.interactionBubble = 0;
-  c.interactionEmoji = '';
+const chars=CREW.map((cr,i)=>{
+  const desk=DESKS[i];
+  const state=SYSTEM_STATE[cr.id];
+  const isActive=state.status==='active';
+  const seat=TABLE_SEATS[i];
+  return{
+    ...cr, idx:i,
+    px: isActive ? desk.cx*TILE+TILE/2 : (TABLE_CX+seat.dx)*TILE+TILE/2,
+    py: isActive ? (desk.cy+2)*TILE : (TABLE_CY+seat.dy)*TILE+TILE/2,
+    tx: isActive ? desk.cx*TILE+TILE/2 : (TABLE_CX+seat.dx)*TILE+TILE/2,
+    ty: isActive ? (desk.cy+2)*TILE : (TABLE_CY+seat.dy)*TILE+TILE/2,
+    state: state.status,
+    task: state.task,
+    atDesk: isActive,
+    bobFrame:0,
+    moveCooldown: 100+Math.random()*200|0,
+  };
 });
 
-function simulateEvents(){
-  if(liveMode) return; // skip simulation when using live data
-  chars.forEach(ch=>{
-    ch.simCooldown--;
-    if(ch.simCooldown > 0) return;
-    if(ch.behavior === 'sleeping'){
-      if(Math.random() < 0.002){
-        ch.behavior = 'waking';
-        ch.wakeTimer = 60;
-        ch.simCooldown = 900 + Math.random()*900;
-      }
-    } else if(ch.behavior === 'scheduled_waiting'){
-      if(Math.random() < 0.003){
-        ch.behavior = 'waking';
-        ch.wakeTimer = 40;
-        ch.simCooldown = 600 + Math.random()*600;
-      }
+let frame=0;
+
+function drawFloor(){
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      X.fillStyle=(r+c)%2===0?COL_FLOOR_A:COL_FLOOR_B;
+      X.fillRect(c*TILE,r*TILE,TILE,TILE);
     }
+  }
+}
+
+function drawDesk(desk){
+  const x=desk.cx*TILE-TILE, y=desk.cy*TILE;
+  const w=TILE*3, h=TILE;
+  const cr=chars[desk.crewIdx];
+  const isActive=cr.state==='active'&&cr.atDesk;
+
+  // Desk surface
+  X.fillStyle=COL_DESK;
+  X.fillRect(x,y,w,h);
+  X.fillStyle='#1e1a24';
+  X.fillRect(x,y+h-1,w,1);
+
+  // Monitor
+  const mw=10, mh=8;
+  const mx=x+w/2-mw/2|0, my=y-mh+2;
+  X.fillStyle=COL_MONITOR_OFF;
+  X.fillRect(mx,my,mw,mh);
+  X.fillStyle=isActive?'#2266aa':'#141420';
+  X.fillRect(mx+1,my+1,mw-2,mh-3);
+  if(isActive){
+    for(let ly=0;ly<mh-3;ly+=2){
+      X.fillStyle='rgba(100,180,255,0.15)';
+      X.fillRect(mx+1,my+1+ly,mw-2,1);
+    }
+    // Monitor glow
+    X.fillStyle='rgba(60,120,200,0.06)';
+    X.fillRect(mx-2,my-2,mw+4,mh+4);
+  }
+  // Stand
+  X.fillStyle='#222';
+  X.fillRect(mx+mw/2-1|0,my+mh-1,2,2);
+
+  // Chair
+  X.fillStyle=COL_CHAIR;
+  const chairX=desk.cx*TILE+TILE/2-3|0, chairY=(desk.cy+1)*TILE+4;
+  X.fillRect(chairX,chairY,6,6);
+  X.fillStyle='#222028';
+  X.fillRect(chairX+1,chairY+1,4,4);
+
+  // Desk label
+  X.fillStyle=cr.color+'66';
+  X.font='4px monospace';
+  X.textAlign='center';
+  X.fillText(cr.name,x+w/2,y+h+4);
+}
+
+function drawMeetingTable(){
+  const cx=TABLE_CX*TILE+TILE/2, cy=TABLE_CY*TILE+TILE/2;
+  const tw=TILE*3, th=TILE*2;
+  X.fillStyle=COL_TABLE;
+  X.fillRect(cx-tw/2|0,cy-th/2|0,tw,th);
+  X.fillStyle='#302018';
+  X.fillRect((cx-tw/2|0)+1,(cy-th/2|0)+1,tw-2,th-2);
+  // Highlight
+  X.fillStyle='#443020';
+  X.fillRect((cx-tw/2|0)+2,(cy-th/2|0)+1,tw-4,1);
+
+  TABLE_SEATS.forEach(s=>{
+    const sx=(TABLE_CX+s.dx)*TILE+TILE/2-3|0;
+    const sy=(TABLE_CY+s.dy)*TILE+TILE/2-3|0;
+    X.fillStyle=COL_CHAIR;
+    X.fillRect(sx,sy,6,6);
+    X.fillStyle='#1a1820';
+    X.fillRect(sx+1,sy+1,4,4);
   });
 }
 
-function getStationForChar(ch){
-  return SYSTEM_STATE[ch.id]?.station || stations.find(s=>s.home===ch.id)?.id || 'command';
-}
-
-function pickStationTarget(ch){
-  const stId = getStationForChar(ch);
-  const target = stations.find(s=>s.id===stId) || stations[0];
-  const r = sRect(target);
-  ch.tx = r.x + r.w/2 + (Math.random()-.5)*r.w*.3;
-  ch.ty = r.y + r.h + ch.size + 8 + Math.random()*8;
-  ch.targetDesk = target.id;
-}
-
-function pickBedTarget(ch){
-  const bed = beds.find(b=>b.id===ch.id);
-  const bp = bedPos(bed);
-  ch.tx = bp.x;
-  ch.ty = bp.y;
-}
-
-function clampChar(ch){
-  const margin = ch.size;
-  ch.px = Math.max(margin, Math.min(W - margin, ch.px));
-  ch.py = Math.max(margin, Math.min(H - margin, ch.py));
-  ch.tx = Math.max(margin, Math.min(W - margin, ch.tx));
-  ch.ty = Math.max(margin, Math.min(H - margin, ch.ty));
-}
-
-function updateClock(){
-  const d=new Date();
-  document.getElementById('clock').textContent=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-setInterval(updateClock,1000);updateClock();
-
-const bar=document.getElementById('crew-bar');
-chars.forEach(ch=>{
-  const state = SYSTEM_STATE[ch.id];
-  const d=document.createElement('div');d.className='crew-card';d.id='crew-'+ch.id;
-  d.innerHTML=`<div class="crew-icon" style="background:${ch.color}22;border:1px solid ${ch.color}44">${ch.emoji}</div><div><div class="crew-name">${ch.name}</div><div class="crew-task" id="task-${ch.id}">${ch.task}</div><div class="crew-status ${state.status}" id="status-${ch.id}">● ${state.status.toUpperCase()}</div></div>`;
-  bar.appendChild(d);
-});
-
-let frame=0,heartbeatPhase=0;
-
-// === CODE SCROLL STATE ===
-let codeScrollOffset=0;
-// === COMMS BUBBLE STATE ===
-let commsBubbleTimer=0, commsBubbleActive=false, commsBubbleY=0;
-// === NOTION CHECKMARK STATE ===
-let notionCheckmarks=[false,false,false,false,false];
-let notionCheckTimer=0;
-
-function drawRoom(){
-  const dn=getDayNight();
-  // Night overlay - darken the whole room
-  const bgBright = dn.ambient;
-  const r=Math.floor(10*bgBright), g=Math.floor(10*bgBright), b=Math.floor(26*bgBright);
-  X.fillStyle=`rgb(${r},${g},${b})`;X.fillRect(0,0,W,H);
-  const r2=Math.floor(21*bgBright), g2=Math.floor(21*bgBright), b2=Math.floor(48*bgBright);
-  X.fillStyle=`rgb(${r2},${g2},${b2})`;X.fillRect(0,0,W,H);
-  const rt=ROOM_TOP();
-  const r3=Math.floor(13*bgBright), g3=Math.floor(13*bgBright), b3=Math.floor(34*bgBright);
-  X.fillStyle=`rgb(${r3},${g3},${b3})`;X.fillRect(WALL,rt,FLOOR_W(),FLOOR_H());
-  X.strokeStyle=`rgba(100,120,180,${.06*bgBright})`;X.lineWidth=1;
-  const gs=32;
-  for(let gx=WALL;gx<W-WALL;gx+=gs){X.beginPath();X.moveTo(gx,rt);X.lineTo(gx,rt+FLOOR_H());X.stroke()}
-  for(let gy=rt;gy<rt+FLOOR_H();gy+=gs){X.beginPath();X.moveTo(WALL,gy);X.lineTo(W-WALL,gy);X.stroke()}
-  X.strokeStyle='rgba(139,92,246,.3)';X.lineWidth=2;X.strokeRect(WALL,rt,FLOOR_W(),FLOOR_H());
-
-  // Night mode vignette
-  if(dn.label==='night'){
-    const vg=X.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.75);
-    vg.addColorStop(0,'transparent');
-    vg.addColorStop(1,'rgba(0,0,10,.35)');
-    X.fillStyle=vg;X.fillRect(0,0,W,H);
-  }
-}
-
-// === DRAW FOOTPRINTS ===
-function drawFootprints(){
-  const now=Date.now();
-  for(let i=footprints.length-1;i>=0;i--){
-    const f=footprints[i];
-    const age=now-f.birth;
-    if(age>f.life){footprints.splice(i,1);continue;}
-    const alpha=(1-age/f.life)*.25;
-    X.fillStyle=f.color+Math.floor(alpha*255).toString(16).padStart(2,'0');
-    X.beginPath();X.arc(f.x,f.y,f.size,0,Math.PI*2);X.fill();
-  }
-}
-
-// === DRAW PARTICLES ===
-function drawParticles(){
-  const dn=getDayNight();
-  particles.forEach(p=>{
-    p.x+=p.vx+Math.sin(frame*.005+p.phase)*.05;
-    p.y+=p.vy;
-    if(p.x<0)p.x=W;if(p.x>W)p.x=0;
-    if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-    const flicker=Math.sin(frame*.02+p.phase)*.3+.7;
-    const a=p.alpha*flicker*(dn.label==='night'?1.5:1);
-    X.fillStyle=dn.label==='night'?`rgba(180,200,255,${a})`:`rgba(255,255,255,${a*.6})`;
-    X.beginPath();X.arc(p.x,p.y,p.size,0,Math.PI*2);X.fill();
+function drawPlants(){
+  PLANTS.forEach(p=>{
+    const x=p.tx*TILE+TILE/2, y=p.ty*TILE+TILE;
+    X.fillStyle=COL_PLANT_POT;
+    X.fillRect(x-3,y-4,6,4);
+    X.fillRect(x-2,y-6,4,2);
+    X.fillStyle=COL_PLANT;
+    X.fillRect(x-4,y-10,3,4);
+    X.fillRect(x+1,y-10,3,4);
+    X.fillRect(x-2,y-12,4,3);
+    X.fillStyle='#266a3a';
+    X.fillRect(x-1,y-11,2,2);
   });
 }
 
-function drawCrewQuarters(){
-  const q = qRect();
-  const g = X.createRadialGradient(q.x+q.w/2, q.y+q.h/2, 0, q.x+q.w/2, q.y+q.h/2, Math.max(q.w,q.h)*.7);
-  g.addColorStop(0, 'rgba(212,165,116,.06)');
-  g.addColorStop(1, 'transparent');
-  X.fillStyle = g;
-  X.fillRect(q.x-q.w*.2, q.y-q.h*.2, q.w*1.4, q.h*1.4);
-  X.fillStyle = 'rgba(30,22,15,.7)';
-  X.beginPath(); X.roundRect(q.x, q.y, q.w, q.h, 8); X.fill();
-  X.strokeStyle = '#d4a57444';
-  X.lineWidth = 1.5;
-  X.beginPath(); X.roundRect(q.x, q.y, q.w, q.h, 8); X.stroke();
-  X.font = '10px "Share Tech Mono"';
-  X.fillStyle = '#d4a574aa';
-  X.textAlign = 'center';
-  X.fillText(crewQuarters.label, q.x+q.w/2, q.y-6 < 0 ? q.y+12 : q.y-6);
-
-  beds.forEach((bed) => {
-    const bp = bedPos(bed);
-    const bw = q.w * .09;
-    const bh = q.h * .55;
-    // Soft glow under pod
-    X.fillStyle = bed.color + '08';
-    X.beginPath(); X.ellipse(bp.x, bp.y, bw*.8, bh*.5, 0, 0, Math.PI*2); X.fill();
-    // Pod bed (rounded capsule shape)
-    X.fillStyle = bed.color + '15';
-    X.beginPath(); X.roundRect(bp.x - bw/2, bp.y - bh/2, bw, bh, bw*.4); X.fill();
-    X.strokeStyle = bed.color + '30';
-    X.lineWidth = 1;
-    X.beginPath(); X.roundRect(bp.x - bw/2, bp.y - bh/2, bw, bh, bw*.4); X.stroke();
-    // Pillow (cute rounded top)
-    X.fillStyle = bed.color + '22';
-    X.beginPath(); X.ellipse(bp.x, bp.y - bh*.32, bw*.35, bh*.12, 0, 0, Math.PI*2); X.fill();
-    // Blanket (wavy bottom half)
-    X.fillStyle = bed.color + '18';
-    X.beginPath();
-    X.moveTo(bp.x - bw*.4, bp.y);
-    X.quadraticCurveTo(bp.x - bw*.2, bp.y - 3, bp.x, bp.y + 1);
-    X.quadraticCurveTo(bp.x + bw*.2, bp.y + 4, bp.x + bw*.4, bp.y);
-    X.lineTo(bp.x + bw*.4, bp.y + bh*.3);
-    X.quadraticCurveTo(bp.x, bp.y + bh*.35, bp.x - bw*.4, bp.y + bh*.3);
-    X.closePath(); X.fill();
-    // Tiny stars / nightlight dots around sleeping pods
-    const starPhase = frame * .01 + bed.idx * 2;
-    for(let st=0;st<3;st++){
-      const sx = bp.x + Math.cos(starPhase + st*2.1) * bw*.7;
-      const sy = bp.y - bh*.3 + Math.sin(starPhase*1.3 + st*1.7) * bh*.2;
-      const sa = (Math.sin(starPhase*2+st*3)*.3+.5)*.3;
-      X.globalAlpha = sa;
-      X.fillStyle = bed.color;
-      X.font = '5px serif';
-      X.textAlign = 'center';
-      X.fillText('✦', sx, sy);
-      X.globalAlpha = 1;
-    }
-    // Name tag
-    X.font = '7px "Share Tech Mono"';
-    X.fillStyle = bed.color + '88';
-    X.textAlign = 'center';
-    X.fillText(bed.name, bp.x, bp.y + bh/2 + 10);
-  });
-
-  // String lights along top of quarters
-  const lightsY = q.y + 4;
-  const numLights = 12;
-  X.strokeStyle = '#d4a57422';X.lineWidth = 1;
-  X.beginPath();X.moveTo(q.x+10, lightsY);
-  for(let i=0;i<numLights;i++){
-    const lx = q.x+10 + i*(q.w-20)/(numLights-1);
-    const sag = Math.sin(i/(numLights-1)*Math.PI)*3;
-    X.lineTo(lx, lightsY+sag);
-  }
-  X.stroke();
-  const bulbColors = ['#facc15','#f472b6','#34d399','#22d3ee','#a78bfa','#fb923c'];
-  for(let i=0;i<numLights;i++){
-    const lx = q.x+10 + i*(q.w-20)/(numLights-1);
-    const sag = Math.sin(i/(numLights-1)*Math.PI)*3;
-    const twinkle = Math.sin(frame*.04+i*1.3)*.3+.6;
-    X.globalAlpha = twinkle;
-    X.fillStyle = bulbColors[i%bulbColors.length];
-    X.beginPath();X.arc(lx, lightsY+sag+2, 2, 0, Math.PI*2);X.fill();
-    // Glow
-    X.globalAlpha = twinkle*.15;
-    X.beginPath();X.arc(lx, lightsY+sag+2, 5, 0, Math.PI*2);X.fill();
-    X.globalAlpha = 1;
-  }
-
-  // Wall clock
-  const cx = q.x + q.w * .5, cy = q.y + 14;
-  X.strokeStyle = '#d4a57455';X.lineWidth = 1;
-  X.beginPath(); X.arc(cx, cy, 8, 0, Math.PI*2); X.stroke();
-  const d = new Date();
-  const hr = d.getHours() % 12, mn = d.getMinutes();
-  const ha = (hr + mn/60) * Math.PI/6 - Math.PI/2;
-  const ma = mn * Math.PI/30 - Math.PI/2;
-  X.strokeStyle = '#d4a57488'; X.lineWidth = 1.5;
-  X.beginPath(); X.moveTo(cx, cy); X.lineTo(cx + Math.cos(ha)*4, cy + Math.sin(ha)*4); X.stroke();
-  X.strokeStyle = '#d4a57466'; X.lineWidth = 1;
-  X.beginPath(); X.moveTo(cx, cy); X.lineTo(cx + Math.cos(ma)*6, cy + Math.sin(ma)*6); X.stroke();
-
-  // Potted plant (left corner)
-  const px2 = q.x + 12, py2 = q.y + q.h - 14;
-  X.fillStyle = '#5a3a2a88';
-  X.beginPath(); X.roundRect(px2-4, py2, 8, 6, 1); X.fill();
-  X.fillStyle = '#2d8a4a55';
-  X.beginPath(); X.arc(px2, py2-2, 5, 0, Math.PI*2); X.fill();
-  X.beginPath(); X.arc(px2-3, py2-4, 3, 0, Math.PI*2); X.fill();
-  X.beginPath(); X.arc(px2+3, py2-4, 3, 0, Math.PI*2); X.fill();
-
-  // Little rug in center
-  X.fillStyle = '#d4a57410';
-  X.beginPath(); X.ellipse(q.x+q.w*.5, q.y+q.h*.7, q.w*.15, q.h*.12, 0, 0, Math.PI*2); X.fill();
-  X.strokeStyle = '#d4a57418'; X.lineWidth = 1;
-  X.beginPath(); X.ellipse(q.x+q.w*.5, q.y+q.h*.7, q.w*.15, q.h*.12, 0, 0, Math.PI*2); X.stroke();
-  X.beginPath(); X.ellipse(q.x+q.w*.5, q.y+q.h*.7, q.w*.1, q.h*.07, 0, 0, Math.PI*2); X.stroke();
-
-  // Bookshelf (right corner)
-  const tx = q.x + q.w - 20, ty = q.y + q.h - 18;
-  X.fillStyle = '#3a2a1a66';
-  X.beginPath(); X.roundRect(tx-8, ty, 16, 12, 2); X.fill();
-  X.strokeStyle = '#5a4a3a44'; X.lineWidth = 1;
-  X.beginPath(); X.roundRect(tx-8, ty, 16, 12, 2); X.stroke();
-  // Tiny books
-  const bookColors = ['#ef444455','#22d3ee55','#a78bfa55','#facc1555'];
-  for(let b=0;b<4;b++){
-    X.fillStyle = bookColors[b];
-    X.fillRect(tx-6+b*3.5, ty+1, 2.5, 9);
-  }
+function drawCooler(){
+  const x=COOLER.tx*TILE+TILE/2, y=COOLER.ty*TILE;
+  X.fillStyle='#667788';
+  X.fillRect(x-3,y,6,10);
+  X.fillStyle='#8899aa';
+  X.fillRect(x-3,y,6,2);
+  X.fillStyle='#5588cc';
+  X.fillRect(x-2,y+2,4,5);
+  X.fillStyle='#aaa';
+  X.fillRect(x-1,y+7,2,1);
 }
 
-function drawDeskCommand(r,s){
-  X.fillStyle='#2a1a4a';
-  X.beginPath();X.ellipse(r.x+r.w/2,r.y+r.h*.75,r.w*.12,r.h*.12,0,0,Math.PI*2);X.fill();
-  X.fillStyle='#3a2a5a';
-  X.beginPath();X.ellipse(r.x+r.w/2,r.y+r.h*.68,r.w*.08,r.h*.06,0,0,Math.PI*2);X.fill();
-  const dn=getDayNight();
-  const mw=r.w*.16,mh=r.h*.3;
-  for(let i=0;i<4;i++){
-    const mx=r.x+r.w*.08+i*(mw+4);
-    const my=r.y+r.h*.08;
-    X.fillStyle='#111125';X.fillRect(mx-1,my-1,mw+2,mh+2);
-    const flicker=Math.sin(frame*.03+i*2)*.05+.95;
-    X.fillStyle=`rgba(167,139,250,${.15*flicker*dn.glowMult})`;X.fillRect(mx,my,mw,mh);
-    // Monitor glow at night
-    if(dn.label==='night'){
-      X.fillStyle=`rgba(167,139,250,${.04*flicker})`;
-      X.fillRect(mx-4,my-4,mw+8,mh+8);
-    }
-    X.strokeStyle=s.color+'66';X.lineWidth=1;X.strokeRect(mx,my,mw,mh);
-    X.fillStyle=s.color+'55';
-    for(let l=0;l<5;l++){
-      const lw=mw*.3+Math.sin(frame*.015+l+i)*mw*.3;
-      X.fillRect(mx+2,my+3+l*(mh/6),lw,1.5);
-    }
-    if(i===1){
-      for(let b=0;b<4;b++){
-        const bh2=mh*.1+Math.sin(frame*.02+b)*mh*.1;
-        X.fillStyle=s.color+'77';
-        X.fillRect(mx+2+b*4,my+mh-2-bh2,3,bh2);
-      }
-    }
-  }
-  X.fillStyle='#5a3a2a';
-  X.beginPath();X.arc(r.x+r.w*.88,r.y+r.h*.55,r.w*.03,0,Math.PI*2);X.fill();
-  X.fillStyle='#8B5E3C';X.beginPath();X.arc(r.x+r.w*.88,r.y+r.h*.55,r.w*.025,0,Math.PI*2);X.fill();
-  X.strokeStyle='#5a3a2a';X.lineWidth=1.5;X.beginPath();X.arc(r.x+r.w*.88+r.w*.03,r.y+r.h*.55,r.w*.015,-.5,1.5);X.stroke();
-  X.fillStyle='#1a1a38';X.fillRect(r.x+r.w*.32,r.y+r.h*.55,r.w*.36,r.h*.1);
-  X.strokeStyle='#2a2a55';X.lineWidth=.5;
-  for(let kr=0;kr<3;kr++)for(let kc=0;kc<8;kc++){
-    X.strokeRect(r.x+r.w*.33+kc*(r.w*.04),r.y+r.h*.56+kr*(r.h*.03),r.w*.035,r.h*.025);
-  }
+function drawWhiteboard(){
+  const x=WHITEBOARD.tx*TILE, y=WHITEBOARD.ty*TILE+1;
+  const w=WHITEBOARD.w*TILE, h=WHITEBOARD.h*TILE;
+  X.fillStyle='#333';
+  X.fillRect(x-1,y-1,w+2,h+2);
+  X.fillStyle='#ddddd8';
+  X.fillRect(x,y,w,h);
+  X.fillStyle='#cc4444';
+  X.fillRect(x+3,y+3,12,1);
+  X.fillStyle='#4444cc';
+  X.fillRect(x+3,y+6,18,1);
+  X.fillStyle='#44aa44';
+  X.fillRect(x+3,y+9,14,1);
+  X.fillStyle='#555';
+  X.fillRect(x+2,y+h,w-4,1);
 }
 
-function drawDeskSearch(r,s){
-  const dn=getDayNight();
-  const mw=r.w*.55,mh=r.h*.5;
-  const mx=r.x+r.w*.22,my=r.y+r.h*.08;
-  X.fillStyle='#0e1a2a';X.fillRect(mx-1,my-1,mw+2,mh+2);
-  X.fillStyle=`rgba(34,211,238,${.12*dn.glowMult})`;X.fillRect(mx,my,mw,mh);
-  if(dn.label==='night'){X.fillStyle='rgba(34,211,238,.03)';X.fillRect(mx-3,my-3,mw+6,mh+6);}
-  X.strokeStyle=s.color+'66';X.lineWidth=1;X.strokeRect(mx,my,mw,mh);
-  X.fillStyle='#1a2a3a';X.fillRect(mx+4,my+3,mw-8,mh*.15);
-  X.strokeStyle=s.color+'44';X.strokeRect(mx+4,my+3,mw-8,mh*.15);
-  X.strokeStyle=s.color+'88';X.lineWidth=1;
-  X.beginPath();X.arc(mx+8,my+3+mh*.075,3,0,Math.PI*2);X.stroke();
-  X.beginPath();X.moveTo(mx+10,my+3+mh*.075+2);X.lineTo(mx+13,my+3+mh*.075+5);X.stroke();
-  // Blinking cursor in search bar
-  if(Math.floor(frame/30)%2===0){
-    X.fillStyle=s.color+'cc';
-    X.fillRect(mx+16,my+4,1.5,mh*.12);
-  }
-  for(let l=0;l<4;l++){
-    const ly=my+mh*.25+l*mh*.17;
-    X.fillStyle=s.color+'55';X.fillRect(mx+4,ly,mw*.7,2);
-    X.fillStyle=s.color+'25';X.fillRect(mx+4,ly+4,mw*.5+Math.sin(frame*.01+l)*mw*.1,1.5);
-    X.fillStyle='#34d39944';X.fillRect(mx+4,ly+7,mw*.35,1);
-  }
-  X.strokeStyle=s.color+'66';X.lineWidth=1;
-  const gx=r.x+r.w*.85,gy=r.y+r.h*.35;
-  X.beginPath();X.arc(gx,gy,r.w*.06,0,Math.PI*2);X.stroke();
-  X.beginPath();X.ellipse(gx,gy,r.w*.03,r.w*.06,0,0,Math.PI*2);X.stroke();
-  X.beginPath();X.moveTo(gx-r.w*.06,gy);X.lineTo(gx+r.w*.06,gy);X.stroke();
-  X.fillStyle='#1a1a38';X.fillRect(r.x+r.w*.3,r.y+r.h*.68,r.w*.4,r.h*.12);
-  X.strokeStyle='#2a2a55';X.strokeRect(r.x+r.w*.3,r.y+r.h*.68,r.w*.4,r.h*.12);
-}
+function drawPixelChar(ch){
+  const x=ch.px|0, y=ch.py|0;
+  const isMoving=ch.px!==ch.tx||ch.py!==ch.ty;
+  const bob=(frame%30<15&&(ch.state==='active'||isMoving))?-1:0;
+  const isActive=ch.state==='active';
+  const py=y+bob;
 
-function drawDeskCode(r,s){
-  const dn=getDayNight();
-  const mw=r.w*.27,mh=r.h*.45;
-  codeScrollOffset+=0.3;
-  // Sound: keyboard clicks when someone is working at code lab
-  if(frame%15===0&&chars.some(c=>c.deskId==='code'&&c.behavior==='working')){
-    playKeyClick();
-  }
-  for(let i=0;i<3;i++){
-    const mx=r.x+r.w*.04+i*(mw+r.w*.02);
-    const my=r.y+r.h*.06;
-    X.fillStyle='#0a1a15';X.fillRect(mx-1,my-1,mw+2,mh+2);
-    X.fillStyle=`rgba(52,211,153,${.08*dn.glowMult})`;X.fillRect(mx,my,mw,mh);
-    if(dn.label==='night'){X.fillStyle='rgba(52,211,153,.03)';X.fillRect(mx-3,my-3,mw+6,mh+6);}
-    X.strokeStyle=s.color+'55';X.lineWidth=1;X.strokeRect(mx,my,mw,mh);
-    // Scrolling code lines
-    X.save();X.beginPath();X.rect(mx,my,mw,mh);X.clip();
-    const colors=['#34d399','#22d3ee','#f472b6','#fb923c','#a78bfa','#facc15','#818cf8'];
-    const totalLines=12;
-    for(let l=0;l<totalLines;l++){
-      const scrollY=((l*mh/8-codeScrollOffset*(.8+i*.2))%((totalLines)*mh/8)+totalLines*mh/8)%(totalLines*mh/8);
-      const indent=Math.floor(Math.sin(l+i)*2+2)*3;
-      const lw=mw*.2+Math.sin(l*1.7+i*3)*mw*.3;
-      X.fillStyle=colors[(l+i*2)%colors.length]+'77';
-      X.fillRect(mx+indent+2,my+scrollY,lw,1.5);
-      if(l%2===0){
-        X.fillStyle=colors[(l+i*2+3)%colors.length]+'44';
-        X.fillRect(mx+indent+lw+5,my+scrollY,lw*.4,1.5);
-      }
-    }
-    // Line numbers
-    X.fillStyle='#ffffff15';
-    for(let l=0;l<totalLines;l++){
-      const scrollY=((l*mh/8-codeScrollOffset*(.8+i*.2))%((totalLines)*mh/8)+totalLines*mh/8)%(totalLines*mh/8);
-      X.fillRect(mx+1,my+scrollY,1,1.5);
-    }
-    X.restore();
-  }
-  X.fillStyle='#1a1a38';X.fillRect(r.x+r.w*.2,r.y+r.h*.6,r.w*.6,r.h*.14);
-  X.strokeStyle='#2a2a55';X.lineWidth=.5;
-  for(let kr=0;kr<3;kr++)for(let kc=0;kc<12;kc++){
-    X.strokeRect(r.x+r.w*.21+kc*(r.w*.048),r.y+r.h*.61+kr*(r.h*.04),r.w*.042,r.h*.035);
-  }
-}
+  // Shadow
+  X.fillStyle='rgba(0,0,0,0.25)';
+  X.fillRect(x-3,py+4,6,2);
 
-function drawDeskComms(r,s){
-  const dn=getDayNight();
-  const mw=r.w*.5,mh=r.h*.5;
-  const mx=r.x+r.w*.05,my=r.y+r.h*.08;
-  X.fillStyle='#1a0a1a';X.fillRect(mx-1,my-1,mw+2,mh+2);
-  X.fillStyle=`rgba(244,114,182,${.1*dn.glowMult})`;X.fillRect(mx,my,mw,mh);
-  if(dn.label==='night'){X.fillStyle='rgba(244,114,182,.03)';X.fillRect(mx-3,my-3,mw+6,mh+6);}
-  X.strokeStyle=s.color+'55';X.lineWidth=1;X.strokeRect(mx,my,mw,mh);
-  const bubbles=[{x:.1,y:.1,w:.5,align:'left'},{x:.25,y:.32,w:.45,align:'right'},{x:.1,y:.55,w:.4,align:'left'},{x:.3,y:.75,w:.35,align:'right'}];
-  bubbles.forEach((b,i)=>{
-    const bx=mx+b.x*mw,by=my+b.y*mh,bw=b.w*mw,bh=mh*.15;
-    X.fillStyle=b.align==='left'?s.color+'33':'#a78bfa33';
-    X.beginPath();X.roundRect(bx,by,bw,bh,3);X.fill();
-    X.fillStyle=b.align==='left'?s.color+'55':'#a78bfa55';
-    X.fillRect(bx+3,by+bh*.3,bw*.6+Math.sin(frame*.02+i)*bw*.1,1.5);
-  });
-  // Pop-up message bubble
-  commsBubbleTimer++;
-  if(commsBubbleTimer>200){
-    commsBubbleTimer=0;
-    commsBubbleActive=true;
-    commsBubbleY=0;
-  }
-  if(commsBubbleActive){
-    commsBubbleY+=.5;
-    const ba=Math.max(0,1-commsBubbleY/30);
-    if(ba<=0) commsBubbleActive=false;
-    else {
-      X.save();X.globalAlpha=ba;
-      X.fillStyle='#f472b6cc';
-      X.beginPath();X.roundRect(mx+mw-20,my+mh-15-commsBubbleY,18,10,3);X.fill();
-      X.fillStyle='#fff';X.font='6px "Share Tech Mono"';X.textAlign='center';
-      X.fillText('💬',mx+mw-11,my+mh-8-commsBubbleY);
-      X.restore();
-    }
-  }
-  const px3=r.x+r.w*.65,py3=r.y+r.h*.15;
-  X.fillStyle='#2a1a30';X.fillRect(px3,py3,r.w*.15,r.h*.3);
-  X.strokeStyle=s.color+'44';X.strokeRect(px3,py3,r.w*.15,r.h*.3);
-  X.fillStyle=s.color+'22';X.fillRect(px3+2,py3+2,r.w*.15-4,r.h*.12);
-  for(let br=0;br<3;br++)for(let bc=0;bc<3;bc++){
-    X.fillStyle=s.color+'33';
-    X.fillRect(px3+3+bc*(r.w*.04),py3+r.h*.16+br*(r.h*.04),r.w*.03,r.h*.03);
-  }
-  X.strokeStyle=s.color+'88';X.lineWidth=1.5;
-  X.beginPath();X.moveTo(r.x+r.w*.88,r.y+r.h*.4);X.lineTo(r.x+r.w*.88,r.y-r.h*.05);X.stroke();
-  const sigAlpha=Math.sin(frame*.06)*.3+.5;
-  X.strokeStyle=`rgba(244,114,182,${sigAlpha})`;X.lineWidth=1;
-  for(let i=1;i<=3;i++){X.beginPath();X.arc(r.x+r.w*.88,r.y-r.h*.05,i*4,-.8,-2.3,true);X.stroke();}
-  X.fillStyle='#1a1a38';X.fillRect(r.x+r.w*.15,r.y+r.h*.68,r.w*.4,r.h*.12);
-  X.strokeStyle='#2a2a55';X.strokeRect(r.x+r.w*.15,r.y+r.h*.68,r.w*.4,r.h*.12);
-}
-
-function drawDeskBrief(r,s){
-  const dn=getDayNight();
-  const mw=r.w*.5,mh=r.h*.5;
-  const mx=r.x+r.w*.25,my=r.y+r.h*.06;
-  X.fillStyle='#1a1208';X.fillRect(mx-1,my-1,mw+2,mh+2);
-  X.fillStyle=`rgba(251,146,60,${.1*dn.glowMult})`;X.fillRect(mx,my,mw,mh);
-  if(dn.label==='night'){X.fillStyle='rgba(251,146,60,.03)';X.fillRect(mx-3,my-3,mw+6,mh+6);}
-  X.strokeStyle=s.color+'55';X.lineWidth=1;X.strokeRect(mx,my,mw,mh);
-  X.fillStyle=s.color+'55';X.fillRect(mx+4,my+3,mw-8,mh*.12);
-  const colW=(mw-12)/2;
-  for(let c=0;c<2;c++){
-    const cx2=mx+4+c*(colW+4);
-    for(let l=0;l<5;l++){
-      X.fillStyle=s.color+(l===0?'55':'30');
-      const lw=l===0?colW:colW*.5+Math.sin(frame*.01+l+c)*colW*.3;
-      X.fillRect(cx2,my+mh*.2+l*(mh*.13),lw,l===0?2:1.5);
-    }
-  }
-  for(let p=0;p<3;p++){
-    X.fillStyle=`rgba(251,146,60,${.06+p*.02})`;
-    X.fillRect(r.x+r.w*.05+p*2,r.y+r.h*.15+p*2,r.w*.16,r.h*.35);
-    X.strokeStyle=s.color+'22';X.strokeRect(r.x+r.w*.05+p*2,r.y+r.h*.15+p*2,r.w*.16,r.h*.35);
-    X.fillStyle=s.color+'18';
-    for(let l=0;l<4;l++){X.fillRect(r.x+r.w*.07+p*2,r.y+r.h*.2+p*2+l*r.h*.06,r.w*.11,1);}
-  }
-  X.fillStyle='#1a1a38';X.fillRect(r.x+r.w*.3,r.y+r.h*.65,r.w*.4,r.h*.12);
-  X.strokeStyle='#2a2a55';X.strokeRect(r.x+r.w*.3,r.y+r.h*.65,r.w*.4,r.h*.12);
-}
-
-function drawDeskNotion(r,s){
-  const dn=getDayNight();
-  const mw=r.w*.6,mh=r.h*.55;
-  const mx=r.x+r.w*.2,my=r.y+r.h*.06;
-  X.fillStyle='#0e0e22';X.fillRect(mx-1,my-1,mw+2,mh+2);
-  X.fillStyle=`rgba(129,140,248,${.08*dn.glowMult})`;X.fillRect(mx,my,mw,mh);
-  if(dn.label==='night'){X.fillStyle='rgba(129,140,248,.03)';X.fillRect(mx-3,my-3,mw+6,mh+6);}
-  X.strokeStyle=s.color+'55';X.lineWidth=1;X.strokeRect(mx,my,mw,mh);
-  // Checkmark timer
-  notionCheckTimer++;
-  if(notionCheckTimer>120){
-    notionCheckTimer=0;
-    const unchecked=notionCheckmarks.map((v,i)=>v?-1:i).filter(i=>i>=0);
-    if(unchecked.length>0){
-      notionCheckmarks[unchecked[Math.floor(Math.random()*unchecked.length)]]=true;
-    } else {
-      notionCheckmarks=[false,false,false,false,false];
-    }
-  }
-  const kw=(mw-10)/3;
-  let cardIdx=0;
-  for(let c=0;c<3;c++){
-    const kx=mx+3+c*(kw+2);
-    const hColors=['#34d39955','#facc1555','#f4728655'];
-    X.fillStyle=hColors[c];X.fillRect(kx,my+3,kw,mh*.1);
-    const cards=3-c;
-    for(let i=0;i<cards;i++){
-      X.fillStyle='#1a1a3a';X.fillRect(kx+1,my+mh*.16+i*(mh*.2),kw-2,mh*.15);
-      X.strokeStyle=s.color+'22';X.strokeRect(kx+1,my+mh*.16+i*(mh*.2),kw-2,mh*.15);
-      X.fillStyle=s.color+'44';X.fillRect(kx+3,my+mh*.19+i*(mh*.2),(kw-6)*.7,1.5);
-      // Checkmark
-      if(notionCheckmarks[cardIdx]){
-        X.fillStyle='#34d399cc';X.font='bold 7px sans-serif';X.textAlign='left';
-        X.fillText('✓',kx+kw-10,my+mh*.19+i*(mh*.2)+5);
-      }
-      cardIdx++;
-    }
-  }
-  const stickyColors=['#facc15','#f472b6','#34d399'];
-  for(let i=0;i<3;i++){
-    X.fillStyle=stickyColors[i]+'44';
-    const sx=r.x+r.w*.02+i*r.w*.06,sy=r.y+r.h*.2+i*r.h*.15;
-    X.fillRect(sx,sy,r.w*.08,r.w*.08);
-    X.fillStyle=stickyColors[i]+'25';
-    X.fillRect(sx+2,sy+3,r.w*.05,1);X.fillRect(sx+2,sy+6,r.w*.04,1);
-  }
-  X.fillStyle='#1a1a38';X.fillRect(r.x+r.w*.25,r.y+r.h*.68,r.w*.4,r.h*.12);
-  X.strokeStyle='#2a2a55';X.strokeRect(r.x+r.w*.25,r.y+r.h*.68,r.w*.4,r.h*.12);
-}
-
-function drawDeskHeartbeat(r,s){
-  const dn=getDayNight();
-  const mw=r.w*.65,mh=r.h*.5;
-  const mx=r.x+r.w*.17,my=r.y+r.h*.06;
-  X.fillStyle='#1a0a0a';X.fillRect(mx-1,my-1,mw+2,mh+2);
-  X.fillStyle=`rgba(248,113,113,${.08*dn.glowMult})`;X.fillRect(mx,my,mw,mh);
-  if(dn.label==='night'){X.fillStyle='rgba(248,113,113,.04)';X.fillRect(mx-4,my-4,mw+8,mh+8);}
-  X.strokeStyle=s.color+'55';X.lineWidth=1;X.strokeRect(mx,my,mw,mh);
-  X.save();X.beginPath();X.rect(mx,my,mw,mh);X.clip();
-  // Animated ECG — continuously drawing line
-  X.strokeStyle='#f87171';X.lineWidth=2;X.beginPath();
-  const pulseY=my+mh*.5;
-  const drawHead=heartbeatPhase%mw; // position of the drawing head
-  for(let px4=0;px4<mw;px4+=1.5){
-    const t=(px4+heartbeatPhase)*.08;
-    const beat=Math.exp(-(Math.pow((t%6)-1,2))*8)*mh*.35 - Math.exp(-(Math.pow((t%6)-1.4,2))*12)*mh*.15;
-    // Fade out behind the drawing head
-    const distFromHead=((drawHead-px4)%mw+mw)%mw;
-    if(distFromHead<mw*.05){
-      X.stroke();X.beginPath();
-      X.strokeStyle=`rgba(248,113,113,${distFromHead/(mw*.05)})`;
-      X.lineWidth=2;
-    }
-    X[px4===0?'moveTo':'lineTo'](mx+px4,pulseY-beat);
-  }
-  X.stroke();
-  // Glow trail
-  X.strokeStyle='rgba(248,113,113,.2)';X.lineWidth=5;X.beginPath();
-  for(let px4=0;px4<mw;px4+=1.5){
-    const t=(px4+heartbeatPhase)*.08;
-    const beat=Math.exp(-(Math.pow((t%6)-1,2))*8)*mh*.35 - Math.exp(-(Math.pow((t%6)-1.4,2))*12)*mh*.15;
-    X[px4===0?'moveTo':'lineTo'](mx+px4,pulseY-beat);
-  }
-  X.stroke();X.restore();
-  // Sound: beep on heartbeat peak
-  if(frame%90===0) playHeartbeep();
-  const lightColors=['#34d399','#34d399','#facc15','#34d399'];
-  for(let i=0;i<4;i++){
-    const blink=i===2?Math.sin(frame*.08)>.3:true;
-    X.fillStyle=blink?lightColors[i]+'bb':lightColors[i]+'22';
-    X.beginPath();X.arc(r.x+r.w*.25+i*r.w*.14,r.y+r.h*.65,3,0,Math.PI*2);X.fill();
-    if(blink){X.fillStyle=lightColors[i]+'15';X.beginPath();X.arc(r.x+r.w*.25+i*r.w*.14,r.y+r.h*.65,6,0,Math.PI*2);X.fill();}
-  }
-  X.fillStyle=s.color+'88';X.font='8px "Share Tech Mono"';X.textAlign='left';
-  const bpm=72+Math.floor(Math.sin(frame*.005)*5);
-  X.fillText(bpm+' BPM',mx+mw-30,my+mh-4);
-}
-
-function drawStation(s){
-  const r=sRect(s);
-  const dn=getDayNight();
-  const g=X.createRadialGradient(r.x+r.w/2,r.y+r.h/2,0,r.x+r.w/2,r.y+r.h/2,Math.max(r.w,r.h)*.8);
-  // Enhanced glow at night
-  const glowColor=s.glow.replace(/[\d.]+\)$/,v=>parseFloat(v)*dn.glowMult+')');
-  g.addColorStop(0,s.glow.replace(/[\d.]+\)$/,`${parseFloat(s.glow.match(/[\d.]+\)$/)[0])*dn.glowMult})`));
-  g.addColorStop(1,'transparent');
-  X.fillStyle=g;X.fillRect(r.x-r.w*.3,r.y-r.h*.3,r.w*1.6,r.h*1.6);
-  // Desk shadow
-  X.fillStyle='rgba(0,0,0,.18)';
-  X.beginPath();X.ellipse(r.x+r.w/2,r.y+r.h+4,r.w*.45,6,0,0,Math.PI*2);X.fill();
-  X.fillStyle='rgba(20,20,45,.85)';
-  X.beginPath();X.roundRect(r.x,r.y,r.w,r.h,6);X.fill();
-  X.strokeStyle=s.color+'55';X.lineWidth=1.5;
-  X.beginPath();X.roundRect(r.x,r.y,r.w,r.h,6);X.stroke();
-  if(s.id==='command') drawDeskCommand(r,s);
-  else if(s.id==='search') drawDeskSearch(r,s);
-  else if(s.id==='code') drawDeskCode(r,s);
-  else if(s.id==='comms') drawDeskComms(r,s);
-  else if(s.id==='brief') drawDeskBrief(r,s);
-  else if(s.id==='notion') drawDeskNotion(r,s);
-  else if(s.id==='heartbeat') drawDeskHeartbeat(r,s);
-  drawPixelStationIcon(s.id, r.x+r.w/2, r.y-16, s.color);
-  X.font='7px "Press Start 2P"';X.fillStyle=s.color+'cc';X.textAlign='center';
-  X.fillText(s.label.replace(/^[^\s]+\s/,''),r.x+r.w/2,r.y-4);
-}
-
-function px(x,y,s,color){X.fillStyle=color;X.fillRect(Math.floor(x),Math.floor(y),s,s);}
-function drawPixelStationIcon(id, cx, cy, color){
-  X.imageSmoothingEnabled=false;
-  const s=2;
-  const ox=cx-8, oy=cy-8;
-  const c=color+'dd';
-  if(id==='command'){
-    [[3,0],[4,0],[2,1],[3,1],[4,1],[5,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[2,4],[3,4],[4,4],[5,4],[1,5],[2,5],[5,5],[6,5],[0,6],[1,6],[6,6],[7,6]].forEach(p=>px(ox+p[0]*s,oy+p[1]*s,s,c));
-  } else if(id==='search'){
-    [[2,0],[3,0],[4,0],[1,1],[5,1],[0,2],[6,2],[0,3],[6,3],[1,4],[5,4],[2,5],[3,5],[4,5],[5,6],[6,7]].forEach(p=>px(ox+p[0]*s,oy+p[1]*s,s,c));
-  } else if(id==='code'){
-    [[2,0],[6,0],[1,1],[5,1],[0,2],[4,2],[0,3],[4,3],[1,4],[5,4],[2,5],[6,5],[3,2],[3,3],[3,4]].forEach(p=>px(ox+p[0]*s,oy+p[1]*s,s,c));
-  } else if(id==='comms'){
-    [[1,0],[2,0],[3,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[1,4],[2,4],[3,4],[4,4],[5,4],[2,5],[3,5],[1,6]].forEach(p=>px(ox+p[0]*s,oy+p[1]*s,s,c));
-    [2,3,4].forEach(dx=>px(ox+dx*s,oy+2*s,s,'#ffffff88'));
-  } else if(id==='brief'){
-    [[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[0,2],[6,2],[0,3],[2,3],[3,3],[4,3],[6,3],[0,4],[2,4],[3,4],[6,4],[0,5],[2,5],[3,5],[4,5],[6,5],[0,6],[1,6],[2,6],[3,6],[4,6],[5,6],[6,6]].forEach(p=>px(ox+p[0]*s,oy+p[1]*s,s,c));
-    [1,2,3,4,5].forEach(dx=>px(ox+dx*s,oy+1*s,s,c));
-  } else if(id==='notion'){
-    [[2,0],[3,0],[4,0],[1,1],[2,1],[3,1],[4,1],[5,1],[1,2],[5,2],[1,3],[2,3],[4,3],[5,3],[1,4],[3,4],[5,4],[1,5],[2,5],[3,5],[4,5],[5,5],[1,6],[5,6],[1,7],[2,7],[3,7],[4,7],[5,7]].forEach(p=>px(ox+p[0]*s,oy+p[1]*s,s,c));
-    px(ox+2*s,oy+4*s,s,'#34d399cc');
-    px(ox+3*s,oy+3*s,s,'#34d399cc');
-  } else if(id==='heartbeat'){
-    const pulse=Math.sin(frame*.06)*.3+.7;
-    const hc=`rgba(248,113,113,${pulse})`;
-    [[1,0],[2,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[1,3],[2,3],[3,3],[4,3],[5,3],[2,4],[3,4],[4,4],[3,5]].forEach(p=>px(ox+p[0]*s,oy+p[1]*s,s,hc));
-  }
-  X.imageSmoothingEnabled=true;
-}
-
-function drawZZZ(x, y, phase, alpha){
-  X.save();
-  X.globalAlpha = alpha;
-  X.font = 'bold 10px "Share Tech Mono"';
-  X.fillStyle = '#d4a574cc';
-  for(let i=0;i<3;i++){
-    const t = (frame * .02 + phase + i * .8) % 3;
-    const zy = y - 20 - t * 14;
-    const zx = x + 8 + i * 4 + Math.sin(frame*.015 + i)*3;
-    const za = Math.max(0, 1 - t/3);
-    X.globalAlpha = za * alpha;
-    const sizes = [8, 10, 12];
-    X.font = `bold ${sizes[i]}px "Share Tech Mono"`;
-    X.fillText('z', zx, zy);
-  }
-  X.restore();
-}
-
-// === CHARACTER SHADOW ===
-function drawCharShadow(ch){
-  const s=ch.size;
-  X.fillStyle='rgba(0,0,0,.2)';
-  X.beginPath();
-  X.ellipse(ch.px, ch.py + s*.55, s*.35, s*.12, 0, 0, Math.PI*2);
-  X.fill();
-}
-
-function drawKawaiiEyes(x1,x2,y,r,pupilR,isSleeping,isWorking,blinkPhase){
-  // Blink every ~4 seconds
-  const blink = Math.sin(blinkPhase)>.97;
-  if(isSleeping){
-    // Happy closed eyes (upside-down U)
-    X.strokeStyle='#333';X.lineWidth=2;X.lineCap='round';
-    X.beginPath();X.arc(x1,y,r*.6,Math.PI,0);X.stroke();
-    X.beginPath();X.arc(x2,y,r*.6,Math.PI,0);X.stroke();
-    X.lineCap='butt';
-  } else if(blink){
-    X.strokeStyle='#333';X.lineWidth=2;X.lineCap='round';
-    X.beginPath();X.moveTo(x1-r,y);X.lineTo(x1+r,y);X.stroke();
-    X.beginPath();X.moveTo(x2-r,y);X.lineTo(x2+r,y);X.stroke();
-    X.lineCap='butt';
-  } else {
-    // Big round eyes
-    X.fillStyle='#fff';
-    X.beginPath();X.arc(x1,y,r,0,Math.PI*2);X.fill();
-    X.beginPath();X.arc(x2,y,r,0,Math.PI*2);X.fill();
-    // Pupils — look slightly toward center
-    const px1=x1+1, px2=x2-1, py=y+(isWorking?0:0.5);
-    X.fillStyle='#222';
-    X.beginPath();X.arc(px1,py,pupilR,0,Math.PI*2);X.fill();
-    X.beginPath();X.arc(px2,py,pupilR,0,Math.PI*2);X.fill();
-    // Big sparkle
-    X.fillStyle='#fff';
-    X.beginPath();X.arc(px1-pupilR*.5,py-pupilR*.6,pupilR*.45,0,Math.PI*2);X.fill();
-    X.beginPath();X.arc(px2-pupilR*.5,py-pupilR*.6,pupilR*.45,0,Math.PI*2);X.fill();
-    // Small sparkle
-    X.beginPath();X.arc(px1+pupilR*.4,py+pupilR*.3,pupilR*.2,0,Math.PI*2);X.fill();
-    X.beginPath();X.arc(px2+pupilR*.4,py+pupilR*.3,pupilR*.2,0,Math.PI*2);X.fill();
-  }
-}
-function drawBlush(x1,x2,y,r,color){
-  X.globalAlpha=.25;
-  X.fillStyle=color||'#ff6b9d';
-  X.beginPath();X.ellipse(x1,y,r,r*.6,0,0,Math.PI*2);X.fill();
-  X.beginPath();X.ellipse(x2,y,r,r*.6,0,0,Math.PI*2);X.fill();
-  X.globalAlpha=1;
-}
-function drawSmile(x,y,w,isSleeping){
-  X.strokeStyle='#444';X.lineWidth=1.5;X.lineCap='round';
-  if(isSleeping){
-    // Tiny 'o' mouth
-    X.beginPath();X.ellipse(x,y+1,2,1.5,0,0,Math.PI*2);X.stroke();
-  } else {
-    X.beginPath();X.arc(x,y-w*.3,w,0.15*Math.PI,0.85*Math.PI);X.stroke();
-  }
-  X.lineCap='butt';
-}
-// ===== FUNNY IDLE ANIMATION SYSTEM =====
-// Each character has: ch.funnyAnim (name), ch.funnyTimer, ch.funnyData
-// Particles spawned by anims
-const funnyParticles = [];
-function spawnFunnyParticle(x,y,emoji,vx,vy,life){
-  funnyParticles.push({x,y,emoji,vx:vx||0,vy:vy||-1,life:life||40,maxLife:life||40});
-}
-function updateFunnyParticles(){
-  for(let i=funnyParticles.length-1;i>=0;i--){
-    const p=funnyParticles[i];
-    p.x+=p.vx; p.y+=p.vy; p.life--;
-    if(p.life<=0){funnyParticles.splice(i,1);continue;}
-    X.globalAlpha=p.life/p.maxLife;
-    X.font='12px serif';X.textAlign='center';
-    X.fillText(p.emoji,p.x,p.y);
-    X.globalAlpha=1;
-  }
-}
-const funnyAnims = ['spin','jump','hearts','sneeze','dance','yawn','wave','startle','dizzy','flex'];
-function triggerFunnyAnim(ch){
-  if(ch.funnyAnim) return; // already doing one
-  const pick = funnyAnims[Math.floor(Math.random()*funnyAnims.length)];
-  ch.funnyAnim = pick;
-  ch.funnyTimer = 0;
-  ch.funnyData = {};
-}
-function updateFunnyAnim(ch){
-  if(!ch.funnyAnim) return;
-  ch.funnyTimer++;
-  const t = ch.funnyTimer;
-  switch(ch.funnyAnim){
-    case 'spin': if(t>=40) ch.funnyAnim=null; break;
-    case 'jump': if(t>=30) ch.funnyAnim=null; break;
-    case 'hearts':
-      if(t===1||t===10||t===20) spawnFunnyParticle(ch.px+(Math.random()-.5)*20,ch.py-ch.size*.6,'💕',(Math.random()-.5)*1.5,-1.5,35);
-      if(t>=30) ch.funnyAnim=null; break;
-    case 'sneeze':
-      if(t===12){
-        for(let i=0;i<5;i++) spawnFunnyParticle(ch.px,ch.py-ch.size*.3,'✨',(Math.random()-.5)*3,-Math.random()*2,25);
-        spawnFunnyParticle(ch.px+15,ch.py-ch.size*.4,'💫',1,-1,30);
-      }
-      if(t>=35) ch.funnyAnim=null; break;
-    case 'dance': if(t>=60) ch.funnyAnim=null; break;
-    case 'yawn':
-      if(t===15) spawnFunnyParticle(ch.px+10,ch.py-ch.size*.5,'😪',0.5,-0.8,30);
-      if(t>=40) ch.funnyAnim=null; break;
-    case 'wave': if(t>=35) ch.funnyAnim=null; break;
-    case 'startle':
-      if(t===1) spawnFunnyParticle(ch.px,ch.py-ch.size*.8,'❗',0,-1.5,25);
-      if(t>=25) ch.funnyAnim=null; break;
-    case 'dizzy':
-      if(t%10===0&&t<40) spawnFunnyParticle(ch.px+(Math.random()-.5)*15,ch.py-ch.size*.7,'💫',(Math.random()-.5),-0.5,20);
-      if(t>=50) ch.funnyAnim=null; break;
-    case 'flex':
-      if(t===5) spawnFunnyParticle(ch.px+15,ch.py-ch.size*.5,'💪',0.5,-1,30);
-      if(t>=35) ch.funnyAnim=null; break;
-  }
-}
-function getFunnyTransform(ch){
-  // Returns {bobY, scaleX, scaleY, rotation} offsets
-  const r={bobY:0,scaleX:1,scaleY:1,rotation:0};
-  if(!ch.funnyAnim) return r;
-  const t=ch.funnyTimer;
-  switch(ch.funnyAnim){
-    case 'spin': r.rotation = (t/40)*Math.PI*2; break;
-    case 'jump':
-      if(t<15){ r.bobY=-Math.sin(t/15*Math.PI)*18; r.scaleX=1-Math.sin(t/15*Math.PI)*.08; r.scaleY=1+Math.sin(t/15*Math.PI)*.12; }
-      else if(t<20){ r.scaleX=1.1; r.scaleY=.9; } // squash on landing
-      break;
-    case 'dance':
-      r.bobY = Math.abs(Math.sin(t*.2))*-6;
-      r.rotation = Math.sin(t*.15)*.15;
-      r.scaleX = 1+Math.sin(t*.3)*.05;
-      break;
-    case 'yawn':
-      if(t>5&&t<30) r.scaleY=1+Math.sin((t-5)/25*Math.PI)*.08; // stretch up
-      break;
-    case 'wave': r.rotation=Math.sin(t*.3)*.12; break;
-    case 'startle':
-      if(t<8){ r.bobY=-8; r.scaleX=1.15; r.scaleY=.85; }
-      else if(t<15){ r.bobY=-3; }
-      break;
-    case 'sneeze':
-      if(t<10) r.scaleY=1+t*.005; // wind up
-      else if(t<15){ r.bobY=3; r.scaleX=1.1; r.scaleY=.9; } // achoo!
-      break;
-    case 'dizzy': r.rotation=Math.sin(t*.12)*.2; break;
-    case 'flex':
-      r.scaleX=1+Math.sin(t/35*Math.PI)*.12;
-      r.scaleY=1-Math.sin(t/35*Math.PI)*.05;
-      break;
-  }
-  return r;
-}
-function drawCharacter(ch){
-  const s=ch.size;
-  const isSleeping = ch.behavior === 'sleeping';
-  const isScheduled = ch.behavior === 'scheduled_waiting';
-  const isWalking = ch.behavior === 'walking_to_station' || ch.behavior === 'walking_to_bed';
-  const isWorking = ch.behavior === 'working';
-  let bobY = 0;
-  if(isSleeping || isScheduled){
-    bobY = Math.sin(frame * .02 + ch.sleepBob) * 2;
-  }
-  if(isWalking){
-    ch.walkBounce += .15;
-    bobY = Math.abs(Math.sin(ch.walkBounce*3))*-4;
-  }
-  // Squash & stretch
-  let scaleX=1, scaleY=1, rotation=0;
-  if(isWalking){
-    const t=Math.sin(ch.walkBounce*3);
-    scaleX=1+t*.04; scaleY=1-t*.04;
-  }
-  // Funny animation transforms
-  const funnyT = getFunnyTransform(ch);
-  bobY += funnyT.bobY;
-  scaleX *= funnyT.scaleX;
-  scaleY *= funnyT.scaleY;
-  rotation = funnyT.rotation;
-
-  drawCharShadow(ch);
-
-  X.save();X.translate(ch.px, ch.py + bobY);
-  if(rotation) X.rotate(rotation);
-  X.scale(scaleX,scaleY);
-  if(isSleeping) X.globalAlpha = .75;
-  else if(isScheduled) X.globalAlpha = .85;
-
-  // Name tag with soft bg
-  X.font='bold 9px "Share Tech Mono"';X.textAlign='center';
-  const nameW=X.measureText(ch.name).width+8;
-  X.fillStyle='rgba(0,0,0,.3)';
-  X.beginPath();X.roundRect(-nameW/2,-s*.7-18,nameW,14,4);X.fill();
+  // Body (6x8)
   X.fillStyle=ch.color;
-  X.fillText(ch.name,0,-s*.7-8);
+  X.fillRect(x-3,py-4,6,8);
+  X.fillStyle=ch.darkColor;
+  X.fillRect(x-3,py-4,1,8);
+  X.fillRect(x+2,py-4,1,8);
 
-  const blinkPhase = frame*.025+ch.sleepBob*10;
+  // Head (6x5)
+  X.fillStyle=ch.color;
+  X.fillRect(x-3,py-9,6,5);
+  // Highlight
+  X.fillStyle=ch.color+'dd';
+  X.fillRect(x-2,py-9,4,1);
 
-  if(ch.id==='clyde'){
-    // === CLYDE — Cute octopus ===
-    // Tentacles (6, curly and cute)
-    for(let i=0;i<6;i++){
-      const a=(i-2.5)*Math.PI/5+Math.sin(frame*.015+i)*.12*(isSleeping?.3:1);
-      const len=s*.75+(isSleeping?0:Math.sin(frame*.025+i*1.5)*3);
-      X.strokeStyle=ch.color+'cc';X.lineWidth=4;X.lineCap='round';X.beginPath();
-      X.moveTo(Math.cos(a)*s*.3,Math.sin(a)*s*.3+s*.1);
-      const cx1=Math.cos(a)*len*.4+(isSleeping?0:Math.sin(frame*.03+i)*3);
-      const cy1=Math.sin(a)*len*.4+s*.1;
-      const ex=Math.cos(a)*len*.7;
-      const ey=Math.sin(a)*len*.7+s*.1;
-      X.quadraticCurveTo(cx1,cy1,ex,ey);
-      X.stroke();
-      // Cute suction cup dots
-      X.fillStyle=ch.color+'55';
-      X.beginPath();X.arc(cx1,cy1,2,0,Math.PI*2);X.fill();
-      X.lineCap='butt';
-    }
-    // Round head
-    const headR=s*.5;
-    X.fillStyle=ch.color;X.beginPath();X.arc(0,-2,headR,0,Math.PI*2);X.fill();
-    // Shiny gradient
-    const grad=X.createRadialGradient(-headR*.25,-headR*.35,0,0,-2,headR);
-    grad.addColorStop(0,'rgba(255,255,255,.18)');grad.addColorStop(.6,'rgba(255,255,255,.03)');grad.addColorStop(1,'transparent');
-    X.fillStyle=grad;X.beginPath();X.arc(0,-2,headR,0,Math.PI*2);X.fill();
-    // Top bump (cute forehead)
-    X.fillStyle=ch.color;X.beginPath();X.ellipse(0,-headR*.7,headR*.4,headR*.25,0,0,Math.PI*2);X.fill();
-    // Eyes
-    drawKawaiiEyes(-8,-2+8,-5, 6.5, 3.5, isSleeping, isWorking, blinkPhase);
-    // Blush
-    if(!isSleeping) drawBlush(-14,14,2,5,'#c084fc44');
-    // Mouth
-    drawSmile(0,4,5,isSleeping);
+  // Eyes
+  X.fillStyle='#ffffff';
+  X.fillRect(x-2,py-7,2,2);
+  X.fillRect(x+1,py-7,2,2);
+  X.fillStyle='#111';
+  X.fillRect(x-1,py-6,1,1);
+  X.fillRect(x+2,py-6,1,1);
 
-  } else if(ch.id==='sonnet'){
-    // === SONNET — Cute lobster/shrimp ===
-    // Claws (round, bubbly)
-    const ca=isSleeping?0:Math.sin(frame*.035)*.15;
-    // Left claw
-    X.fillStyle=ch.color;
-    X.beginPath();X.ellipse(-s*.5,-s*.15,s*.18,s*.14,ca-.2,0,Math.PI*2);X.fill();
-    X.beginPath();X.ellipse(-s*.52-s*.12,-s*.22,s*.1,s*.08,ca-.5,0,Math.PI*2);X.fill();
-    X.beginPath();X.ellipse(-s*.52+s*.02,-s*.08,s*.1,s*.08,ca+.2,0,Math.PI*2);X.fill();
-    // Right claw
-    X.beginPath();X.ellipse(s*.5,-s*.15,s*.18,s*.14,-ca+.2,0,Math.PI*2);X.fill();
-    X.beginPath();X.ellipse(s*.52+s*.12,-s*.22,s*.1,s*.08,-ca+.5,0,Math.PI*2);X.fill();
-    X.beginPath();X.ellipse(s*.52-s*.02,-s*.08,s*.1,s*.08,-ca-.2,0,Math.PI*2);X.fill();
-    // Body — round and chubby
-    X.fillStyle=ch.color;
-    X.beginPath();X.ellipse(0,0,s*.32,s*.45,0,0,Math.PI*2);X.fill();
-    // Belly highlight
-    X.fillStyle='rgba(255,200,200,.15)';
-    X.beginPath();X.ellipse(0,s*.05,s*.2,s*.3,0,0,Math.PI*2);X.fill();
-    // Shiny
-    const sg=X.createRadialGradient(-s*.08,-s*.15,0,0,0,s*.35);
-    sg.addColorStop(0,'rgba(255,255,255,.12)');sg.addColorStop(1,'transparent');
-    X.fillStyle=sg;X.beginPath();X.ellipse(0,0,s*.32,s*.45,0,0,Math.PI*2);X.fill();
-    // Little antennae
-    const antW=isSleeping?0:Math.sin(frame*.05)*2;
-    X.strokeStyle=ch.color;X.lineWidth=1.5;X.lineCap='round';
-    X.beginPath();X.moveTo(-5,-s*.44);X.quadraticCurveTo(-10,-s*.7,-8-antW,-s*.72);X.stroke();
-    X.beginPath();X.moveTo(5,-s*.44);X.quadraticCurveTo(10,-s*.7,8+antW,-s*.72);X.stroke();
-    X.fillStyle=ch.color;
-    X.beginPath();X.arc(-8-antW,-s*.72,2.5,0,Math.PI*2);X.fill();
-    X.beginPath();X.arc(8+antW,-s*.72,2.5,0,Math.PI*2);X.fill();
-    X.lineCap='butt';
-    // Eyes
-    drawKawaiiEyes(-7,7,-8, 5, 2.8, isSleeping, isWorking, blinkPhase);
-    // Blush
-    if(!isSleeping) drawBlush(-12,12,-1,4,'#ff6b6b44');
-    // Mouth
-    drawSmile(0,-2,4,isSleeping);
-
-  } else if(ch.id==='flash'){
-    // === FLASH — Cute firefly/lightning bug ===
-    // Wings (translucent, sparkly)
-    X.globalAlpha=.3;
-    const wingFlap=isSleeping?0:Math.sin(frame*.08)*0.15;
-    X.fillStyle='#fde68a';
-    X.beginPath();X.ellipse(-s*.38,-s*.15,s*.22,s*.35,-.3+wingFlap,0,Math.PI*2);X.fill();
-    X.beginPath();X.ellipse(s*.38,-s*.15,s*.22,s*.35,.3-wingFlap,0,Math.PI*2);X.fill();
-    X.globalAlpha=.15;
-    X.fillStyle='#fff';
-    X.beginPath();X.ellipse(-s*.35,-s*.2,s*.12,s*.2,-.2+wingFlap,0,Math.PI*2);X.fill();
-    X.beginPath();X.ellipse(s*.35,-s*.2,s*.12,s*.2,.2-wingFlap,0,Math.PI*2);X.fill();
-    X.globalAlpha=isSleeping?.75:1;
-    // Round body
-    X.fillStyle=ch.color;
-    X.beginPath();X.ellipse(0,0,s*.28,s*.38,0,0,Math.PI*2);X.fill();
-    // Glowing belly
-    const glowPulse=.5+Math.sin(frame*.04)*.3;
-    X.globalAlpha=(isSleeping?.2:.5)*glowPulse;
-    X.fillStyle='#fbbf24';
-    X.beginPath();X.ellipse(0,s*.12,s*.18,s*.22,0,0,Math.PI*2);X.fill();
-    X.globalAlpha=isSleeping?.75:1;
-    // Shiny
-    const fg=X.createRadialGradient(-s*.06,-s*.12,0,0,0,s*.3);
-    fg.addColorStop(0,'rgba(255,255,255,.15)');fg.addColorStop(1,'transparent');
-    X.fillStyle=fg;X.beginPath();X.ellipse(0,0,s*.28,s*.38,0,0,Math.PI*2);X.fill();
-    // Antennae (cute curly)
-    const antMov = isSleeping ? 0 : Math.sin(frame*.05)*2;
-    X.strokeStyle=ch.color;X.lineWidth=1.5;X.lineCap='round';
-    X.beginPath();X.moveTo(-3,-s*.37);X.quadraticCurveTo(-8,-s*.65+antMov,-12,-s*.6+antMov);X.stroke();
-    X.beginPath();X.moveTo(3,-s*.37);X.quadraticCurveTo(8,-s*.65-antMov,12,-s*.6-antMov);X.stroke();
-    // Antenna tips (glowing dots)
-    X.fillStyle='#fbbf24';
-    X.beginPath();X.arc(-12,-s*.6+antMov,3,0,Math.PI*2);X.fill();
-    X.beginPath();X.arc(12,-s*.6-antMov,3,0,Math.PI*2);X.fill();
-    X.lineCap='butt';
-    // Eyes (big for a bug!)
-    drawKawaiiEyes(-5,5,-6, 4.5, 2.5, isSleeping, isWorking, blinkPhase);
-    // Blush
-    if(!isSleeping) drawBlush(-10,10,0,3.5,'#fbbf2444');
-    // Mouth
-    drawSmile(0,2,3,isSleeping);
-
-  } else if(ch.id==='qwen'){
-    // === QWEN — Cute squid ===
-    // Tentacles (flowy, wavy)
-    for(let i=0;i<6;i++){
-      const a=(i-2.5)*.22;
-      X.strokeStyle=ch.color+'bb';X.lineWidth=3.5;X.lineCap='round';X.beginPath();
-      X.moveTo(Math.sin(a)*s*.18,s*.3);
-      const wiggle = isSleeping ? 0 : Math.sin(frame*.02+i*.8)*4;
-      const endY=s*.75+(isSleeping?0:Math.sin(frame*.025+i)*3);
-      X.quadraticCurveTo(Math.sin(a)*s*.1+wiggle,s*.55,Math.sin(a)*s*.12+wiggle*.7,endY);
-      X.stroke();
-      // Cute dot at tip
-      X.fillStyle=ch.color+'88';
-      X.beginPath();X.arc(Math.sin(a)*s*.12+wiggle*.7,endY,2,0,Math.PI*2);X.fill();
-      X.lineCap='butt';
-    }
-    // Mantle (dome head, bigger and rounder)
-    X.fillStyle=ch.color;
-    X.beginPath();X.ellipse(0,-s*.05,s*.33,s*.42,0,0,Math.PI*2);X.fill();
-    // Top dome
-    X.beginPath();X.ellipse(0,-s*.35,s*.25,s*.18,0,0,Math.PI*2);X.fill();
-    // Shiny gradient
-    const qg=X.createRadialGradient(-s*.08,-s*.18,0,0,-s*.05,s*.35);
-    qg.addColorStop(0,'rgba(255,255,255,.14)');qg.addColorStop(1,'transparent');
-    X.fillStyle=qg;X.beginPath();X.ellipse(0,-s*.05,s*.33,s*.42,0,0,Math.PI*2);X.fill();
-    // Little fins
-    const finFlap=isSleeping?0:Math.sin(frame*.04)*.1;
-    X.fillStyle=ch.color+'cc';
-    X.beginPath();X.ellipse(-s*.35,-s*.1,s*.1,s*.18,-.3+finFlap,0,Math.PI*2);X.fill();
-    X.beginPath();X.ellipse(s*.35,-s*.1,s*.1,s*.18,.3-finFlap,0,Math.PI*2);X.fill();
-    // Eyes
-    drawKawaiiEyes(-8,8,-8, 5.5, 3, isSleeping, isWorking, blinkPhase);
-    // Blush
-    if(!isSleeping) drawBlush(-14,14,-1,4.5,'#60a5fa44');
-    // Mouth
-    drawSmile(0,0,4.5,isSleeping);
+  // Features
+  if(ch.feature==='tentacles'){
+    X.fillStyle=ch.darkColor;
+    X.fillRect(x-4,py+4,2,2);
+    X.fillRect(x-1,py+5,2,1);
+    X.fillRect(x+3,py+4,2,2);
+  } else if(ch.feature==='note'){
+    X.fillStyle='#ffe0a0';
+    X.fillRect(x+4,py-11,1,4);
+    X.fillRect(x+3,py-8,2,1);
+    X.fillRect(x+5,py-11,1,1);
+  } else if(ch.feature==='bolt'){
+    X.fillStyle='#ffdd44';
+    X.fillRect(x+4,py-8,2,1);
+    X.fillRect(x+3,py-7,2,1);
+    X.fillRect(x+4,py-6,2,1);
+    X.fillRect(x+5,py-5,2,1);
+  } else if(ch.feature==='wrench'){
+    X.fillStyle='#bbb';
+    X.fillRect(x+4,py-7,1,4);
+    X.fillRect(x+3,py-8,3,1);
+    X.fillRect(x+3,py-3,3,1);
   }
 
-  X.globalAlpha = 1;
+  // Status dot
+  X.fillStyle=isActive?'#44dd66':ch.state==='scheduled'?'#ddaa22':'#555555';
+  X.fillRect(x-5,py-9,2,2);
 
-  if(isSleeping){
-    drawZZZ(ch.px > W/2 ? -s*.3 : s*.3, -s*.5, ch.zzzPhase, 1);
-  }
-
-  if(isWorking&&ch.bubbleT>0){
-    const ba=Math.min(ch.bubbleT/30,1);
-    X.globalAlpha=ba;
-    const bubbleText = (liveMode && ch.task) ? ch.task : '.'.repeat(Math.floor(frame/20)%4);
-    X.font='8px "Share Tech Mono"';X.textAlign='center';
-    const tw = Math.min(X.measureText(bubbleText).width + 12, 140);
-    const bx = -tw/2, by = -s*.7-32, bw = tw, bh = 18;
-    // Rounded speech bubble
-    X.fillStyle='rgba(255,255,255,.92)';
-    X.strokeStyle='rgba(0,0,0,.08)';X.lineWidth=1;
-    X.beginPath();X.roundRect(bx,by,bw,bh,8);X.fill();X.stroke();
-    X.beginPath();X.moveTo(-4,-s*.7-14);X.lineTo(0,-s*.7-6);X.lineTo(4,-s*.7-14);X.fillStyle='rgba(255,255,255,.92)';X.fill();
-    X.fillStyle='#333';
-    X.fillText(bubbleText.length>22?bubbleText.slice(0,20)+'…':bubbleText,0,by+12);
-    X.globalAlpha=1;
-  }
-
-  if(isScheduled){
-    X.font='14px serif';X.textAlign='center';
-    X.fillText('⏰', s*.4, -s*.4);
-  }
-
-  // Interaction bubbles
-  if(ch.interactionBubble>0){
-    const ba=Math.min(ch.interactionBubble/15,1);
-    X.globalAlpha=ba;
-    X.font='12px serif';X.textAlign='center';
-    X.fillText(ch.interactionEmoji, 0, -s*.8-22);
-    X.globalAlpha=1;
-  }
-
-  if(ch.chatT>0){
-    const ba=Math.min(ch.chatT/20,1);
-    X.globalAlpha=ba;
-    X.fillStyle='rgba(167,139,250,.85)';
-    X.beginPath();X.roundRect(-14,-s*.7-26,28,16,6);X.fill();
-    X.fillStyle='#fff';X.font='10px "Share Tech Mono"';X.textAlign='center';
-    X.fillText('💬',0,-s*.7-16);
-    X.globalAlpha=1;
-  }
-  X.restore();
+  // Name
+  X.fillStyle=ch.color;
+  X.font='5px monospace';
+  X.textAlign='center';
+  X.fillText(ch.name,x,py+12);
 }
 
 function updateChars(){
-  simulateEvents();
   chars.forEach(ch=>{
-    const isWalking = ch.behavior === 'walking_to_station' || ch.behavior === 'walking_to_bed';
+    ch.bobFrame++;
 
-    // Footprints while walking
-    if(isWalking){
-      ch.footprintCd--;
-      if(ch.footprintCd<=0){
-        addFootprint(ch);
-        ch.footprintCd=8;
+    // Grid-snapped movement
+    if(ch.px!==ch.tx||ch.py!==ch.ty){
+      const dx=ch.tx-ch.px, dy=ch.ty-ch.py;
+      if(Math.abs(dx)>=Math.abs(dy)){
+        ch.px+=dx>0?1:-1;
+      } else {
+        ch.py+=dy>0?1:-1;
+      }
+      if(Math.abs(ch.px-ch.tx)<=1&&Math.abs(ch.py-ch.ty)<=1){
+        ch.px=ch.tx; ch.py=ch.ty;
       }
     }
 
-    // Check proximity for interaction bubbles
-    if(ch.interactionBubble>0) ch.interactionBubble--;
-    chars.forEach(o=>{
-      if(o.id<=ch.id)return;
-      const d=Math.sqrt(Math.pow(ch.px-o.px,2)+Math.pow(ch.py-o.py,2));
-      if(d<60 && d>10 && ch.interactionBubble<=0 && o.interactionBubble<=0 && Math.random()<.005){
-        const emojis=['!','♥','✨','💡','👋'];
-        const e=emojis[Math.floor(Math.random()*emojis.length)];
-        ch.interactionBubble=45;ch.interactionEmoji=e;
-        o.interactionBubble=45;o.interactionEmoji=e;
-      }
-    });
-
-    switch(ch.behavior){
-      case 'sleeping': break;
-      case 'scheduled_waiting': break;
-      case 'waking':
-        ch.wakeTimer--;
-        if(ch.wakeTimer <= 0){
-          ch.behavior = 'walking_to_station';
-          pickStationTarget(ch);
-          const tasks = {command:'Orchestrating',search:'Searching web',code:'Coding',comms:'Messaging',brief:'Reading news',notion:'Updating docs',heartbeat:'Monitoring'};
-          ch.task = tasks[ch.targetDesk] || 'Working';
-          updateTaskUI(ch);
-        }
-        break;
-      case 'walking_to_station': {
-        const dx=ch.tx-ch.px, dy=ch.ty-ch.py;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<3){
-          ch.behavior = 'working';
-          ch.px=ch.tx; ch.py=ch.ty;
-          ch.deskId = ch.targetDesk;
-          ch.workTimer = 300 + Math.random()*400;
-          ch.bubbleT = 0;
+    if(!liveMode){
+      ch.moveCooldown--;
+      if(ch.moveCooldown<=0){
+        ch.moveCooldown=120+Math.random()*240|0;
+        if(ch.state==='active'){
+          const desk=DESKS[ch.idx];
+          ch.tx=desk.cx*TILE+TILE/2+(Math.random()*6-3|0);
+          ch.ty=(desk.cy+2)*TILE+(Math.random()*4-2|0);
+          ch.atDesk=true;
         } else {
-          const spd=ch.speed*1.2;
-          ch.px+=dx/dist*spd; ch.py+=dy/dist*spd;
-          ch.angle=Math.atan2(dy,dx);
-        }
-        chars.forEach(o=>{
-          if(o.id!==ch.id && (o.behavior==='walking_to_station'||o.behavior==='walking_to_bed')){
-            const d=Math.sqrt(Math.pow(ch.px-o.px,2)+Math.pow(ch.py-o.py,2));
-            if(d<40&&ch.chatT<=0&&o.chatT<=0&&Math.random()<.01){
-              ch.chatT=60;o.chatT=60;
-            }
+          if(Math.random()<0.5){
+            const seat=TABLE_SEATS[ch.idx];
+            ch.tx=(TABLE_CX+seat.dx)*TILE+TILE/2;
+            ch.ty=(TABLE_CY+seat.dy)*TILE+TILE/2;
+          } else {
+            ch.tx=(TABLE_CX+(Math.random()*6-3|0))*TILE;
+            ch.ty=(TABLE_CY+(Math.random()*4-2|0))*TILE;
           }
-        });
-        break;
-      }
-      case 'working':
-        ch.workTimer--;
-        ch.bubbleT = Math.min(ch.bubbleT+1,60);
-        if(ch.workTimer <= 0){
-          ch.behavior = 'walking_to_bed';
-          ch.bubbleT = 0;
-          pickBedTarget(ch);
-          ch.task = 'Heading to rest';
-          updateTaskUI(ch);
+          ch.atDesk=false;
         }
-        break;
-      case 'walking_to_bed': {
-        const dx=ch.tx-ch.px, dy=ch.ty-ch.py;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<3){
-          ch.behavior = 'falling_asleep';
-          ch.px=ch.tx; ch.py=ch.ty;
-          ch.wakeTimer = 40;
-          ch.deskId = null;
-          ch.task = 'Resting';
-          updateTaskUI(ch);
-        } else {
-          const spd=ch.speed*1.2;
-          ch.px+=dx/dist*spd; ch.py+=dy/dist*spd;
-        }
-        break;
+        ch.tx=Math.max(TILE,Math.min(IW-TILE*2,ch.tx))|0;
+        ch.ty=Math.max(TILE*2,Math.min(IH-TILE*3,ch.ty))|0;
       }
-      case 'falling_asleep':
-        ch.wakeTimer--;
-        if(ch.wakeTimer <= 0) ch.behavior = 'sleeping';
-        break;
     }
-    clampChar(ch);
-    ch.chatT = Math.max(ch.chatT-1, 0);
-    // Funny idle animations — ~1% chance per frame when idle/working (not walking/sleeping)
-    if(!ch.funnyAnim && !isWalking && ch.behavior!=='sleeping' && ch.behavior!=='falling_asleep' && Math.random()<.003){
-      triggerFunnyAnim(ch);
-    }
-    updateFunnyAnim(ch);
   });
 }
 
-function updateTaskUI(ch){
-  const el = document.getElementById('task-'+ch.id);
-  if(el) el.textContent = ch.task;
-  const sel = document.getElementById('status-'+ch.id);
-  if(sel){
-    const isWorking = ch.behavior === 'working' || ch.behavior === 'walking_to_station';
-    const isSched = ch.behavior === 'scheduled_waiting';
-    sel.className = 'crew-status ' + (isWorking ? 'active' : isSched ? 'scheduled' : 'idle');
-    sel.textContent = '● ' + (isWorking ? 'ACTIVE' : isSched ? 'SCHEDULED' : 'IDLE');
-  }
+function drawStatusBar(){
+  X.fillStyle='#0c0c12';
+  X.fillRect(0,IH-14,IW,14);
+  X.fillStyle='#1a1a24';
+  X.fillRect(0,IH-14,IW,1);
+
+  chars.forEach((ch,i)=>{
+    const bx=i*(IW/4), by=IH-12;
+    X.fillStyle=ch.state==='active'?'#44dd66':ch.state==='scheduled'?'#ddaa22':'#555';
+    X.fillRect(bx+2,by+2,3,3);
+    X.fillStyle=ch.color;
+    X.font='5px monospace';
+    X.textAlign='left';
+    X.fillText(ch.name,bx+7,by+6);
+    X.fillStyle='#555';
+    const taskText=ch.task.length>14?ch.task.slice(0,13)+'…':ch.task;
+    X.fillText(taskText,bx+7,by+12);
+  });
+
+  const d=new Date();
+  const t=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  X.fillStyle=liveMode?'#44dd66':'#555';
+  X.font='5px monospace';
+  X.textAlign='right';
+  X.fillText((liveMode?'● LIVE':'○ SIM')+' '+t,IW-2,IH-6);
+}
+
+function drawHeader(){
+  X.fillStyle='#0c0c12';
+  X.fillRect(0,0,IW,10);
+  X.fillStyle='#1a1a24';
+  X.fillRect(0,10,IW,1);
+  X.fillStyle='#8866cc';
+  X.font='bold 6px monospace';
+  X.textAlign='center';
+  X.fillText('OPENCLAW HQ',IW/2,7);
 }
 
 function draw(){
-  frame++;heartbeatPhase+=1.5;
-  drawRoom();
-  drawFootprints();
-  drawParticles();
-  drawCrewQuarters();
-  stations.forEach(drawStation);
-  chars.sort((a,b)=>a.py-b.py).forEach(drawCharacter);
-  updateFunnyParticles();
+  frame++;
+  X.clearRect(0,0,IW,IH);
+  drawFloor();
+  drawHeader();
+  drawWhiteboard();
+  DESKS.forEach(drawDesk);
+  drawMeetingTable();
+  drawPlants();
+  drawCooler();
+  chars.sort((a,b)=>a.py-b.py).forEach(drawPixelChar);
+  drawStatusBar();
   updateChars();
   requestAnimationFrame(draw);
 }
 draw();
 
-// === LIVE DATA POLLING ===
-// liveMode declared at top
-let lastActivityKeys = new Set();
-const crewIdMap = { clyde:'clyde', sonnet:'sonnet', glmFlash:'flash', qwenCoder:'qwen' };
-const stationIdMap = { command:'command', search:'search', code:'code', comms:'comms', brief:'brief', notion:'notion', heartbeat:'heartbeat', rest:null };
-
-function relativeTime(iso){
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff/60000);
-  if(m<1) return 'just now';
-  if(m<60) return m+'m ago';
-  const h = Math.floor(m/60);
-  if(h<24) return h+'h ago';
-  return Math.floor(h/24)+'d ago';
-}
-
-function timeUntil(iso){
-  const diff = new Date(iso).getTime() - Date.now();
-  if(diff<0) return 'now';
-  const m = Math.floor(diff/60000);
-  if(m<60) return m+'m';
-  const h = Math.floor(m/60);
-  return h+'h '+(m%60)+'m';
-}
-
-function setConnStatus(live){
-  liveMode = live;
-  const dot = document.getElementById('conn-dot');
-  const label = document.getElementById('conn-label');
-  dot.style.background = live ? '#34d399' : '#64748b';
-  dot.style.animation = live ? 'pulse-dot 2s infinite' : 'none';
-  label.textContent = live ? 'LIVE' : 'SIMULATED';
-  label.style.color = live ? '#34d399' : '#64748b';
-}
-
 function applyLiveData(data){
-  Object.entries(data.crew).forEach(([jsonId, info])=>{
-    const charId = crewIdMap[jsonId];
+  Object.entries(data.crew).forEach(([jsonId,info])=>{
+    const charId=crewIdMap[jsonId];
     if(!charId) return;
-    const ch = chars.find(c=>c.id===charId);
+    const ch=chars.find(c=>c.id===charId);
     if(!ch) return;
-    ch.task = info.task;
-    updateTaskUI(ch);
-    if(info.status === 'active' && info.currentStation !== 'rest'){
-      const targetStation = stations.find(s=>s.id===info.currentStation);
-      if(targetStation && ch.behavior !== 'working'){
-        ch.behavior = 'walking_to_station';
-        ch.targetDesk = info.currentStation;
-        const r = sRect(targetStation);
-        ch.tx = r.x + r.w/2 + (Math.random()-.5)*r.w*.3;
-        ch.ty = r.y + r.h + ch.size + 8 + Math.random()*8;
-        ch.workTimer = 999999;
-        ch.simCooldown = 999999;
-      } else if(ch.behavior === 'working'){
-        ch.workTimer = 999999;
-        ch.simCooldown = 999999;
-      }
+    ch.task=info.task;
+    ch.state=info.status;
+    if(info.status==='active'&&info.currentStation!=='rest'){
+      const desk=DESKS[ch.idx];
+      ch.tx=desk.cx*TILE+TILE/2;
+      ch.ty=(desk.cy+2)*TILE;
+      ch.atDesk=true;
+      ch.moveCooldown=999999;
     } else {
-      if(ch.behavior === 'working' || ch.behavior === 'walking_to_station'){
-        ch.behavior = 'walking_to_bed';
-        pickBedTarget(ch);
-        ch.simCooldown = 999999;
-      }
-      if(info.status === 'scheduled' && (ch.behavior === 'sleeping' || ch.behavior === 'falling_asleep')){
-        ch.behavior = 'scheduled_waiting';
-      }
-    }
-    const sel = document.getElementById('status-'+charId);
-    if(sel){
-      sel.className = 'crew-status ' + info.status;
-      sel.textContent = '● ' + info.status.toUpperCase();
+      const seat=TABLE_SEATS[ch.idx];
+      ch.tx=(TABLE_CX+seat.dx)*TILE+TILE/2;
+      ch.ty=(TABLE_CY+seat.dy)*TILE+TILE/2;
+      ch.atDesk=false;
+      ch.moveCooldown=999999;
     }
   });
-
-  window._liveStations = data.stations;
-
-  const list = document.getElementById('activity-list');
-  const newKeys = new Set(data.activityLog.map(e=>e.time+e.crew));
-  const entries = data.activityLog.slice(0, 20);
-  const newHtml = entries.map(e=>
-    `<div class="activity-entry${lastActivityKeys.has(e.time+e.crew)?'':' new'}">
-      <div><span class="ae-emoji">${e.emoji}</span><span class="ae-msg">${e.message}</span></div>
-      <div class="ae-time">${e.crew} · ${relativeTime(e.time)}</div>
-    </div>`
-  ).join('');
-  if(list.innerHTML !== newHtml) list.innerHTML = newHtml;
-  lastActivityKeys = newKeys;
-
-  const evEl = document.getElementById('next-events-content');
-  if(data.nextEvents && data.nextEvents.length){
-    evEl.innerHTML = data.nextEvents.map(e=>
-      `<div class="ne-item"><span style="color:#facc15">▸</span> ${e.name} in <span style="color:#22d3ee">${timeUntil(e.time)}</span></div>`
-    ).join('');
-  }
 }
 
 async function pollStatus(){
   try{
-    const resp = await fetch('crew-status.json?t='+Date.now());
+    const resp=await fetch('crew-status.json?t='+Date.now());
     if(!resp.ok) throw new Error('not found');
-    const data = await resp.json();
-    setConnStatus(true);
+    const data=await resp.json();
+    liveMode=true;
     applyLiveData(data);
   } catch(e){
-    setConnStatus(false);
-    chars.forEach(ch=>{ if(ch.simCooldown > 99999) ch.simCooldown = 300 + Math.random()*300; });
+    liveMode=false;
+    chars.forEach(ch=>{if(ch.moveCooldown>99999)ch.moveCooldown=100+Math.random()*200|0;});
   }
 }
-
 pollStatus();
-setInterval(pollStatus, 60000);
+setInterval(pollStatus,60000);
 </script>
 </body>
 </html>
