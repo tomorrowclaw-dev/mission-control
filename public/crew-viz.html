@@ -41,19 +41,19 @@ const CREW=[
 ];
 
 const DESKS=[
-  {cx:5, cy:2, crewIdx:0},
-  {cx:13,cy:2, crewIdx:1},
-  {cx:5, cy:6, crewIdx:2},
-  {cx:13,cy:6, crewIdx:3},
+  {cx:4, cy:1, crewIdx:0},
+  {cx:14,cy:1, crewIdx:1},
+  {cx:4, cy:5, crewIdx:2},
+  {cx:14,cy:5, crewIdx:3},
 ];
 
 const TABLE_CX=9, TABLE_CY=12;
 const TABLE_SEATS=[
-  {dx:-2,dy:-1},{dx:2,dy:-1},{dx:-2,dy:1},{dx:2,dy:1}
+  {dx:-3,dy:-2},{dx:3,dy:-2},{dx:-3,dy:2},{dx:3,dy:2}
 ];
 
-const PLANTS=[{tx:1,ty:1},{tx:22,ty:1},{tx:1,ty:14},{tx:22,ty:14}];
-const COOLER={tx:21,ty:4};
+const PLANTS=[{tx:0,ty:0},{tx:23,ty:0},{tx:0,ty:15},{tx:23,ty:15}];
+const COOLER={tx:22,ty:3};
 const WHITEBOARD={tx:8,ty:0,w:4,h:1};
 
 const SYSTEM_STATE={
@@ -74,9 +74,9 @@ const chars=CREW.map((cr,i)=>{
   return{
     ...cr, idx:i,
     px: isActive ? desk.cx*TILE+TILE/2 : (TABLE_CX+seat.dx)*TILE+TILE/2,
-    py: isActive ? (desk.cy+2)*TILE : (TABLE_CY+seat.dy)*TILE+TILE/2,
+    py: isActive ? (desk.cy+3)*TILE : (TABLE_CY+seat.dy)*TILE+TILE/2,
     tx: isActive ? desk.cx*TILE+TILE/2 : (TABLE_CX+seat.dx)*TILE+TILE/2,
-    ty: isActive ? (desk.cy+2)*TILE : (TABLE_CY+seat.dy)*TILE+TILE/2,
+    ty: isActive ? (desk.cy+3)*TILE : (TABLE_CY+seat.dy)*TILE+TILE/2,
     state: state.status,
     task: state.task,
     atDesk: isActive,
@@ -130,7 +130,7 @@ function drawDesk(desk){
 
   // Chair
   X.fillStyle=COL_CHAIR;
-  const chairX=desk.cx*TILE+TILE/2-3|0, chairY=(desk.cy+1)*TILE+4;
+  const chairX=desk.cx*TILE+TILE/2-3|0, chairY=(desk.cy+2)*TILE+4;
   X.fillRect(chairX,chairY,6,6);
   X.fillStyle='#222028';
   X.fillRect(chairX+1,chairY+1,4,4);
@@ -404,7 +404,7 @@ function updateChars(){
         if(ch.state==='active'){
           const desk=DESKS[ch.idx];
           ch.tx=desk.cx*TILE+TILE/2+(Math.random()*6-3|0);
-          ch.ty=(desk.cy+2)*TILE+(Math.random()*4-2|0);
+          ch.ty=(desk.cy+3)*TILE+(Math.random()*4-2|0);
           ch.atDesk=true;
         } else {
           if(Math.random()<0.5){
@@ -490,7 +490,7 @@ function applyLiveData(data){
     if(info.status==='active'&&info.currentStation!=='rest'){
       const desk=DESKS[ch.idx];
       ch.tx=desk.cx*TILE+TILE/2;
-      ch.ty=(desk.cy+2)*TILE;
+      ch.ty=(desk.cy+3)*TILE;
       ch.atDesk=true;
       ch.moveCooldown=999999;
     } else {
