@@ -13,114 +13,153 @@ export default function CountdownTimer({ targetDate, label, variant = 'default' 
   const target = new Date(targetDate)
   const daysLeft = differenceInDays(target, now)
   const weeksLeft = differenceInWeeks(target, now)
-  const hoursLeft = differenceInHours(target, now) % 24
-  const isUrgent = daysLeft > 0 && daysLeft < 28
+  const hoursLeft = differenceInHours(target, now)
 
-  // Total days for thesis (18 weeks = 126 days from Feb 9)
-  const totalDays = 139 // Feb 9 to Jun 28
-  const elapsed = totalDays - daysLeft
-  const progress = Math.max(0, Math.min(100, (elapsed / totalDays) * 100))
+  // Enhanced urgency system with more granular levels
+  const getUrgencyLevel = () => {
+    if (daysLeft <= 3) return 'critical'
+    if (daysLeft <= 7) return 'urgent'
+    if (daysLeft <= 21) return 'warning'
+    if (daysLeft <= 42) return 'attention'
+    return 'normal'
+  }
 
-  const urgencyColor = daysLeft <= 28
-    ? 'text-red-400'
-    : daysLeft <= 56
-    ? 'text-amber-400'
-    : 'text-emerald-400'
+  const urgencyLevel = getUrgencyLevel()
 
-  const ringColor = daysLeft <= 28
-    ? '#f87171'
-    : daysLeft <= 56
-    ? '#fbbf24'
-    : '#34d399'
+  const urgencyStyles = {
+    critical: {
+      color: 'text-red-300',
+      border: 'border-red-500/30 hover:border-red-500/50',
+      glow: 'shadow-red-500/10 hover:shadow-red-500/20',
+      bg: 'from-red-500/20 to-red-500/5',
+      pulse: 'animate-pulse',
+      icon: '🚨'
+    },
+    urgent: {
+      color: 'text-red-400',
+      border: 'border-red-500/20 hover:border-red-500/40',
+      glow: 'shadow-red-500/8',
+      bg: 'from-red-500/15 to-red-500/0',
+      pulse: '',
+      icon: '⚠️'
+    },
+    warning: {
+      color: 'text-yellow-400',
+      border: 'border-yellow-500/20 hover:border-yellow-500/40',
+      glow: 'shadow-yellow-500/5',
+      bg: 'from-yellow-500/10 to-yellow-500/0',
+      pulse: '',
+      icon: '⏰'
+    },
+    attention: {
+      color: 'text-amber-400',
+      border: 'border-amber-500/20 hover:border-amber-500/30',
+      glow: 'shadow-amber-500/5',
+      bg: 'from-amber-500/8 to-amber-500/0',
+      pulse: '',
+      icon: '📅'
+    },
+    normal: {
+      color: 'text-indigo-400',
+      border: 'border-indigo-500/20 hover:border-indigo-500/40',
+      glow: 'shadow-indigo-500/5',
+      bg: 'from-indigo-500/8 to-indigo-500/0',
+      pulse: '',
+      icon: '🎯'
+    }
+  }
 
-  const ringBg = daysLeft <= 28
-    ? 'rgba(248,113,113,0.1)'
-    : daysLeft <= 56
-    ? 'rgba(251,191,36,0.1)'
-    : 'rgba(52,211,153,0.1)'
+  const styles = urgencyStyles[urgencyLevel]
 
   if (variant === 'hero') {
-    const circumference = 2 * Math.PI * 52
-    const offset = circumference - (progress / 100) * circumference
-
     return (
-      <div className={`card-gradient p-5 relative overflow-hidden ${isUrgent ? 'countdown-urgent' : ''}`}>
-        {/* Subtle animated gradient background */}
-        <div className="absolute inset-0 opacity-30" style={{
-          background: `radial-gradient(ellipse at 20% 50%, ${ringBg} 0%, transparent 70%)`
-        }} />
-        <div className="relative z-10 flex items-center gap-5">
-          {/* Ring */}
-          <div className="relative flex-shrink-0">
-            <svg width="120" height="120" className="-rotate-90">
-              <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="4"
-                className="text-zinc-800/50 dark:text-zinc-800/50" />
-              <circle cx="60" cy="60" r="52" fill="none" stroke={ringColor} strokeWidth="4"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={offset}
-                style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`font-mono text-3xl font-bold ${urgencyColor}`}>{daysLeft}</span>
-              <span className="text-[9px] uppercase tracking-[0.2em] text-zinc-500">days</span>
+      <div className={`card-gradient p-5 ${styles.border} ${styles.glow} relative overflow-hidden group transition-all duration-500`}>
+        {/* Dramatic background gradient for urgency */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${styles.bg} transition-all duration-700 group-hover:opacity-80`} />
+        
+        {/* Pulsing glow effect for critical countdown */}
+        {urgencyLevel === 'critical' && (
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-transparent animate-pulse" />
+        )}
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-lg">{styles.icon}</span>
+            <div className="text-right">
+              <div className={`font-mono text-lg font-bold ${styles.color}`}>
+                {weeksLeft}
+              </div>
+              <div className="text-[9px] uppercase tracking-[0.2em] text-zinc-500 font-body">
+                weeks
+              </div>
             </div>
           </div>
-          {/* Text */}
-          <div className="flex-1 min-w-0">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-mono">Defense Countdown</div>
-            <div className="font-display text-lg mt-1 text-zinc-200 dark:text-zinc-200 light:text-zinc-800 truncate">{label}</div>
-            <div className="flex items-center gap-3 mt-2">
-              <div className="text-center">
-                <div className={`font-mono text-xl font-bold ${urgencyColor}`}>{weeksLeft}</div>
-                <div className="text-[8px] uppercase tracking-wider text-zinc-500">weeks</div>
-              </div>
-              <div className="w-px h-6 bg-zinc-700/50" />
-              <div className="text-center">
-                <div className={`font-mono text-xl font-bold ${urgencyColor}`}>{daysLeft % 7}</div>
-                <div className="text-[8px] uppercase tracking-wider text-zinc-500">days</div>
-              </div>
-              <div className="w-px h-6 bg-zinc-700/50" />
-              <div className="text-center">
-                <div className={`font-mono text-xl font-bold ${urgencyColor}`}>{hoursLeft}</div>
-                <div className="text-[8px] uppercase tracking-wider text-zinc-500">hours</div>
-              </div>
+          
+          <div className={`font-mono text-5xl font-bold tracking-tight ${styles.color} ${styles.pulse}`}>
+            {daysLeft}
+          </div>
+          
+          <div className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 mt-1.5 font-body">
+            days remaining
+          </div>
+          
+          <div className="font-display text-sm mt-3 text-zinc-300">{label}</div>
+          
+          {/* Show hours for very urgent countdowns */}
+          {urgencyLevel === 'critical' && hoursLeft > 0 && (
+            <div className="text-[10px] text-zinc-500 font-mono mt-1">
+              {hoursLeft}h remaining
             </div>
-            <div className="text-[10px] text-zinc-600 font-mono mt-2">{progress.toFixed(1)}% elapsed</div>
+          )}
+          
+          {/* Progress indicator */}
+          <div className="mt-3">
+            <div className="h-1 bg-zinc-800/50 rounded-full overflow-hidden">
+              <div 
+                className={`h-full bg-gradient-to-r ${
+                  urgencyLevel === 'critical' ? 'from-red-500 to-red-400' :
+                  urgencyLevel === 'urgent' ? 'from-red-600 to-red-400' :
+                  urgencyLevel === 'warning' ? 'from-yellow-500 to-yellow-400' :
+                  urgencyLevel === 'attention' ? 'from-amber-500 to-amber-400' :
+                  'from-indigo-600 to-indigo-400'
+                } rounded-full transition-all duration-1000 ${styles.pulse}`}
+                style={{ width: `${Math.max(5, Math.min(100, (138 - daysLeft) / 138 * 100))}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
     )
   }
 
-  // Default variant — compact with mini ring
-  const miniCirc = 2 * Math.PI * 18
-  const miniDaysTotal = daysLeft + elapsed // approximate
-  const miniProgress = Math.max(0, Math.min(100, (1 - daysLeft / miniDaysTotal) * 100))
-  const miniOffset = miniCirc - (miniProgress / 100) * miniCirc
-
   return (
-    <div className={`card-gradient p-4 relative overflow-hidden card-shine ${isUrgent ? 'countdown-urgent' : ''}`}>
-      <div className="relative z-10 flex items-center gap-3">
-        <div className="relative flex-shrink-0">
-          <svg width="44" height="44" className="-rotate-90">
-            <circle cx="22" cy="22" r="18" fill="none" stroke="currentColor" strokeWidth="3"
-              className="text-zinc-800/40" />
-            <circle cx="22" cy="22" r="18" fill="none" stroke={ringColor} strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray={miniCirc}
-              strokeDashoffset={miniOffset}
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className={`font-mono text-xs font-bold ${urgencyColor}`}>{daysLeft}</span>
+    <div className={`card p-4 ${styles.border} ${styles.glow} relative overflow-hidden card-shine transition-all duration-300 group`}>
+      {/* Subtle background gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${styles.bg} transition-all duration-500 group-hover:opacity-60`} />
+      
+      <div className="relative z-10">
+        <div className="flex items-start justify-between">
+          <div className={`font-mono text-3xl font-bold tracking-tight ${styles.color} ${styles.pulse}`}>
+            {daysLeft}
           </div>
+          <span className="text-sm opacity-60">{styles.icon}</span>
         </div>
-        <div className="min-w-0">
-          <div className={`font-mono text-lg font-bold ${urgencyColor}`}>{daysLeft} days left</div>
-          <div className="text-xs text-zinc-400 mt-0.5 truncate">{label}</div>
+        
+        <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1 font-body">days left</div>
+        <div className="text-sm font-medium mt-2.5 text-zinc-300 leading-snug">{label}</div>
+        
+        <div className="flex items-center justify-between mt-2">
           <div className="text-[10px] text-zinc-600 font-mono">{weeksLeft} weeks</div>
+          {urgencyLevel !== 'normal' && (
+            <div className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+              urgencyLevel === 'critical' ? 'bg-red-500/20 text-red-400' :
+              urgencyLevel === 'urgent' ? 'bg-red-500/15 text-red-400' :
+              urgencyLevel === 'warning' ? 'bg-yellow-500/15 text-yellow-400' :
+              'bg-amber-500/15 text-amber-400'
+            } uppercase tracking-wider font-semibold`}>
+              {urgencyLevel}
+            </div>
+          )}
         </div>
       </div>
     </div>

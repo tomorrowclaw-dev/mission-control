@@ -106,7 +106,7 @@ export default function Dashboard() {
         {/* Logo */}
         <div className="p-5 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/10 border border-indigo-500/20 flex items-center justify-center text-lg">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/20 flex items-center justify-center text-lg">
               🐙
             </div>
             <div>
@@ -143,7 +143,7 @@ export default function Dashboard() {
               onClick={() => { setActiveTab(item.key); setSidebarOpen(false) }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                 activeTab === item.key
-                  ? 'bg-violet-500/10 text-violet-300 border border-violet-500/20'
+                  ? 'bg-[var(--accent-glow)] text-[var(--accent-bright)] border border-[var(--glass-border-hover)]'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text)] hover:bg-[var(--card-hover)] border border-transparent'
               }`}
             >
@@ -192,33 +192,33 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in">
             <CountdownTimer targetDate={defenseDate} label="Defense Day" variant="hero" />
 
-            <div className="card-gradient p-4">
+            <div className="instrument p-4">
               <div className="relative z-10">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-mono text-3xl font-bold text-indigo-400">{completedMilestones}</span>
+                  <span className="font-mono text-3xl font-bold text-[var(--accent)]">{completedMilestones}</span>
                   <span className="font-mono text-lg text-zinc-600">/{totalMilestones}</span>
                 </div>
                 <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">milestones</div>
                 <div className="mt-3">
-                  <div className="h-1.5 bg-zinc-800/80 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full progress-bar" style={{ width: `${milestonePercent}%` }} />
+                  <div className="h-1 bg-zinc-800/80 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full progress-bar" style={{ width: `${milestonePercent}%` }} />
                   </div>
                   <div className="text-[10px] text-zinc-600 font-mono mt-1">{milestonePercent}%</div>
                 </div>
               </div>
             </div>
 
-            <div className="card-gradient p-4">
+            <div className="instrument p-4">
               <div className="relative z-10">
                 <div className="flex items-baseline gap-1">
-                  <span className="font-mono text-3xl font-bold text-emerald-400">{(totalWords / 1000).toFixed(1)}</span>
+                  <span className="font-mono text-3xl font-bold text-[var(--accent)]">{(totalWords / 1000).toFixed(1)}</span>
                   <span className="font-mono text-sm text-zinc-600">k words</span>
                 </div>
                 <div className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mt-1">
                   of {(targetWords / 1000).toFixed(0)}k target
                 </div>
                 <div className="mt-3">
-                  <div className="h-1.5 bg-zinc-800/80 rounded-full overflow-hidden">
+                  <div className="h-1 bg-zinc-800/80 rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full progress-bar" style={{ width: `${wordPercent}%` }} />
                   </div>
                   <div className="text-[10px] text-zinc-600 font-mono mt-1">{wordPercent.toFixed(1)}%</div>
@@ -229,7 +229,7 @@ export default function Dashboard() {
 
           {/* Content area */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 min-h-[500px] animate-in" style={{ animationDelay: '100ms' }}>
+            <div key={activeTab} className="lg:col-span-2 min-h-[500px] animate-in" style={{ animationDelay: '100ms' }}>
               {activeTab === 'activity' && <ActivityFeed />}
               {activeTab === 'schedule' && <CalendarView />}
               {activeTab === 'search' && <GlobalSearch />}
@@ -268,8 +268,8 @@ export default function Dashboard() {
         {/* Footer */}
         <footer className="border-t border-[var(--border)] mt-8">
           <div className="max-w-5xl px-6 lg:px-8 py-4 flex items-center justify-between">
-            <span className="text-[10px] text-[var(--text-dim)] font-mono">mission-control v1.1</span>
-            <span className="text-[10px] text-[var(--text-dim)] italic font-body">
+            <span className="text-[9px] text-[var(--text-dim)] font-mono opacity-50">mission-control v1.1</span>
+            <span className="text-[9px] text-[var(--text-dim)] italic font-body opacity-40">
               {['Ship research, not chaos.', 'One milestone at a time.', 'Trust the process.', 'Build. Evaluate. Write. Defend.', 'The artifact is the argument.'][Math.floor(Date.now() / 86400000) % 5]}
             </span>
           </div>
