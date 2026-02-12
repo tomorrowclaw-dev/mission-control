@@ -41,20 +41,20 @@ const CREW=[
 ];
 
 const DESKS=[
-  {cx:4, cy:1, crewIdx:0},
-  {cx:14,cy:1, crewIdx:1},
-  {cx:4, cy:5, crewIdx:2},
-  {cx:14,cy:5, crewIdx:3},
+  {cx:4, cy:2, crewIdx:0},
+  {cx:15,cy:2, crewIdx:1},
+  {cx:4, cy:6, crewIdx:2},
+  {cx:15,cy:6, crewIdx:3},
 ];
 
-const TABLE_CX=9, TABLE_CY=12;
+const TABLE_CX=10, TABLE_CY=12;
 const TABLE_SEATS=[
-  {dx:-3,dy:-2},{dx:3,dy:-2},{dx:-3,dy:2},{dx:3,dy:2}
+  {dx:-3,dy:-2},{dx:3,dy:-2},{dx:-3,dy:3},{dx:3,dy:3}
 ];
 
-const PLANTS=[{tx:0,ty:0},{tx:23,ty:0},{tx:0,ty:15},{tx:23,ty:15}];
-const COOLER={tx:22,ty:3};
-const WHITEBOARD={tx:8,ty:0,w:4,h:1};
+const PLANTS=[{tx:1,ty:1},{tx:22,ty:1},{tx:1,ty:14},{tx:22,ty:14}];
+const COOLER={tx:21,ty:4};
+const WHITEBOARD={tx:8,ty:1,w:4,h:1};
 
 const SYSTEM_STATE={
   clyde:{status:'active',station:'command',task:'Orchestrating crew'},
@@ -97,8 +97,8 @@ function drawFloor(){
 }
 
 function drawDesk(desk){
-  const x=desk.cx*TILE-TILE, y=desk.cy*TILE;
-  const w=TILE*3, h=TILE;
+  const x=desk.cx*TILE-TILE/2, y=desk.cy*TILE;
+  const w=TILE*2, h=TILE-2;
   const cr=chars[desk.crewIdx];
   const isActive=cr.state==='active'&&cr.atDesk;
 
@@ -108,58 +108,55 @@ function drawDesk(desk){
   X.fillStyle='#1e1a24';
   X.fillRect(x,y+h-1,w,1);
 
-  // Monitor
-  const mw=10, mh=8;
-  const mx=x+w/2-mw/2|0, my=y-mh+2;
-  X.fillStyle=COL_MONITOR_OFF;
+  // Monitor (bigger)
+  const mw=12, mh=10;
+  const mx=x+w/2-mw/2|0, my=y-mh+1;
+  X.fillStyle='#181820';
+  X.fillRect(mx-1,my-1,mw+2,mh+2); // bezel
+  X.fillStyle=isActive?'#1a4488':'#0e0e18';
   X.fillRect(mx,my,mw,mh);
-  X.fillStyle=isActive?'#2266aa':'#141420';
-  X.fillRect(mx+1,my+1,mw-2,mh-3);
   if(isActive){
-    for(let ly=0;ly<mh-3;ly+=2){
-      X.fillStyle='rgba(100,180,255,0.15)';
-      X.fillRect(mx+1,my+1+ly,mw-2,1);
+    // Screen content lines
+    X.fillStyle='rgba(100,180,255,0.2)';
+    for(let ly=1;ly<mh-1;ly+=2){
+      X.fillRect(mx+1,my+ly,mw-2,1);
     }
-    // Monitor glow
-    X.fillStyle='rgba(60,120,200,0.06)';
-    X.fillRect(mx-2,my-2,mw+4,mh+4);
+    // Glow
+    X.fillStyle='rgba(60,140,220,0.08)';
+    X.fillRect(mx-3,my-3,mw+6,mh+8);
   }
   // Stand
   X.fillStyle='#222';
-  X.fillRect(mx+mw/2-1|0,my+mh-1,2,2);
+  X.fillRect(mx+mw/2-1|0,my+mh,2,3);
 
   // Chair
   X.fillStyle=COL_CHAIR;
-  const chairX=desk.cx*TILE+TILE/2-3|0, chairY=(desk.cy+2)*TILE+4;
-  X.fillRect(chairX,chairY,6,6);
+  const chairX=desk.cx*TILE+TILE/2-4|0, chairY=(desk.cy+2)*TILE;
+  X.fillRect(chairX,chairY,8,7);
   X.fillStyle='#222028';
-  X.fillRect(chairX+1,chairY+1,4,4);
-
-  // Desk label
-  X.fillStyle=cr.color+'66';
-  X.font='4px monospace';
-  X.textAlign='center';
-  X.fillText(cr.name,x+w/2,y+h+4);
+  X.fillRect(chairX+1,chairY+1,6,5);
+  // Chair back
+  X.fillStyle=COL_CHAIR;
+  X.fillRect(chairX+1,chairY-2,6,2);
 }
 
 function drawMeetingTable(){
   const cx=TABLE_CX*TILE+TILE/2, cy=TABLE_CY*TILE+TILE/2;
-  const tw=TILE*3, th=TILE*2;
+  const tw=TILE*2+8, th=TILE+6;
   X.fillStyle=COL_TABLE;
   X.fillRect(cx-tw/2|0,cy-th/2|0,tw,th);
   X.fillStyle='#302018';
   X.fillRect((cx-tw/2|0)+1,(cy-th/2|0)+1,tw-2,th-2);
-  // Highlight
   X.fillStyle='#443020';
   X.fillRect((cx-tw/2|0)+2,(cy-th/2|0)+1,tw-4,1);
 
   TABLE_SEATS.forEach(s=>{
-    const sx=(TABLE_CX+s.dx)*TILE+TILE/2-3|0;
-    const sy=(TABLE_CY+s.dy)*TILE+TILE/2-3|0;
+    const sx=(TABLE_CX+s.dx)*TILE+TILE/2-4|0;
+    const sy=(TABLE_CY+s.dy)*TILE+TILE/2-4|0;
     X.fillStyle=COL_CHAIR;
-    X.fillRect(sx,sy,6,6);
+    X.fillRect(sx,sy,8,7);
     X.fillStyle='#1a1820';
-    X.fillRect(sx+1,sy+1,4,4);
+    X.fillRect(sx+1,sy+1,6,5);
   });
 }
 
