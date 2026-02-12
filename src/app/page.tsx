@@ -388,9 +388,6 @@ export default function Dashboard() {
                 <div className="text-sm text-zinc-400">
                   {format(now, 'EEEE, MMMM d, yyyy')}
                 </div>
-                <div className="hidden sm:block">
-                  <CountdownTimer targetDate={defenseDate} label="Defense" variant="default" />
-                </div>
               </div>
               
               <button
