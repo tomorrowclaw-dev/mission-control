@@ -13,7 +13,7 @@ import ContentIdeas from '@/components/ContentIdeas'
 import AdvisorDeliverables from '@/components/AdvisorDeliverables'
 import DailyBriefs from '@/components/DailyBriefs'
 import ActivityFeed from '@/components/ActivityFeed'
-import ScheduledTasks from '@/components/ScheduledTasks'
+import CalendarView from '@/components/CalendarView'
 import GlobalSearch from '@/components/GlobalSearch'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
@@ -216,7 +216,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2 space-y-6">
             <div className="min-h-[500px] animate-in" style={{ animationDelay: '200ms' }}>
               {activeTab === 'activity' && <ActivityFeed />}
-              {activeTab === 'schedule' && <ScheduledTasks />}
+              {activeTab === 'schedule' && <CalendarView />}
               {activeTab === 'search' && <GlobalSearch />}
 
               {activeTab === 'timeline' && (
