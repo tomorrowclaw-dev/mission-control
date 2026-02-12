@@ -2,7 +2,7 @@
 
 export default function CrewViz() {
   return (
-    <div className="fixed top-0 right-0 bottom-0 bg-[#08080c]" style={{ left: '240px' }}>
+    <div className="bg-[#08080c] -m-6 overflow-hidden" style={{ width: 'calc(100% + 48px)', height: 'calc(100vh - 64px)' }}>
       <iframe
         src="/crew-viz.html"
         className="w-full h-full border-0 block"
