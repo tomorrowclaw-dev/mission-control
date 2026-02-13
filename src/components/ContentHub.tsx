@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { ContentIdea } from '@/lib/types'
-import { RotateCw, Plus, ChevronRight, ExternalLink, Pencil, X, Check, Sparkles, Send, Archive } from 'lucide-react'
+// Using inline icons to avoid Turbopack resolve issues
+const Icon = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <span className={`inline-flex items-center justify-center ${className}`}>{children}</span>
+)
 
 const PLATFORM_ICONS: Record<string, string> = {
   twitter: '𝕏',
@@ -24,11 +27,11 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string; bgColor: string }> = {
-  idea: { label: 'Idea', icon: <Sparkles size={12} />, color: 'text-zinc-400', bgColor: 'bg-zinc-500/10 border-zinc-500/20' },
-  drafted: { label: 'Drafted', icon: <Pencil size={12} />, color: 'text-blue-400', bgColor: 'bg-blue-500/10 border-blue-500/20' },
-  ready: { label: 'Ready', icon: <Check size={12} />, color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
-  scheduled: { label: 'Scheduled', icon: <Send size={12} />, color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
-  posted: { label: 'Posted', icon: <ExternalLink size={12} />, color: 'text-green-400', bgColor: 'bg-green-500/10 border-green-500/20' },
+  idea: { label: 'Idea', icon: ✨, color: 'text-zinc-400', bgColor: 'bg-zinc-500/10 border-zinc-500/20' },
+  drafted: { label: 'Drafted', icon: ✏️, color: 'text-blue-400', bgColor: 'bg-blue-500/10 border-blue-500/20' },
+  ready: { label: 'Ready', icon: ✓, color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
+  scheduled: { label: 'Scheduled', icon: 📤, color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
+  posted: { label: 'Posted', icon: ↗, color: 'text-green-400', bgColor: 'bg-green-500/10 border-green-500/20' },
 }
 
 type ViewMode = 'board' | 'list'
@@ -181,7 +184,7 @@ export default function ContentHub() {
             onClick={() => setShowNewForm(true)}
             className="flex items-center gap-2 px-4 py-2 bg-accent/20 hover:bg-accent/30 text-[var(--accent)] rounded-xl border border-accent/20 hover:border-accent/40 transition-all text-sm font-medium"
           >
-            <Plus size={14} />
+            ＋
             New Idea
           </button>
 
@@ -189,7 +192,7 @@ export default function ContentHub() {
             onClick={fetchIdeas}
             className="p-2 rounded-lg bg-zinc-800/30 hover:bg-zinc-700/50 text-[var(--text-dim)] hover:text-[var(--text)] border border-zinc-700/30 transition-all"
           >
-            <RotateCw size={14} />
+            🔄
           </button>
         </div>
       </div>
@@ -213,7 +216,7 @@ export default function ContentHub() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display text-lg">New Content Idea</h3>
             <button onClick={() => setShowNewForm(false)} className="p-1 text-[var(--text-dim)] hover:text-[var(--text)]">
-              <X size={16} />
+              ✕
             </button>
           </div>
           <div className="space-y-4">
@@ -450,7 +453,7 @@ function ContentCard({
               onClick={onStartEdit}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-800/50 hover:bg-zinc-700/50 text-[var(--text-secondary)] rounded-lg border border-zinc-700/30 transition-all"
             >
-              <Pencil size={11} />
+              ✏️
               {idea.full_draft ? 'Edit Draft' : 'Write Draft'}
             </button>
 
@@ -459,7 +462,7 @@ function ContentCard({
                 onClick={() => onStatusChange(nextStatus[idea.status])}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent/10 hover:bg-accent/20 text-[var(--accent)] rounded-lg border border-accent/20 transition-all"
               >
-                <ChevronRight size={11} />
+                ›
                 Move to {STATUS_CONFIG[nextStatus[idea.status]]?.label || nextStatus[idea.status]}
               </button>
             )}
@@ -470,7 +473,7 @@ function ContentCard({
               onClick={onDelete}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
             >
-              <Archive size={11} />
+              🗑
               Delete
             </button>
           </div>
