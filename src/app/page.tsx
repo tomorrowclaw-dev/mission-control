@@ -12,6 +12,7 @@ import AdvisorDeliverables from '@/components/AdvisorDeliverables'
 import DailyBriefs from '@/components/DailyBriefs'
 import MeetingNotes from '@/components/MeetingNotes'
 import CalendarView from '@/components/CalendarView'
+import WeeklyMeetingCalendar from '@/components/WeeklyMeetingCalendar'
 import CrewViz from '@/components/CrewViz'
 import ContentHub from '@/components/ContentHub'
 import ActivityFeed from '@/components/ActivityFeed'
@@ -19,7 +20,7 @@ import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvis
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'activity' | 'content' | 'schedule' | 'search' | 'crew' | 'thesis'
+type Tab = 'activity' | 'content' | 'schedule' | 'search' | 'crew' | 'thesis' | 'calendar'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('activity')
@@ -106,6 +107,10 @@ export default function Dashboard() {
 
   const thesisItems = [
     { key: 'thesis', label: 'Thesis', icon: '📋', description: 'Writing and deliverables' },
+  ]
+
+  const calendarItems = [
+    { key: 'calendar', label: 'Calendar', icon: '🗓️', description: 'Weekly meeting view' },
   ]
 
   const renderContent = () => {
@@ -267,6 +272,22 @@ export default function Dashboard() {
       case 'crew':
         return <CrewViz />
 
+      case 'calendar':
+        return (
+          <div className="space-y-6">
+            <div className="card-glass p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
+                  🗓️
+                </div>
+                <h2 className="font-display text-xl">Weekly Calendar</h2>
+                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
+              </div>
+              <WeeklyMeetingCalendar />
+            </div>
+          </div>
+        )
+
       case 'thesis':
         return (
           <div className="space-y-6">
@@ -351,6 +372,27 @@ export default function Dashboard() {
                 <div className="flex-1 text-left">
                   <div>{item.label}</div>
                   <div className="text-xs text-[var(--text-dim)] mt-0.5">{item.description}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="nav-divider" />
+
+          <div className="space-y-1">
+            {calendarItems.map((item) => (
+              <button
+                key={item.key}
+                onClick={() => {
+                  setActiveTab(item.key as Tab)
+                  setSidebarOpen(false)
+                }}
+                className={`nav-item ${activeTab === item.key ? 'active' : ''}`}
+              >
+                <span className="text-sm">{item.icon}</span>
+                <div className="flex-1 text-left">
+                  <div>{item.label}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">{item.description}</div>
                 </div>
               </button>
             ))}
