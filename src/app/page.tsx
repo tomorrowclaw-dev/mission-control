@@ -17,11 +17,12 @@ import CrewViz from '@/components/CrewViz'
 import ContentHub from '@/components/ContentHub'
 import ActivityFeed from '@/components/ActivityFeed'
 import UpcomingMeetings from '@/components/UpcomingMeetings'
+import MeetingIntel from '@/components/MeetingIntel'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'activity' | 'content' | 'schedule' | 'search' | 'crew' | 'thesis' | 'calendar'
+type Tab = 'activity' | 'content' | 'meetings' | 'schedule' | 'search' | 'crew' | 'thesis' | 'calendar'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('activity')
@@ -101,6 +102,7 @@ export default function Dashboard() {
   const navigationItems = [
     { key: 'activity', label: 'Activity', icon: '📡', description: 'Timeline, progress, briefs' },
     { key: 'content', label: 'Content', icon: '💡', description: 'Content pipeline & drafts' },
+    { key: 'meetings', label: 'Meetings', icon: '🎙️', description: 'Meeting intelligence & agendas' },
     { key: 'schedule', label: 'Schedule', icon: '📅', description: 'Calendar and meetings' },
     { key: 'search', label: 'Search', icon: '🔍', description: 'Find papers and content' },
     { key: 'crew', label: 'Crew HQ', icon: '🐙', description: 'AI crew visualization' },
@@ -226,6 +228,9 @@ export default function Dashboard() {
       }
       case 'content':
         return <ContentHub />
+
+      case 'meetings':
+        return <MeetingIntel />
 
       case 'schedule':
         return (
@@ -482,7 +487,7 @@ export default function Dashboard() {
               </div>
 
               {/* Right Sidebar */}
-              {(activeTab === 'activity' || activeTab === 'schedule') && (
+              {(activeTab === 'activity' || activeTab === 'schedule' || activeTab === 'meetings') && (
                 <div className="xl:col-span-1 order-first xl:order-last">
                   <div className="right-sidebar space-y-4">
                     <UpcomingMeetings />
