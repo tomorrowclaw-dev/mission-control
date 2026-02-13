@@ -16,6 +16,7 @@ import WeeklyMeetingCalendar from '@/components/WeeklyMeetingCalendar'
 import CrewViz from '@/components/CrewViz'
 import ContentHub from '@/components/ContentHub'
 import ActivityFeed from '@/components/ActivityFeed'
+import UpcomingMeetings from '@/components/UpcomingMeetings'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -480,11 +481,12 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Right Sidebar (Tasks - Activity tab only) */}
-              {activeTab === 'activity' && (
+              {/* Right Sidebar */}
+              {(activeTab === 'activity' || activeTab === 'schedule') && (
                 <div className="xl:col-span-1 order-first xl:order-last">
-                  <div className="right-sidebar">
-                    <NotionTasks />
+                  <div className="right-sidebar space-y-4">
+                    <UpcomingMeetings />
+                    {activeTab === 'activity' && <NotionTasks />}
                   </div>
                 </div>
               )}
