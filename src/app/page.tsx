@@ -13,11 +13,12 @@ import DailyBriefs from '@/components/DailyBriefs'
 import MeetingNotes from '@/components/MeetingNotes'
 import CalendarView from '@/components/CalendarView'
 import CrewViz from '@/components/CrewViz'
+import ContentHub from '@/components/ContentHub'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
 
-type Tab = 'activity' | 'schedule' | 'search' | 'crew' | 'thesis'
+type Tab = 'activity' | 'content' | 'schedule' | 'search' | 'crew' | 'thesis'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('activity')
@@ -96,6 +97,7 @@ export default function Dashboard() {
 
   const navigationItems = [
     { key: 'activity', label: 'Activity', icon: '📡', description: 'Timeline, progress, briefs' },
+    { key: 'content', label: 'Content', icon: '💡', description: 'Content pipeline & drafts' },
     { key: 'schedule', label: 'Schedule', icon: '📅', description: 'Calendar and meetings' },
     { key: 'search', label: 'Search', icon: '🔍', description: 'Find papers and content' },
     { key: 'crew', label: 'Crew HQ', icon: '🐙', description: 'AI crew visualization' },
@@ -184,19 +186,11 @@ export default function Dashboard() {
               <DailyBriefs />
             </div>
 
-            {/* Content Ideas */}
-            <div className="card-glass p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
-                  💡
-                </div>
-                <h2 className="font-display text-xl">Content Pipeline</h2>
-                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
-              </div>
-              <ContentIdeas ideas={contentIdeas} />
-            </div>
           </div>
         )
+
+      case 'content':
+        return <ContentHub />
 
       case 'schedule':
         return (
