@@ -1,13 +1,15 @@
 'use client'
 
 import { useMemo } from 'react'
-import { format, startOfWeek, addDays, isToday, isTomorrow, isPast, addWeeks, isBefore, isAfter } from 'date-fns'
+import { format, startOfWeek, addDays, isToday, isTomorrow, isPast, addWeeks, isAfter } from 'date-fns'
 
 interface Meeting {
   name: string
   day: number // 0=Sun, 1=Mon, ... 6=Sat
   hour: number
   minute: number
+  endHour: number
+  endMinute: number
   color: string
   emoji: string
   biweekly?: boolean
@@ -15,18 +17,25 @@ interface Meeting {
 }
 
 const RECURRING_MEETINGS: Meeting[] = [
-  { name: 'Technology & Innovation Studio', day: 1, hour: 18, minute: 0, color: 'from-blue-500/20 to-blue-600/10', emoji: '💡' },
-  { name: 'Technology & Innovation Studio', day: 3, hour: 18, minute: 0, color: 'from-blue-500/20 to-blue-600/10', emoji: '💡' },
-  { name: 'HRA 2.0', day: 2, hour: 16, minute: 0, color: 'from-amber-500/20 to-amber-600/10', emoji: '🔒' },
-  { name: 'NCITE Huddle', day: 2, hour: 18, minute: 30, color: 'from-red-500/20 to-red-600/10', emoji: '🛡️' },
-  { name: 'T*Lab', day: 5, hour: 9, minute: 0, color: 'from-purple-500/20 to-purple-600/10', emoji: '🔬' },
-  { name: 'Thesis Meeting', day: 3, hour: 14, minute: 0, color: 'from-emerald-500/20 to-emerald-600/10', emoji: '📝', biweekly: true, biweeklyAnchor: '2026-02-18' },
+  { name: 'James | Angie', day: 1, hour: 10, minute: 0, endHour: 11, endMinute: 0, color: 'from-pink-500/20 to-pink-600/10', emoji: '👩‍💼' },
+  { name: 'Technology & Innovation Studio', day: 1, hour: 12, minute: 0, endHour: 13, endMinute: 15, color: 'from-blue-500/20 to-blue-600/10', emoji: '💡' },
+  { name: 'HRA 2.0', day: 2, hour: 10, minute: 0, endHour: 10, endMinute: 45, color: 'from-amber-500/20 to-amber-600/10', emoji: '🔒' },
+  { name: 'NCITE Huddle', day: 2, hour: 12, minute: 30, endHour: 12, endMinute: 50, color: 'from-red-500/20 to-red-600/10', emoji: '🛡️' },
+  { name: 'Technology & Innovation Studio', day: 3, hour: 12, minute: 0, endHour: 13, endMinute: 15, color: 'from-blue-500/20 to-blue-600/10', emoji: '💡' },
+  { name: 'T*Lab Leadership', day: 3, hour: 13, minute: 30, endHour: 14, endMinute: 0, color: 'from-violet-500/20 to-violet-600/10', emoji: '🔬' },
+  { name: 'Thesis Meeting', day: 3, hour: 14, minute: 0, endHour: 14, endMinute: 30, color: 'from-emerald-500/20 to-emerald-600/10', emoji: '📝', biweekly: true, biweeklyAnchor: '2026-02-18' },
+  { name: 'James | Angie Touchbase', day: 4, hour: 10, minute: 30, endHour: 11, endMinute: 0, color: 'from-pink-500/20 to-pink-600/10', emoji: '👩‍💼' },
+  { name: 'T*Lab', day: 5, hour: 9, minute: 0, endHour: 9, endMinute: 30, color: 'from-purple-500/20 to-purple-600/10', emoji: '🔬' },
 ]
 
 function formatTime(hour: number, minute: number): string {
   const period = hour >= 12 ? 'PM' : 'AM'
   const h = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour
   return `${h}:${minute.toString().padStart(2, '0')} ${period}`
+}
+
+function formatTimeRange(h1: number, m1: number, h2: number, m2: number): string {
+  return `${formatTime(h1, m1)} – ${formatTime(h2, m2)}`
 }
 
 function getRelativeLabel(date: Date): string | null {
@@ -39,16 +48,17 @@ export default function UpcomingMeetings() {
   const meetings = useMemo(() => {
     const now = new Date()
     const weekStart = startOfWeek(now, { weekStartsOn: 0 })
-    const results: { name: string; date: Date; color: string; emoji: string; past: boolean }[] = []
+    const results: { name: string; date: Date; endDate: Date; color: string; emoji: string; past: boolean }[] = []
 
-    // Generate meetings for this week and next week
     for (let weekOffset = 0; weekOffset < 2; weekOffset++) {
       const ws = addWeeks(weekStart, weekOffset)
       for (const m of RECURRING_MEETINGS) {
         const meetingDate = addDays(ws, m.day)
         meetingDate.setHours(m.hour, m.minute, 0, 0)
 
-        // Skip biweekly meetings on off-weeks
+        const endDate = new Date(meetingDate)
+        endDate.setHours(m.endHour, m.endMinute, 0, 0)
+
         if (m.biweekly && m.biweeklyAnchor) {
           const anchor = new Date(m.biweeklyAnchor)
           anchor.setHours(0, 0, 0, 0)
@@ -62,37 +72,34 @@ export default function UpcomingMeetings() {
         results.push({
           name: m.name,
           date: meetingDate,
+          endDate,
           color: m.color,
           emoji: m.emoji,
-          past: isPast(meetingDate),
+          past: isPast(endDate),
         })
       }
     }
 
-    // Sort by date, filter out meetings from before today
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
 
     return results
       .filter(m => isAfter(m.date, todayStart) || isToday(m.date))
       .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .slice(0, 8)
+      .slice(0, 10)
   }, [])
 
-  // Group by day
   const grouped = useMemo(() => {
     const groups: { label: string; dateStr: string; meetings: typeof meetings }[] = []
     const seen = new Map<string, typeof meetings>()
 
     for (const m of meetings) {
       const key = format(m.date, 'yyyy-MM-dd')
-      if (!seen.has(key)) {
-        seen.set(key, [])
-      }
+      if (!seen.has(key)) seen.set(key, [])
       seen.get(key)!.push(m)
     }
 
-    for (const [key, items] of seen) {
+    for (const [, items] of seen) {
       const date = items[0].date
       const relative = getRelativeLabel(date)
       const label = relative || format(date, 'EEEE')
@@ -127,7 +134,7 @@ export default function UpcomingMeetings() {
 
             <div className="space-y-1.5">
               {group.meetings.map((m, mi) => {
-                const isPastMeeting = m.past && isToday(m.date)
+                const isPastMeeting = m.past
                 return (
                   <div
                     key={mi}
@@ -141,7 +148,7 @@ export default function UpcomingMeetings() {
                         {m.name}
                       </div>
                       <div className="text-[10px] font-mono text-[var(--text-dim)]">
-                        {formatTime(m.date.getHours(), m.date.getMinutes())}
+                        {formatTimeRange(m.date.getHours(), m.date.getMinutes(), m.endDate.getHours(), m.endDate.getMinutes())}
                       </div>
                     </div>
                     {isPastMeeting && (
