@@ -36,6 +36,42 @@ export async function GET() {
   }
 }
 
+export async function PATCH(request: Request) {
+  if (!NOTION_API_KEY) {
+    return NextResponse.json({ error: 'Missing Notion API Key' }, { status: 500 })
+  }
+
+  try {
+    const { blockId, checked } = await request.json()
+    if (!blockId || typeof checked !== 'boolean') {
+      return NextResponse.json({ error: 'blockId and checked required' }, { status: 400 })
+    }
+
+    const response = await fetch(`https://api.notion.com/v1/blocks/${blockId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${NOTION_API_KEY}`,
+        'Notion-Version': NOTION_VERSION,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to_do: { checked }
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Notion PATCH Error:', errorText)
+      return NextResponse.json({ error: 'Failed to update task' }, { status: response.status })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Server Error:', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+  }
+}
+
 function parseTasks(blocks: any[]) {
   const tasks = []
   let currentSection: 'main' | 'backlog' | null = null

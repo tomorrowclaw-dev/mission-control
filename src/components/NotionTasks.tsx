@@ -33,6 +33,24 @@ export default function NotionTasks() {
     return () => clearInterval(interval)
   }, [fetchTasks])
 
+  const toggleTask = useCallback(async (taskId: string, currentChecked: boolean) => {
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, isChecked: !currentChecked } : t))
+    try {
+      const res = await fetch('/api/notion/tasks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ blockId: taskId, checked: !currentChecked })
+      })
+      if (!res.ok) {
+        // Revert on failure
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, isChecked: currentChecked } : t))
+      }
+    } catch {
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, isChecked: currentChecked } : t))
+    }
+  }, [])
+
   const mainTasks = tasks.filter(t => t.section === 'main')
   const backlogTasks = tasks.filter(t => t.section === 'backlog')
   const completedCount = tasks.filter(t => t.isChecked).length
@@ -118,7 +136,7 @@ export default function NotionTasks() {
           <div className="space-y-2">
             {mainTasks.length > 0 ? (
               mainTasks.map((task, idx) => (
-                <TaskItem key={task.id} task={task} index={idx} />
+                <TaskItem key={task.id} task={task} index={idx} onToggle={toggleTask} />
               ))
             ) : (
               <div className="text-center py-6">
@@ -142,7 +160,7 @@ export default function NotionTasks() {
             </div>
             <div className="space-y-2">
               {backlogTasks.map((task, idx) => (
-                <TaskItem key={task.id} task={task} index={idx} isBacklog />
+                <TaskItem key={task.id} task={task} index={idx} isBacklog onToggle={toggleTask} />
               ))}
             </div>
           </div>
@@ -164,14 +182,14 @@ export default function NotionTasks() {
   )
 }
 
-function TaskItem({ task, index, isBacklog = false }: { task: NotionTask, index: number, isBacklog?: boolean }) {
+function TaskItem({ task, index, isBacklog = false, onToggle }: { task: NotionTask, index: number, isBacklog?: boolean, onToggle: (id: string, checked: boolean) => void }) {
   const [isHovered, setIsHovered] = useState(false)
   const [justCompleted, setJustCompleted] = useState(false)
 
   const handleTaskClick = () => {
+    onToggle(task.id, task.isChecked)
     if (!task.isChecked) {
       setJustCompleted(true)
-      // In a real app, this would update the task status
       setTimeout(() => setJustCompleted(false), 1000)
     }
   }
