@@ -1100,7 +1100,9 @@ function applyLiveData(data){
 
 async function pollStatus(){
   try{
-    const resp=await fetch('crew-status.json?t='+Date.now());
+    // Try local first (dev), then Supabase Storage (production)
+    let resp=await fetch('crew-status.json?t='+Date.now()).catch(()=>null);
+    if(!resp||!resp.ok) resp=await fetch('https://jofskdvhfapxfwjxaxho.supabase.co/storage/v1/object/public/crew-status/status.json?t='+Date.now());
     if(!resp.ok) throw new Error('not found');
     const data=await resp.json();
     liveMode=true;
