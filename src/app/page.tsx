@@ -104,7 +104,6 @@ export default function Dashboard() {
     { key: 'content', label: 'Content', icon: '💡', description: 'Content pipeline & drafts' },
     { key: 'meetings', label: 'Meetings', icon: '🎙️', description: 'Meeting intelligence & agendas' },
     { key: 'schedule', label: 'Schedule', icon: '📅', description: 'Calendar and meetings' },
-    { key: 'search', label: 'Search', icon: '🔍', description: 'Find papers and content' },
     { key: 'crew', label: 'Crew HQ', icon: '🐙', description: 'AI crew visualization' },
   ]
 
@@ -255,22 +254,6 @@ export default function Dashboard() {
                 <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
               </div>
               <MeetingNotes />
-            </div>
-          </div>
-        )
-
-      case 'search':
-        return (
-          <div className="space-y-6">
-            <div className="card-glass p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center text-sm">
-                  📄
-                </div>
-                <h2 className="font-display text-xl">Research Library</h2>
-                <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
-              </div>
-              <PapersList papers={papers} />
             </div>
           </div>
         )
