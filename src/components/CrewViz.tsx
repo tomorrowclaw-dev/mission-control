@@ -5,8 +5,7 @@ export default function CrewViz() {
     <div
       className="w-full rounded-xl overflow-hidden shadow-2xl"
       style={{
-        aspectRatio: '3 / 2',
-        maxHeight: 'calc(100vh - 120px)',
+        height: 'calc(100vh - 80px)',
         background: '#0e0d14',
       }}
     >
