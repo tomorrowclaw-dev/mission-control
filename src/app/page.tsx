@@ -14,6 +14,7 @@ import MeetingNotes from '@/components/MeetingNotes'
 import CalendarView from '@/components/CalendarView'
 import CrewViz from '@/components/CrewViz'
 import ContentHub from '@/components/ContentHub'
+import ActivityFeed from '@/components/ActivityFeed'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
 import { Milestone, WritingSection, Paper, ContentIdea, AdvisorDeliverable } from '@/lib/types'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -109,9 +110,32 @@ export default function Dashboard() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'activity':
+      case 'activity': {
+        const hour = now.getHours()
+        const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+        const daysLeft = Math.ceil((new Date(defenseDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        const readyContent = contentIdeas.filter(c => c.status === 'ready').length
+        const draftedContent = contentIdeas.filter(c => c.status === 'drafted').length
+        const postedContent = contentIdeas.filter(c => c.status === 'posted').length
+
         return (
           <div className="space-y-6">
+            {/* Welcome Card */}
+            <div className="instrument p-5">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">🐙</div>
+                <div>
+                  <h2 className="font-display text-xl text-[var(--text)]">{greeting}, James.</h2>
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">
+                    <span className="font-mono text-[var(--accent)]">{daysLeft}</span> days until defense
+                    {totalWords > 0 && <> · <span className="font-mono">{(totalWords/1000).toFixed(1)}k</span> words written</>}
+                    {(readyContent + draftedContent) > 0 && <> · <span className="font-mono">{readyContent}</span> content ready, <span className="font-mono">{draftedContent}</span> drafted</>}
+                    {postedContent > 0 && <> · <span className="font-mono">{postedContent}</span> posted</>}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="instrument p-4">
@@ -186,9 +210,14 @@ export default function Dashboard() {
               <DailyBriefs />
             </div>
 
+            {/* Activity Feed */}
+            <div className="card-glass p-6">
+              <ActivityFeed />
+            </div>
+
           </div>
         )
-
+      }
       case 'content':
         return <ContentHub />
 

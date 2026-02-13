@@ -435,14 +435,28 @@ function ContentCard({
                 placeholder="Write your post here..."
                 autoFocus
               />
-              <div className="flex justify-end gap-2 mt-2">
-                <button onClick={onCancelEdit} className="px-3 py-1 text-xs text-[var(--text-dim)]">Cancel</button>
-                <button onClick={onSaveDraft} className="px-3 py-1 text-xs bg-accent/20 text-[var(--accent)] rounded-md border border-accent/30">Save Draft</button>
+              <div className="flex items-center justify-between mt-2">
+                {idea.platform === 'twitter' && (
+                  <span className={`text-[10px] font-mono ${editDraft.length > 280 ? 'text-red-400' : editDraft.length > 240 ? 'text-amber-400' : 'text-[var(--text-dim)]'}`}>
+                    {editDraft.length}/280
+                  </span>
+                )}
+                <div className="flex gap-2 ml-auto">
+                  <button onClick={onCancelEdit} className="px-3 py-1 text-xs text-[var(--text-dim)]">Cancel</button>
+                  <button onClick={onSaveDraft} className="px-3 py-1 text-xs bg-accent/20 text-[var(--accent)] rounded-md border border-accent/30">Save Draft</button>
+                </div>
               </div>
             </div>
           ) : idea.full_draft ? (
             <div>
-              <div className="text-[9px] uppercase tracking-wider text-[var(--text-dim)] font-mono mb-1">Draft</div>
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-[9px] uppercase tracking-wider text-[var(--text-dim)] font-mono">Draft</div>
+                {idea.platform === 'twitter' && (
+                  <span className={`text-[9px] font-mono ${idea.full_draft.length > 280 ? 'text-red-400' : 'text-[var(--text-dim)]'}`}>
+                    {idea.full_draft.length}/280
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-[var(--text)] whitespace-pre-wrap leading-relaxed bg-zinc-800/30 rounded-lg p-3 border border-zinc-700/30">{idea.full_draft}</p>
             </div>
           ) : null}
