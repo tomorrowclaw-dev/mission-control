@@ -3,10 +3,11 @@
 export default function CrewViz() {
   return (
     <div
-      className="w-full rounded-xl overflow-hidden shadow-2xl"
+      className="w-full overflow-hidden"
       style={{
-        height: 'calc(100vh - 80px)',
+        height: 'calc(100vh - 100px)',
         background: '#0e0d14',
+        borderRadius: '8px',
       }}
     >
       <iframe

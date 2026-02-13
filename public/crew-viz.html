@@ -14,10 +14,14 @@ canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;width
 <canvas id="c"></canvas>
 <script>
 const C=document.getElementById('c'), X=C.getContext('2d');
-const SCALE=3;
 const TILE=16;
-const LW=30*TILE, LH=20*TILE; // 480x320 logical
-C.width=LW*SCALE; C.height=LH*SCALE;
+// Dynamically size canvas to fill container
+const cw=window.innerWidth, ch=window.innerHeight;
+const SCALE=Math.max(2,Math.floor(Math.min(cw/(30*TILE),ch/(20*TILE))));
+const tilesW=Math.ceil(cw/SCALE/TILE), tilesH=Math.ceil(ch/SCALE/TILE);
+const LW=tilesW*TILE, LH=tilesH*TILE;
+C.width=tilesW*TILE*SCALE; C.height=tilesH*TILE*SCALE;
+C.style.width=cw+'px'; C.style.height=ch+'px';
 X.imageSmoothingEnabled=false;
 X.setTransform(SCALE,0,0,SCALE,0,0);
 
@@ -52,32 +56,35 @@ const CREW=[
   {id:'qwen',name:'Qwen',role:'Coder',color:'#9060d0',dark:'#5a3890',light:'#b888ee',species:'pufferfish'},
 ];
 
-// ── ROOM LAYOUT (tile coords) ──
-// Room interior: cols 2-27, rows 3-16 (walls on top/left/right, bar at bottom)
-const ROOM={x:2,y:3,w:26,h:14};
+// ── ROOM LAYOUT (tile coords, dynamic) ──
+const rw=tilesW-4, rh=tilesH-6; // room interior size (leave margin for walls+header+bar)
+const ROOM={x:2,y:3,w:rw,h:rh};
 
-// Desk positions (cx,cy = center of desk surface in tile coords)
+// Desk positions scaled to room
+const dxL=Math.round(rw*0.18)+2, dxR=Math.round(rw*0.50)+2;
+const dyT=Math.round(rh*0.20)+3, dyB=Math.round(rh*0.58)+3;
 const DESKS=[
-  {cx:6,  cy:5, crewIdx:0}, // top-left
-  {cx:16, cy:5, crewIdx:1}, // top-right
-  {cx:6,  cy:10,crewIdx:2}, // bottom-left
-  {cx:16, cy:10,crewIdx:3}, // bottom-right
+  {cx:dxL, cy:dyT, crewIdx:0},
+  {cx:dxR, cy:dyT, crewIdx:1},
+  {cx:dxL, cy:dyB, crewIdx:2},
+  {cx:dxR, cy:dyB, crewIdx:3},
 ];
 
 // Meeting table center
-const TABLE={cx:24,cy:8};
+const TABLE={cx:Math.round(rw*0.82)+2, cy:Math.round(rh*0.45)+3};
 const TABLE_SEATS=[{dx:0,dy:-2},{dx:0,dy:3},{dx:-2,dy:0},{dx:2,dy:0}];
 
 // Decor
-const PLANTS=[{tx:2,ty:3},{tx:27,ty:3},{tx:2,ty:15},{tx:27,ty:15}];
-const COOLER={tx:22,ty:4};
+const rx=ROOM.x+rw-1, by=ROOM.y+rh-1;
+const PLANTS=[{tx:2,ty:3},{tx:rx,ty:3},{tx:2,ty:by},{tx:rx,ty:by}];
+const COOLER={tx:Math.round(rw*0.65)+2,ty:4};
 const WHITEBOARD={tx:5,ty:2,w:4,h:2};
-const CLOCK={tx:25,ty:2};
-const WINDOW={tx:12,ty:1,w:5,h:2};
-const BOOKSHELF={tx:3,ty:12,h:3};
-const COUCH={cx:7,cy:14};
-const SERVER_RACK={tx:26,ty:6,h:3};
-const FLOOR_LAMP={tx:11,ty:7};
+const CLOCK={tx:rx-2,ty:2};
+const WINDOW={tx:Math.round(tilesW*0.35),ty:1,w:Math.round(tilesW*0.2),h:2};
+const BOOKSHELF={tx:3,ty:Math.round(rh*0.70)+3,h:3};
+const COUCH={cx:Math.round(rw*0.22)+2,cy:by-1};
+const SERVER_RACK={tx:rx-1,ty:Math.round(rh*0.30)+3,h:3};
+const FLOOR_LAMP={tx:Math.round(rw*0.35)+2,ty:Math.round(rh*0.45)+3};
 const COFFEE_TABLE={cx:11,cy:13};
 
 // ── STATE ──

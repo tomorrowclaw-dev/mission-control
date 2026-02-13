@@ -405,11 +405,11 @@ export default function Dashboard() {
         </header>
 
         {/* Content Area */}
-        <div className="p-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div className={activeTab === 'crew' ? 'p-2' : 'p-6'}>
+          <div className={activeTab === 'crew' ? '' : 'max-w-7xl mx-auto'}>
+            <div className={activeTab === 'crew' ? '' : 'grid grid-cols-1 xl:grid-cols-4 gap-6'}>
               {/* Main Content */}
-              <div className="xl:col-span-3">
+              <div className={activeTab === 'crew' ? '' : 'xl:col-span-3'}>
                 <div key={activeTab} className="animate-in fade-slide">
                   {renderContent()}
                 </div>
