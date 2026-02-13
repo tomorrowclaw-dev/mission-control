@@ -27,11 +27,11 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string; bgColor: string }> = {
-  idea: { label: 'Idea', icon: ✨, color: 'text-zinc-400', bgColor: 'bg-zinc-500/10 border-zinc-500/20' },
-  drafted: { label: 'Drafted', icon: ✏️, color: 'text-blue-400', bgColor: 'bg-blue-500/10 border-blue-500/20' },
-  ready: { label: 'Ready', icon: ✓, color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
-  scheduled: { label: 'Scheduled', icon: 📤, color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
-  posted: { label: 'Posted', icon: ↗, color: 'text-green-400', bgColor: 'bg-green-500/10 border-green-500/20' },
+  idea: { label: 'Idea', icon: '✨', color: 'text-zinc-400', bgColor: 'bg-zinc-500/10 border-zinc-500/20' },
+  drafted: { label: 'Drafted', icon: '✏️', color: 'text-blue-400', bgColor: 'bg-blue-500/10 border-blue-500/20' },
+  ready: { label: 'Ready', icon: '✓', color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
+  scheduled: { label: 'Scheduled', icon: '📤', color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
+  posted: { label: 'Posted', icon: '↗', color: 'text-green-400', bgColor: 'bg-green-500/10 border-green-500/20' },
 }
 
 type ViewMode = 'board' | 'list'
@@ -396,7 +396,7 @@ function ContentCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <h4 className="text-sm font-medium text-[var(--text)] leading-snug">{idea.title}</h4>
-            <ChevronRight size={14} className={`text-[var(--text-dim)] shrink-0 transition-transform ${expanded ? 'rotate-90' : ''}`} />
+            <span className="text-[var(--text-dim)] shrink-0">›</span>
           </div>
 
           {/* Tags row */}

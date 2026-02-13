@@ -96,7 +96,7 @@ export interface ContentIdea {
   category: 'ai-tools' | 'thesis-insights' | 'industry' | 'personal-brand' | 'tutorial'
   hook: string | null
   full_draft: string | null
-  status: 'idea' | 'drafted' | 'scheduled' | 'posted'
+  status: 'idea' | 'drafted' | 'ready' | 'scheduled' | 'posted'
   scheduled_for: string | null
   posted_at: string | null
   week_of: string | null
