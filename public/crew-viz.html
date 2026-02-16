@@ -50,10 +50,10 @@ const PAL={
 
 // ── CREW ──
 const CREW=[
-  {id:'clyde',name:'Clyde',role:'Orchestrator',color:'#2dd4a0',dark:'#1a8a66',light:'#66eec8',species:'octopus'},
-  {id:'sonnet',name:'Sonnet',role:'Research',color:'#f08050',dark:'#a05030',light:'#ffaa80',species:'crab'},
-  {id:'flash',name:'Flash',role:'Heartbeat',color:'#40b0e0',dark:'#2070a0',light:'#80d0ff',species:'jellyfish'},
-  {id:'qwen',name:'Qwen',role:'Coder',color:'#9060d0',dark:'#5a3890',light:'#b888ee',species:'pufferfish'},
+  {id:'clyde',name:'Clyde',role:'Brain',color:'#2dd4a0',dark:'#1a8a66',light:'#66eec8',species:'octopus'},
+  {id:'quinn',name:'Quinn',role:'Research',color:'#f08050',dark:'#a05030',light:'#ffaa80',species:'crab'},
+  {id:'flick',name:'Flick',role:'Heartbeat',color:'#40b0e0',dark:'#2070a0',light:'#80d0ff',species:'jellyfish'},
+  {id:'reno',name:'Reno',role:'Builder',color:'#9060d0',dark:'#5a3890',light:'#b888ee',species:'pufferfish'},
 ];
 
 // ── ROOM LAYOUT (tile coords, dynamic) ──
@@ -90,13 +90,13 @@ const COFFEE_TABLE={cx:11,cy:13};
 // ── STATE ──
 const SYSTEM_STATE={
   clyde:{status:'active',station:'command',task:'Orchestrating crew'},
-  sonnet:{status:'idle',station:'search',task:'Resting'},
-  flash:{status:'scheduled',station:'comms',task:'Waiting for heartbeat'},
-  qwen:{status:'idle',station:'code',task:'Resting'},
+  quinn:{status:'idle',station:'search',task:'Resting'},
+  flick:{status:'scheduled',station:'comms',task:'Waiting for heartbeat'},
+  reno:{status:'idle',station:'code',task:'Resting'},
 };
 
 let liveMode=false;
-const crewIdMap={clyde:'clyde',sonnet:'sonnet',glmFlash:'flash',qwenCoder:'qwen'};
+const crewIdMap={clyde:'clyde',quinn:'quinn',glmFlash:'flick',qwenCoder:'reno'};
 
 const chars=CREW.map((cr,i)=>{
   const desk=DESKS[i];
