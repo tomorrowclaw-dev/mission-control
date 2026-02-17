@@ -16,6 +16,8 @@ import WeeklyMeetingCalendar from '@/components/WeeklyMeetingCalendar'
 import CrewViz from '@/components/CrewViz'
 import ContentHub from '@/components/ContentHub'
 import ActivityFeed from '@/components/ActivityFeed'
+import CrewStatus from '@/components/CrewStatus'
+import InboxNotes from '@/components/InboxNotes'
 import UpcomingMeetings from '@/components/UpcomingMeetings'
 import MeetingIntel from '@/components/MeetingIntel'
 import { getMilestones, getWritingSections, getPapers, getContentIdeas, getAdvisorDeliverables } from '@/lib/data'
@@ -215,6 +217,16 @@ export default function Dashboard() {
                 <div className="flex-1 h-px bg-gradient-to-r from-zinc-700 to-transparent" />
               </div>
               <DailyBriefs />
+            </div>
+
+            {/* Crew Status + Inbox */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="card-glass p-6">
+                <CrewStatus />
+              </div>
+              <div className="card-glass p-6">
+                <InboxNotes />
+              </div>
             </div>
 
             {/* Activity Feed */}

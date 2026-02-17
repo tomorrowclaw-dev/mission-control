@@ -13,21 +13,15 @@ function getSupabase() {
 export async function GET() {
   try {
     const { data, error } = await getSupabase()
-      .from('activity_log')
+      .from('inbox_notes')
       .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(100)
+      .order('created_at', { ascending: false })
+      .limit(50)
 
-    if (error) {
-      if (error.code === 'PGRST205') {
-        return NextResponse.json([])
-      }
-      throw error
-    }
-
+    if (error) throw error
     return NextResponse.json(data || [])
   } catch (err) {
-    console.error('Activity feed error:', err)
+    console.error('Inbox error:', err)
     return NextResponse.json([])
   }
 }
@@ -35,23 +29,22 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { agent, action, details, status } = body
+    const { text } = body
 
-    if (!agent || !action) {
-      return NextResponse.json({ error: 'agent and action are required' }, { status: 400 })
+    if (!text) {
+      return NextResponse.json({ error: 'text is required' }, { status: 400 })
     }
 
     const { data, error } = await getSupabase()
-      .from('activity_log')
-      .insert({ agent, action, details, status })
+      .from('inbox_notes')
+      .insert({ text })
       .select()
       .single()
 
     if (error) throw error
-
     return NextResponse.json(data)
   } catch (err) {
-    console.error('Activity log insert error:', err)
-    return NextResponse.json({ error: 'Failed to log activity' }, { status: 500 })
+    console.error('Inbox insert error:', err)
+    return NextResponse.json({ error: 'Failed to add note' }, { status: 500 })
   }
 }

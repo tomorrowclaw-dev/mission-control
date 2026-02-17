@@ -4,21 +4,28 @@ import { useState, useEffect } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 
 interface ActivityEntry {
-  id: string
-  created_at: string
-  crew: string
-  emoji: string
+  id: number
+  timestamp: string
+  agent: string
   action: string
-  detail: string | null
-  station: string | null
+  details: string | null
+  status: string | null
+}
+
+const crewEmoji: Record<string, string> = {
+  'clyde': '🐙',
+  'flick': '⚡',
+  'reno': '🔧',
+  'bear': '💪',
+  'quinn': '📚',
 }
 
 const crewColors: Record<string, string> = {
-  'Clyde': 'text-violet-400 bg-violet-500/10 border-violet-500/20',
-  'Sonnet': 'text-red-400 bg-red-500/10 border-red-500/20',
-  'GLM Flash': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-  'Qwen Coder': 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
-  'System': 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20',
+  'clyde': 'text-violet-400 bg-violet-500/10 border-violet-500/20',
+  'flick': 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
+  'reno': 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+  'bear': 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+  'quinn': 'text-rose-400 bg-rose-500/10 border-rose-500/20',
 }
 
 export default function ActivityFeed() {
@@ -42,16 +49,15 @@ export default function ActivityFeed() {
       }
     }
     load()
-    // Poll every 30s
     const interval = setInterval(load, 30000)
     return () => clearInterval(interval)
   }, [])
 
   const filtered = filter === 'all' 
     ? activities 
-    : activities.filter(a => a.crew === filter)
+    : activities.filter(a => a.agent === filter)
 
-  const crews = ['all', ...new Set(activities.map(a => a.crew))]
+  const agents = ['all', ...new Set(activities.map(a => a.agent))]
 
   if (loading) {
     return (
@@ -70,9 +76,8 @@ export default function ActivityFeed() {
     )
   }
 
-  // Group by date
   const grouped = filtered.reduce<Record<string, ActivityEntry[]>>((acc, a) => {
-    const day = format(new Date(a.created_at), 'yyyy-MM-dd')
+    const day = format(new Date(a.timestamp), 'yyyy-MM-dd')
     if (!acc[day]) acc[day] = []
     acc[day].push(a)
     return acc
@@ -87,9 +92,8 @@ export default function ActivityFeed() {
         <span className="text-[11px] text-zinc-600 font-mono">{activities.length} events</span>
       </div>
 
-      {/* Crew filter */}
       <div className="flex items-center gap-1.5 flex-wrap">
-        {crews.map(c => (
+        {agents.map(c => (
           <button
             key={c}
             onClick={() => setFilter(c)}
@@ -99,12 +103,11 @@ export default function ActivityFeed() {
                 : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30 border border-transparent'
             }`}
           >
-            {c === 'all' ? 'All' : c}
+            {c === 'all' ? 'All' : `${crewEmoji[c] || '🤖'} ${c.charAt(0).toUpperCase() + c.slice(1)}`}
           </button>
         ))}
       </div>
 
-      {/* Timeline */}
       <div className="space-y-6">
         {Object.entries(grouped).map(([date, entries]) => (
           <div key={date}>
@@ -113,34 +116,38 @@ export default function ActivityFeed() {
             </div>
             <div className="space-y-1 border-l-2 border-zinc-800/50 ml-2 pl-4">
               {entries.map((a, idx) => {
-                const colors = crewColors[a.crew] || crewColors['System']
+                const colors = crewColors[a.agent] || 'text-zinc-400 bg-zinc-500/10 border-zinc-500/20'
+                const emoji = crewEmoji[a.agent] || '🤖'
                 return (
                   <div
                     key={a.id}
                     className="group flex items-start gap-3 py-2 animate-in"
                     style={{ animationDelay: `${idx * 30}ms` }}
                   >
-                    {/* Timeline dot */}
                     <div className="relative -ml-[22px] mt-1.5">
                       <div className={`w-2.5 h-2.5 rounded-full border ${colors}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-lg leading-none">{a.emoji}</span>
+                        <span className="text-lg leading-none">{emoji}</span>
                         <span className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border ${colors}`}>
-                          {a.crew}
+                          {a.agent}
                         </span>
-                        {a.station && (
-                          <span className="text-[9px] text-zinc-600 font-mono">@ {a.station}</span>
+                        {a.status && (
+                          <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                            a.status === 'success' ? 'text-emerald-400 bg-emerald-500/10' :
+                            a.status === 'error' ? 'text-red-400 bg-red-500/10' :
+                            'text-zinc-500 bg-zinc-500/10'
+                          }`}>{a.status}</span>
                         )}
                         <span className="text-[10px] text-zinc-600 font-mono ml-auto">
-                          {formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(a.timestamp), { addSuffix: true })}
                         </span>
                       </div>
                       <div className="text-sm text-zinc-300 mt-0.5">{a.action}</div>
-                      {a.detail && (
+                      {a.details && (
                         <div className="text-[11px] text-zinc-500 mt-0.5 truncate group-hover:text-zinc-400 transition-colors">
-                          {a.detail}
+                          {a.details}
                         </div>
                       )}
                     </div>
@@ -154,7 +161,7 @@ export default function ActivityFeed() {
 
       {filtered.length === 0 && (
         <div className="text-center py-12 text-zinc-600 text-sm">
-          No activity recorded yet. Clyde will start logging actions here.
+          No activity recorded yet. The crew will start logging actions here.
         </div>
       )}
     </div>
